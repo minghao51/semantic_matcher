@@ -1,0 +1,43 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build / packaging
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+.env
+.env.*
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# OS/editor noise
+.DS_Store
+
+# ML / training artifacts
+checkpoints/
+**/checkpoints/
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+
+# Local runtime outputs
+tmp/
+logs/
