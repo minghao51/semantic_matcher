@@ -1,0 +1,14 @@
+# SemanticMatcher Configuration
+
+# Default model for SetFit
+default_model: "sentence-transformers/paraphrase-mpnet-base-v2"
+
+# Training defaults
+training:
+  num_epochs: 4
+  batch_size: 16
+
+# Embedding similarity defaults
+embedding:
+  model: "BAAI/bge-m3"
+  threshold: 0.7
