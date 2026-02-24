@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Related docs: [`index.md`](./index.md) | [`architecture.md`](./architecture.md)
+Related docs: [`index.md`](./index.md) | [`notebooks.md`](./notebooks.md) | [`examples.md`](./examples.md) | [`architecture.md`](./architecture.md)
 
 ## Installation
 
@@ -8,13 +8,38 @@ Related docs: [`index.md`](./index.md) | [`architecture.md`](./architecture.md)
 pip install semantic-matcher
 ```
 
-## Basic Usage
+Use this page for the official package wrapper API. If you want experiment notebooks/scripts, see [`notebooks.md`](./notebooks.md). If you want lower-level raw `setfit` examples, see [`examples.md`](./examples.md).
 
-Use this page for first-run examples. For internals and module layout, see [`architecture.md`](./architecture.md).
+## Choose a Matcher
 
-### Option 1: SetFit Training (Recommended for Production)
+| Matcher | Best For | Tradeoff |
+|---|---|---|
+| `EmbeddingMatcher` | Prototyping, no training setup | Usually lower accuracy on harder cases |
+| `EntityMatcher` | Few-shot production matching | Requires labeled training data + training time |
 
-Train a few-shot model for better accuracy:
+## Path 1: Embedding Similarity (No Training)
+
+Use cosine similarity without training for quick prototypes.
+
+```python
+from semanticmatcher import EmbeddingMatcher
+
+entities = [
+    {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
+    {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
+    {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
+]
+
+matcher = EmbeddingMatcher(entities=entities, threshold=0.7)
+matcher.build_index()
+
+print(matcher.match("Deutschland"))  # {"id": "DE", "score": ...}
+print(matcher.match("UnknownPlace"))  # None (below threshold)
+```
+
+## Path 2: Few-Shot Training with `EntityMatcher`
+
+Train a SetFit-backed matcher when you have labeled examples.
 
 ```python
 from semanticmatcher import EntityMatcher
@@ -38,79 +63,67 @@ training_data = [
 matcher = EntityMatcher(entities=entities)
 matcher.train(training_data, num_epochs=4)
 
-result = matcher.predict("Deutchland")
-print(result)  # → "DE"
-
-results = matcher.predict(["Deutchland", "America", "France"])
-print(results)  # → ["DE", "US", "FR"]
+print(matcher.predict("Deutchland"))  # "DE"
+print(matcher.predict(["Deutchland", "America", "France"]))  # ["DE", "US", "FR"]
 ```
 
-### Option 2: Embedding Similarity (No Training)
+## Text Normalization (Optional)
 
-Use cosine similarity without training - great for prototyping:
-
-```python
-from semanticmatcher import EmbeddingMatcher
-
-entities = [
-    {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
-    {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
-    {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
-]
-
-matcher = EmbeddingMatcher(entities=entities)
-matcher.build_index()
-
-result = matcher.match("Deutschland")
-print(result)  # → {"id": "DE", "score": 0.92}
-
-result = matcher.match("UnknownPlace", threshold=0.7)
-print(result)  # → None (below threshold)
-```
-
-## Text Normalization
-
-Both matchers support text normalization:
+Both matchers support normalization by default. You can also use `TextNormalizer` directly.
 
 ```python
-from semanticmatcher import EntityMatcher, TextNormalizer
+from semanticmatcher import TextNormalizer
 
 normalizer = TextNormalizer(
     lowercase=True,
     remove_accents=True,
-    remove_punctuation=True
+    remove_punctuation=True,
 )
 
-result = normalizer.normalize("HELLO, World!")  # → "hello world"
+print(normalizer.normalize("HELLO, World!"))  # "hello world"
 ```
 
-## Custom Models
+## Custom Model Names
 
 ```python
 from semanticmatcher import EntityMatcher, EmbeddingMatcher
 
-# Use multilingual model
-matcher = EntityMatcher(
+entity_matcher = EntityMatcher(
     entities=entities,
-    model_name="sentence-transformers/LaBSE"
+    model_name="sentence-transformers/LaBSE",
 )
 
-# Embedding matcher with custom model
-matcher = EmbeddingMatcher(
+embedding_matcher = EmbeddingMatcher(
     entities=entities,
     model_name="BAAI/bge-m3",
-    threshold=0.8
+    threshold=0.8,
 )
 ```
 
-## Saving and Loading Models
+## Save/Load (Low-Level `SetFitClassifier`)
+
+`EntityMatcher` does not currently expose a top-level save/load API. If you need lower-level model persistence, use `SetFitClassifier` directly.
 
 ```python
 from semanticmatcher import SetFitClassifier
 
-# Save trained model
+# Assuming `classifier` is an already-trained SetFitClassifier instance:
 classifier.save("/path/to/model")
 
-# Load model
+# Load it later
 classifier = SetFitClassifier.load("/path/to/model")
 ```
+
+## Common First-Run Issues
+
+- `EmbeddingMatcher`: call `build_index()` before `match()`
+- `EntityMatcher`: call `train()` before `predict()`
+- First run may download models (network required)
+
+See [`troubleshooting.md`](./troubleshooting.md) for fixes.
+
+## Where to Go Next
+
+- Experiments and notebook methods: [`notebooks.md`](./notebooks.md)
+- Raw/advanced examples: [`examples.md`](./examples.md)
+- Internals and module layout: [`architecture.md`](./architecture.md)

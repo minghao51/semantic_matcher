@@ -9,7 +9,7 @@ Improvement Strategies:
   F) Different classifier heads (LinearSVC, SVC)
 
 Usage:
-    PYTHONPATH=. uv run python notebook/country_classifier_advanced.py
+    PYTHONPATH=. uv run python notebooks/country_classifier_advanced.py
 """
 
 import pandas as pd

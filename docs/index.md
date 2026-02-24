@@ -1,33 +1,48 @@
 # Documentation Index
 
-This folder is organized by audience and task:
+This folder is organized by audience and task.
 
-- New users: start with [`quickstart.md`](./quickstart.md)
-- Contributors / maintainers: see [`architecture.md`](./architecture.md)
-- Notebook experiment scripts: see [`country-classifier-scripts.md`](./country-classifier-scripts.md)
+## Start Here (New Users)
+
+- [`quickstart.md`](./quickstart.md): official package wrapper API (`EmbeddingMatcher`, `EntityMatcher`)
+- [`troubleshooting.md`](./troubleshooting.md): common install and first-run errors
+
+## Experiments (`notebooks/`)
+
+- [`notebooks.md`](./notebooks.md): canonical index for all experiment assets in `notebooks/` (`.py` scripts + `.ipynb`)
+- [`country-classifier-scripts.md`](./country-classifier-scripts.md): deep dive on the country classifier experiment scripts now located in `notebooks/`
+
+## Advanced / Raw Examples
+
+- [`examples.md`](./examples.md): guide to `examples/` (direct `setfit` / `sentence-transformers` workflows)
+
+## Contributors / Maintainers
+
+- [`architecture.md`](./architecture.md): module layout and internals
 
 ## Reading Paths
 
-### I want to use the library
+### I want to use the library (recommended)
 
-1. Install the package
-2. Run a minimal example in [`quickstart.md`](./quickstart.md)
-3. Pick a matcher strategy:
-   - `EntityMatcher` (few-shot SetFit training)
-   - `EmbeddingMatcher` (no training)
+1. Read [`quickstart.md`](./quickstart.md)
+2. Pick a matcher strategy (`EmbeddingMatcher` or `EntityMatcher`)
+3. Use [`troubleshooting.md`](./troubleshooting.md) if setup/runtime issues appear
+4. Explore [`notebooks.md`](./notebooks.md) for experiments after first success
 
-### I want to work on the codebase
+### I want to reproduce experiments
 
-1. Read the module map in [`architecture.md`](./architecture.md)
-2. Check public exports in `semanticmatcher/__init__.py`
-3. Run tests in `tests/`
+1. Read [`notebooks.md`](./notebooks.md) for the experiment inventory and prerequisites
+2. If you want country matching benchmarks, read [`country-classifier-scripts.md`](./country-classifier-scripts.md)
+3. Run the corresponding file from `notebooks/`
 
-### I want to reproduce country classifier experiments
+### I want lower-level control
 
-1. Review script differences in [`country-classifier-scripts.md`](./country-classifier-scripts.md)
-2. Run the script that matches your iteration depth (baseline / quick / advanced)
+1. Read [`examples.md`](./examples.md)
+2. Use raw `setfit` / `sentence-transformers` examples as a base
+3. Refer to [`architecture.md`](./architecture.md) for project internals
 
 ## Notes
 
 - The package code lives in `semanticmatcher/` (not `src/`).
+- Previous experiment path `notebook/` was merged into `notebooks/`.
 - Some backend integrations are documented as future/planned capabilities and may not be fully wired.

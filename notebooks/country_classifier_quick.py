@@ -4,7 +4,7 @@ Country Code Classifier - Quick Optimization Test
 Quick test to improve beyond 90.91% baseline.
 
 Usage:
-    PYTHONPATH=. uv run python notebook/country_classifier_quick.py
+    PYTHONPATH=. uv run python notebooks/country_classifier_quick.py
 """
 
 import pandas as pd

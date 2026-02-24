@@ -10,7 +10,7 @@ Three scenarios are compared:
   C) Full SetFit training (already done)
 
 Usage:
-    PYTHONPATH=. uv run python notebook/country_classifier.py
+    PYTHONPATH=. uv run python notebooks/country_classifier.py
 """
 
 import pandas as pd

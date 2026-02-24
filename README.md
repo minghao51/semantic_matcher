@@ -13,7 +13,7 @@ Map messy text to canonical entities using:
 
 - Normalize messy entity strings (typos, aliases, alternate names)
 - Map text to canonical IDs (for example, country code matching)
-- Run locally with Sentence Transformers
+- Run locally with Sentence Transformers + SetFit
 
 Example: `"Deutchland"` -> `DE`
 
@@ -23,7 +23,12 @@ Example: `"Deutchland"` -> `DE`
 pip install semantic-matcher
 ```
 
-## Minimal Example
+Optional tools you may also need for experiments/notebooks:
+
+- `jupyter` for `.ipynb` notebooks
+- `geograpy` for `notebooks/geograpy.ipynb`
+
+## Minimal Example (Official Package Wrapper API)
 
 ```python
 from semanticmatcher import EmbeddingMatcher
@@ -39,28 +44,44 @@ matcher.build_index()
 print(matcher.match("America"))  # {"id": "US", "score": ...}
 ```
 
-## Choose a Matcher
+## Choose Your Path
 
-| Matcher | Best For | Tradeoff |
+| Path | Best For | Start Here |
 |---|---|---|
-| `EmbeddingMatcher` | Prototyping, no training setup | Usually lower accuracy on harder cases |
-| `EntityMatcher` | Production few-shot matching | Requires training data + training time |
+| `EmbeddingMatcher` (no training) | Fast prototypes, simple setup | [`docs/quickstart.md`](docs/quickstart.md) |
+| `EntityMatcher` (few-shot training) | Better accuracy with labeled examples | [`docs/quickstart.md`](docs/quickstart.md) |
+| `notebooks/` experiments (scripts + Jupyter) | Reproducing experiments and explorations | [`docs/notebooks.md`](docs/notebooks.md) |
+| Advanced/raw examples (`examples/`) | Lower-level SetFit / sentence-transformers workflows | [`docs/examples.md`](docs/examples.md) |
+
+## Official vs Advanced Examples
+
+- Official beginner path: `semanticmatcher` package wrappers (`EmbeddingMatcher`, `EntityMatcher`)
+- Advanced/raw path: direct `setfit` / `sentence-transformers` usage in `examples/` and some notebooks
 
 ## Documentation
 
 - [Docs Index](docs/index.md)
 - [Quick Start Guide](docs/quickstart.md)
-- [Architecture](docs/architecture.md)
+- [Notebook & Experiment Index](docs/notebooks.md)
+- [Advanced Examples Guide](docs/examples.md)
 - [Country Classifier Scripts](docs/country-classifier-scripts.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Architecture](docs/architecture.md)
 
 ## Development
 
 - Package code: `semanticmatcher/`
 - Tests: `tests/`
-- Example notebooks/scripts: `notebook/`, `notebooks/`
+- Experiments (scripts + Jupyter): `notebooks/`
 
 Run tests (environment permitting):
 
 ```bash
 uv run python -m pytest
 ```
+
+## First-Run Expectations
+
+- First run may download models from Hugging Face (network required).
+- CPU works for small examples; training can be much slower than GPU.
+- Some experiments/notebooks use extra libraries not required for core package usage.
