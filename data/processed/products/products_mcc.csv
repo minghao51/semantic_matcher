@@ -1,0 +1,982 @@
+id,name,aliases,type,system
+0742,Veterinary Services,07,product,MCC
+0763,Agricultural Co-operatives,07,product,MCC
+0780,"Horticultural Services, Landscaping Services",07,product,MCC
+1520,General Contractors-Residential and Commercial,15,product,MCC
+1711,"Air Conditioning Contractors – Sales and Installation, Heating Contractors – Sales, Service, Installation",17,product,MCC
+1731,Electrical Contractors,17,product,MCC
+1740,"Insulation – Contractors, Masonry, Stonework Contractors, Plastering Contractors, Stonework and Masonry Contractors, Tile Settings Contractors",17,product,MCC
+1750,Carpentry Contractors,17,product,MCC
+1761,"Roofing – Contractors, Sheet Metal Work – Contractors, Siding – Contractors",17,product,MCC
+1771,Contractors – Concrete Work,17,product,MCC
+1799,"Contractors – Special Trade, Not Elsewhere Classified",17,product,MCC
+2741,Miscellaneous Publishing and Printing,27,product,MCC
+2791,"Typesetting, Plate Making, & Related Services",27,product,MCC
+2842,"Specialty Cleaning, Polishing, and Sanitation Preparations",28,product,MCC
+3000,UNITED AIRLINES,30,product,MCC
+3001,AMERICAN AIRLINES,30,product,MCC
+3002,PAN AMERICAN,30,product,MCC
+3003,Airlines,30,product,MCC
+3004,TRANS WORLD AIRLINES,30,product,MCC
+3005,BRITISH AIRWAYS,30,product,MCC
+3006,JAPAN AIRLINES,30,product,MCC
+3007,AIR FRANCE,30,product,MCC
+3008,LUFTHANSA,30,product,MCC
+3009,AIR CANADA,30,product,MCC
+3010,KLM (ROYAL DUTCH AIRLINES),30,product,MCC
+3011,AEORFLOT,30,product,MCC
+3012,QANTAS,30,product,MCC
+3013,ALITALIA,30,product,MCC
+3014,SAUDIA ARABIAN AIRLINES,30,product,MCC
+3015,SWISSAIR,30,product,MCC
+3016,SAS,30,product,MCC
+3017,SOUTH AFRICAN AIRWAYS,30,product,MCC
+3018,VARIG (BRAZIL),30,product,MCC
+3019,Airlines,30,product,MCC
+3020,AIR-INDIA,30,product,MCC
+3021,AIR ALGERIE,30,product,MCC
+3022,PHILIPPINE AIRLINES,30,product,MCC
+3023,MEXICANA,30,product,MCC
+3024,PAKISTAN INTERNATIONAL,30,product,MCC
+3025,AIR NEW ZEALAND,30,product,MCC
+3026,Airlines,30,product,MCC
+3027,UTA/INTERAIR,30,product,MCC
+3028,AIR MALTA,30,product,MCC
+3029,SABENA,30,product,MCC
+3030,AEROLINEAS ARGENTINAS,30,product,MCC
+3031,OLYMPIC AIRWAYS,30,product,MCC
+3032,EL AL,30,product,MCC
+3033,ANSETT AIRLINES,30,product,MCC
+3034,AUSTRAINLIAN AIRLINES,30,product,MCC
+3035,TAP (PORTUGAL),30,product,MCC
+3036,VASP (BRAZIL),30,product,MCC
+3037,EGYPTAIR,30,product,MCC
+3038,KUWAIT AIRLINES,30,product,MCC
+3039,AVIANCA,30,product,MCC
+3040,GULF AIR (BAHRAIN),30,product,MCC
+3041,BALKAN-BULGARIAN AIRLINES,30,product,MCC
+3042,FINNAIR,30,product,MCC
+3043,AER LINGUS,30,product,MCC
+3044,AIR LANKA,30,product,MCC
+3045,NIGERIA AIRWAYS,30,product,MCC
+3046,CRUZEIRO DO SUL (BRAZIJ),30,product,MCC
+3047,THY (TURKEY),30,product,MCC
+3048,ROYAL AIR MAROC,30,product,MCC
+3049,TUNIS AIR,30,product,MCC
+3050,ICELANDAIR,30,product,MCC
+3051,AUSTRIAN AIRLINES,30,product,MCC
+3052,LANCHILE,30,product,MCC
+3053,AVIACO (SPAIN),30,product,MCC
+3054,LADECO (CHILE),30,product,MCC
+3055,LAB (BOLIVIA),30,product,MCC
+3056,QUEBECAIRE,30,product,MCC
+3057,EASTWEST AIRLINES (AUSTRALIA),30,product,MCC
+3058,DELTA,30,product,MCC
+3059,Airlines,30,product,MCC
+3060,NORTHWEST,30,product,MCC
+3061,CONTINENTAL,30,product,MCC
+3062,WESTERN,30,product,MCC
+3063,US AIR,30,product,MCC
+3064,Airlines,30,product,MCC
+3065,AIRINTER,30,product,MCC
+3066,SOUTHWEST,30,product,MCC
+3067,Airlines,30,product,MCC
+3068,Airlines,30,product,MCC
+3069,SUN COUNTRY AIRLINES,30,product,MCC
+3070,Airlines,30,product,MCC
+3071,AIR BRITISH COLUBIA,30,product,MCC
+3072,Airlines,30,product,MCC
+3073,Airlines,30,product,MCC
+3074,Airlines,30,product,MCC
+3075,SINGAPORE AIRLINES,30,product,MCC
+3076,AEROMEXICO,30,product,MCC
+3077,THAI AIRWAYS,30,product,MCC
+3078,CHINA AIRLINES,30,product,MCC
+3079,Airlines,30,product,MCC
+3080,Airlines,30,product,MCC
+3081,NORDAIR,30,product,MCC
+3082,KOREAN AIRLINES,30,product,MCC
+3083,AIR AFRIGUE,30,product,MCC
+3084,EVA AIRLINES,30,product,MCC
+3085,"MIDWEST EXPRESS AIRLINES, INC.",30,product,MCC
+3086,Airlines,30,product,MCC
+3087,METRO AIRLINES,30,product,MCC
+3088,CROATIA AIRLINES,30,product,MCC
+3089,TRANSAERO,30,product,MCC
+3090,Airlines,30,product,MCC
+3091,Airlines,30,product,MCC
+3092,Airlines,30,product,MCC
+3093,Airlines,30,product,MCC
+3094,ZAMBIA AIRWAYS,30,product,MCC
+3095,Airlines,30,product,MCC
+3096,AIR ZIMBABWE,30,product,MCC
+3097,Airlines,30,product,MCC
+3098,Airlines,30,product,MCC
+3099,CATHAY PACIFIC,30,product,MCC
+3100,MALAYSIAN AIRLINE SYSTEM,31,product,MCC
+3101,Airlines,31,product,MCC
+3102,IBERIA,31,product,MCC
+3103,GARUDA (INDONESIA),31,product,MCC
+3104,Airlines,31,product,MCC
+3105,Airlines,31,product,MCC
+3106,BRAATHENS S.A.F.E. (NORWAY),31,product,MCC
+3107,Airlines,31,product,MCC
+3108,Airlines,31,product,MCC
+3109,Airlines,31,product,MCC
+3110,WINGS AIRWAYS,31,product,MCC
+3111,BRITISH MIDLAND,31,product,MCC
+3112,WINDWARD ISLAND,31,product,MCC
+3113,Airlines,31,product,MCC
+3114,Airlines,31,product,MCC
+3115,Airlines,31,product,MCC
+3116,Airlines,31,product,MCC
+3117,VIASA,31,product,MCC
+3118,VALLEY AIRLINES,31,product,MCC
+3119,Airlines,31,product,MCC
+3120,Airlines,31,product,MCC
+3121,Airlines,31,product,MCC
+3122,Airlines,31,product,MCC
+3123,Airlines,31,product,MCC
+3124,Airlines,31,product,MCC
+3125,TAN,31,product,MCC
+3126,TALAIR,31,product,MCC
+3127,TACA INTERNATIONAL,31,product,MCC
+3128,Airlines,31,product,MCC
+3129,SURINAM AIRWAYS,31,product,MCC
+3130,SUN WORLD INTERNATIONAL,31,product,MCC
+3131,Airlines,31,product,MCC
+3132,Airlines,31,product,MCC
+3133,SUNBELT AIRLINES,31,product,MCC
+3134,Airlines,31,product,MCC
+3135,SUDAN AIRWAYS,31,product,MCC
+3136,Airlines,31,product,MCC
+3137,SINGLETON,31,product,MCC
+3138,SIMMONS AIRLINES,31,product,MCC
+3139,Airlines,31,product,MCC
+3140,Airlines,31,product,MCC
+3141,Airlines,31,product,MCC
+3142,Airlines,31,product,MCC
+3143,SCENIC AIRLINES,31,product,MCC
+3144,VIRGIN ATLANTIC,31,product,MCC
+3145,SAN JUAN AIRLINES,31,product,MCC
+3146,LUXAIR,31,product,MCC
+3147,Airlines,31,product,MCC
+3148,Airlines,31,product,MCC
+3149,Airlines,31,product,MCC
+3150,Airlines,31,product,MCC
+3151,AIR ZAIRE,31,product,MCC
+3152,Airlines,31,product,MCC
+3153,Airlines,31,product,MCC
+3154,PRINCEVILLE,31,product,MCC
+3155,Airlines,31,product,MCC
+3156,Airlines,31,product,MCC
+3157,Airlines,31,product,MCC
+3158,Airlines,31,product,MCC
+3159,PBA,31,product,MCC
+3160,Airlines,31,product,MCC
+3161,ALL NIPPON AIRWAYS,31,product,MCC
+3162,Airlines,31,product,MCC
+3163,Airlines,31,product,MCC
+3164,NORONTAIR,31,product,MCC
+3165,NEW YORK HELICOPTER,31,product,MCC
+3166,Airlines,31,product,MCC
+3167,Airlines,31,product,MCC
+3168,Airlines,31,product,MCC
+3169,Airlines,31,product,MCC
+3170,NOUNT COOK,31,product,MCC
+3171,CANADIAN AIRLINES INTERNATIONAL,31,product,MCC
+3172,NATIONAIR,31,product,MCC
+3173,Airlines,31,product,MCC
+3174,Airlines,31,product,MCC
+3175,Airlines,31,product,MCC
+3176,METROFLIGHT AIRLINES,31,product,MCC
+3177,Airlines,31,product,MCC
+3178,MESA AIR,31,product,MCC
+3179,Airlines,31,product,MCC
+3180,Airlines,31,product,MCC
+3181,MALEV,31,product,MCC
+3182,LOT (POLAND),31,product,MCC
+3183,Airlines,31,product,MCC
+3184,LIAT,31,product,MCC
+3185,LAV (VENEZUELA),31,product,MCC
+3186,LAP (PARAGUAY),31,product,MCC
+3187,LACSA (COSTA RICA),31,product,MCC
+3188,Airlines,31,product,MCC
+3189,Airlines,31,product,MCC
+3190,JUGOSLAV AIR,31,product,MCC
+3191,ISLAND AIRLINES,31,product,MCC
+3192,IRAN AIR,31,product,MCC
+3193,INDIAN AIRLINES,31,product,MCC
+3194,Airlines,31,product,MCC
+3195,Airlines,31,product,MCC
+3196,HAWAIIAN AIR,31,product,MCC
+3197,HAVASU AIRLINES,31,product,MCC
+3198,Airlines,31,product,MCC
+3199,Airlines,31,product,MCC
+3200,FUYANA AIRWAYS,32,product,MCC
+3201,Airlines,32,product,MCC
+3202,Airlines,32,product,MCC
+3203,GOLDEN PACIFIC AIR,32,product,MCC
+3204,FREEDOM AIR,32,product,MCC
+3205,Airlines,32,product,MCC
+3206,Airlines,32,product,MCC
+3207,Airlines,32,product,MCC
+3208,Airlines,32,product,MCC
+3209,Airlines,32,product,MCC
+3210,Airlines,32,product,MCC
+3211,Airlines,32,product,MCC
+3212,DOMINICANA,32,product,MCC
+3213,Airlines,32,product,MCC
+3214,Airlines,32,product,MCC
+3215,DAN AIR SERVICES,32,product,MCC
+3216,CUMBERLAND AIRLINES,32,product,MCC
+3217,CSA,32,product,MCC
+3218,CROWN AIR,32,product,MCC
+3219,COPA,32,product,MCC
+3220,COMPANIA FAUCETT,32,product,MCC
+3221,TRANSPORTES AEROS MILITARES ECCUATORANOS,32,product,MCC
+3222,COMMAND AIRWAYS,32,product,MCC
+3223,COMAIR,32,product,MCC
+3224,Airlines,32,product,MCC
+3225,Airlines,32,product,MCC
+3226,Airlines,32,product,MCC
+3227,Airlines,32,product,MCC
+3228,CAYMAN AIRWAYS,32,product,MCC
+3229,SAETA SOCIAEDAD ECUATORIANOS DE TRANSPORTES AEREOS,32,product,MCC
+3230,Airlines,32,product,MCC
+3231,SASHA SERVICIO AERO DE HONDURAS,32,product,MCC
+3232,Airlines,32,product,MCC
+3233,CAPITOL AIR,32,product,MCC
+3234,BWIA,32,product,MCC
+3235,BROKWAY AIR,32,product,MCC
+3236,Airlines,32,product,MCC
+3237,Airlines,32,product,MCC
+3238,BEMIDJI AIRLINES,32,product,MCC
+3239,BAR HARBOR AIRLINES,32,product,MCC
+3240,BAHAMASAIR,32,product,MCC
+3241,AVIATECA (GUATEMALA),32,product,MCC
+3242,AVENSA,32,product,MCC
+3243,AUSTRIAN AIR SERVICE,32,product,MCC
+3244,Airlines,32,product,MCC
+3245,Airlines,32,product,MCC
+3246,Airlines,32,product,MCC
+3247,Airlines,32,product,MCC
+3248,Airlines,32,product,MCC
+3249,Airlines,32,product,MCC
+3250,Airlines,32,product,MCC
+3251,ALOHA AIRLINES,32,product,MCC
+3252,ALM,32,product,MCC
+3253,AMERICA WEST,32,product,MCC
+3254,TRUMP AIRLINE,32,product,MCC
+3255,Airlines,32,product,MCC
+3256,ALASKA AIRLINES,32,product,MCC
+3257,Airlines,32,product,MCC
+3258,Airlines,32,product,MCC
+3259,AMERICAN TRANS AIR,32,product,MCC
+3260,Airlines,32,product,MCC
+3261,AIR CHINA,32,product,MCC
+3262,"RENO AIR, INC.",32,product,MCC
+3263,Airlines,32,product,MCC
+3264,Airlines,32,product,MCC
+3265,Airlines,32,product,MCC
+3266,AIR SEYCHELLES,32,product,MCC
+3267,AIR PANAMA,32,product,MCC
+3268,Airlines,32,product,MCC
+3269,Airlines,32,product,MCC
+3270,Airlines,32,product,MCC
+3271,Airlines,32,product,MCC
+3272,Airlines,32,product,MCC
+3273,Airlines,32,product,MCC
+3274,Airlines,32,product,MCC
+3275,Airlines,32,product,MCC
+3276,Airlines,32,product,MCC
+3277,Airlines,32,product,MCC
+3278,Airlines,32,product,MCC
+3279,Airlines,32,product,MCC
+3280,AIR JAMAICA,32,product,MCC
+3281,Airlines,32,product,MCC
+3282,AIR DJIBOUTI,32,product,MCC
+3283,Airlines,32,product,MCC
+3284,AERO VIRGIN ISLANDS,32,product,MCC
+3285,AERO PERU,32,product,MCC
+3286,AEROLINEAS NICARAGUENSIS,32,product,MCC
+3287,AERO COACH AVAIATION,32,product,MCC
+3288,Airlines,32,product,MCC
+3289,Airlines,32,product,MCC
+3290,Airlines,32,product,MCC
+3291,ARIANA AFGHAN,32,product,MCC
+3292,CYPRUS AIRWAYS,32,product,MCC
+3293,ECUATORIANA,32,product,MCC
+3294,ETHIOPIAN AIRLINES,32,product,MCC
+3295,KENYA AIRLINES,32,product,MCC
+3296,Airlines,32,product,MCC
+3297,Airlines,32,product,MCC
+3298,AIR MAURITIUS,32,product,MCC
+3299,WIDERO’S FLYVESELSKAP,32,product,MCC
+3351,AFFILIATED AUTO RENTAL,33,product,MCC
+3352,AMERICAN INTL RENT-A-CAR,33,product,MCC
+3353,BROOKS RENT-A-CAR,33,product,MCC
+3354,ACTION AUTO RENTAL,33,product,MCC
+3355,Car Rental,33,product,MCC
+3356,Car Rental,33,product,MCC
+3357,HERTZ RENT-A-CAR,33,product,MCC
+3358,Car Rental,33,product,MCC
+3359,PAYLESS CAR RENTAL,33,product,MCC
+3360,SNAPPY CAR RENTAL,33,product,MCC
+3361,AIRWAYS RENT-A-CAR,33,product,MCC
+3362,ALTRA AUTO RENTAL,33,product,MCC
+3363,Car Rental,33,product,MCC
+3364,AGENCY RENT-A-CAR,33,product,MCC
+3365,Car Rental,33,product,MCC
+3366,BUDGET RENT-A-CAR,33,product,MCC
+3367,Car Rental,33,product,MCC
+3368,HOLIDAY RENT-A-WRECK,33,product,MCC
+3369,Car Rental,33,product,MCC
+3370,RENT-A-WRECK,33,product,MCC
+3371,Car Rental,33,product,MCC
+3372,Car Rental,33,product,MCC
+3373,Car Rental,33,product,MCC
+3374,Car Rental,33,product,MCC
+3375,Car Rental,33,product,MCC
+3376,AJAX RENT-A-CAR,33,product,MCC
+3377,Car Rental,33,product,MCC
+3378,Car Rental,33,product,MCC
+3379,Car Rental,33,product,MCC
+3380,Car Rental,33,product,MCC
+3381,EUROP CAR,33,product,MCC
+3382,Car Rental,33,product,MCC
+3383,Car Rental,33,product,MCC
+3384,Car Rental,33,product,MCC
+3385,TROPICAL RENT-A-CAR,33,product,MCC
+3386,SHOWCASE RENTAL CARS,33,product,MCC
+3387,ALAMO RENT-A-CAR,33,product,MCC
+3388,Car Rental,33,product,MCC
+3389,AVIS RENT-A-CAR,33,product,MCC
+3390,DOLLAR RENT-A-CAR,33,product,MCC
+3391,EUROPE BY CAR,33,product,MCC
+3392,Car Rental,33,product,MCC
+3393,NATIONAL CAR RENTAL,33,product,MCC
+3394,KEMWELL GROUP RENT-A-CAR,33,product,MCC
+3395,THRIFTY RENT-A-CAR,33,product,MCC
+3396,TILDEN TENT-A-CAR,33,product,MCC
+3397,Car Rental,33,product,MCC
+3398,ECONO-CAR RENT-A-CAR,33,product,MCC
+3399,Car Rental,33,product,MCC
+3400,AUTO HOST COST CAR RENTALS,34,product,MCC
+3401,Car Rental,34,product,MCC
+3402,Car Rental,34,product,MCC
+3403,Car Rental,34,product,MCC
+3404,Car Rental,34,product,MCC
+3405,ENTERPRISE RENT-A-CAR,34,product,MCC
+3406,Car Rental,34,product,MCC
+3407,Car Rental,34,product,MCC
+3408,Car Rental,34,product,MCC
+3409,GENERAL RENT-A-CAR,34,product,MCC
+3410,Car Rental,34,product,MCC
+3411,Car Rental,34,product,MCC
+3412,A-1 RENT-A-CAR,34,product,MCC
+3413,Car Rental,34,product,MCC
+3414,GODFREY NATL RENT-A-CAR,34,product,MCC
+3415,Car Rental,34,product,MCC
+3416,Car Rental,34,product,MCC
+3417,Car Rental,34,product,MCC
+3418,Car Rental,34,product,MCC
+3419,ALPHA RENT-A-CAR,34,product,MCC
+3420,ANSA INTL RENT-A-CAR,34,product,MCC
+3421,ALLSTAE RENT-A-CAR,34,product,MCC
+3422,Car Rental,34,product,MCC
+3423,AVCAR RENT-A-CAR,34,product,MCC
+3424,Car Rental,34,product,MCC
+3425,AUTOMATE RENT-A-CAR,34,product,MCC
+3426,Car Rental,34,product,MCC
+3427,AVON RENT-A-CAR,34,product,MCC
+3428,CAREY RENT-A-CAR,34,product,MCC
+3429,INSURANCE RENT-A-CAR,34,product,MCC
+3430,MAJOR RENT-A-CAR,34,product,MCC
+3431,REPLACEMENT RENT-A-CAR,34,product,MCC
+3432,RESERVE RENT-A-CAR,34,product,MCC
+3433,UGLY DUCKLING RENT-A-CAR,34,product,MCC
+3434,USA RENT-A-CAR,34,product,MCC
+3435,VALUE RENT-A-CAR,34,product,MCC
+3436,AUTOHANSA RENT-A-CAR,34,product,MCC
+3437,CITE RENT-A-CAR,34,product,MCC
+3438,INTERENT RENT-A-CAR,34,product,MCC
+3439,MILLEVILLE RENT-A-CAR,34,product,MCC
+3440,VIA ROUTE RENT-A-CAR,34,product,MCC
+3441,Car Rental,34,product,MCC
+3501,"HOLIDAY INNS, HOLIDAY INN EXPRESS",35,product,MCC
+3502,BEST WESTERN HOTELS,35,product,MCC
+3503,SHERATON HOTELS,35,product,MCC
+3504,HILTON HOTELS,35,product,MCC
+3505,FORTE HOTELS,35,product,MCC
+3506,GOLDEN TULIP HOTELS,35,product,MCC
+3507,FRIENDSHIP INNS,35,product,MCC
+3508,"QUALITY INNS, QUALITY SUITES",35,product,MCC
+3509,MARRIOTT HOTELS,35,product,MCC
+3510,"DAYS INN, DAYSTOP",35,product,MCC
+3511,ARABELLA HOTELS,35,product,MCC
+3512,INTER-CONTINENTAL HOTELS,35,product,MCC
+3513,WESTIN HOTELS,35,product,MCC
+3514,Hotels/Motels/Inns/Resorts,35,product,MCC
+3515,RODEWAY INNS,35,product,MCC
+3516,LA QUINTA MOTOR INNS,35,product,MCC
+3517,AMERICANA HOTELS,35,product,MCC
+3518,SOL HOTELS,35,product,MCC
+3519,PULLMAN INTERNATIONAL HOTELS,35,product,MCC
+3520,MERIDIEN HOTELS,35,product,MCC
+3521,CREST HOTELS (see FORTE HOTELS),35,product,MCC
+3522,TOKYO HOTEL,35,product,MCC
+3523,PENNSULA HOTEL,35,product,MCC
+3524,WELCOMGROUP HOTELS,35,product,MCC
+3525,DUNFEY HOTELS,35,product,MCC
+3526,Hotels/Motels/Inns/Resorts,35,product,MCC
+3527,DOWNTOWNER-PASSPORT HOTEL,35,product,MCC
+3528,"RED LION HOTELS, RED LION INNS",35,product,MCC
+3529,CP HOTELS,35,product,MCC
+3530,"RENAISSANCE HOTELS, STOUFFER HOTELS",35,product,MCC
+3531,ASTIR HOTELS,35,product,MCC
+3532,SUN ROUTE HOTELS,35,product,MCC
+3533,HOTEL IBIS,35,product,MCC
+3534,SOUTHERN PACIFIC HOTELS,35,product,MCC
+3535,HILTON INTERNATIONAL,35,product,MCC
+3536,AMFAC HOTELS,35,product,MCC
+3537,ANA HOTEL,35,product,MCC
+3538,CONCORDE HOTELS,35,product,MCC
+3539,Hotels/Motels/Inns/Resorts,35,product,MCC
+3540,IBEROTEL HOTELS,35,product,MCC
+3541,HOTEL OKURA,35,product,MCC
+3542,ROYAL HOTELS,35,product,MCC
+3543,FOUR SEASONS HOTELS,35,product,MCC
+3544,CIGA HOTELS,35,product,MCC
+3545,SHANGRI-LA INTERNATIONAL,35,product,MCC
+3546,Hotels/Motels/Inns/Resorts,35,product,MCC
+3547,Hotels/Motels/Inns/Resorts,35,product,MCC
+3548,HOTELES MELIA,35,product,MCC
+3549,AUBERGE DES GOVERNEURS,35,product,MCC
+3550,REGAL 8 INNS,35,product,MCC
+3551,Hotels/Motels/Inns/Resorts,35,product,MCC
+3552,COAST HOTELS,35,product,MCC
+3553,PARK INNS INTERNATIONAL,35,product,MCC
+3554,Hotels/Motels/Inns/Resorts,35,product,MCC
+3555,Hotels/Motels/Inns/Resorts,35,product,MCC
+3556,Hotels/Motels/Inns/Resorts,35,product,MCC
+3557,Hotels/Motels/Inns/Resorts,35,product,MCC
+3558,JOLLY HOTELS,35,product,MCC
+3559,Hotels/Motels/Inns/Resorts,35,product,MCC
+3560,Hotels/Motels/Inns/Resorts,35,product,MCC
+3561,Hotels/Motels/Inns/Resorts,35,product,MCC
+3562,COMFORT INNS,35,product,MCC
+3563,JOURNEY’S END MOTLS,35,product,MCC
+3564,Hotels/Motels/Inns/Resorts,35,product,MCC
+3565,RELAX INNS,35,product,MCC
+3566,Hotels/Motels/Inns/Resorts,35,product,MCC
+3567,Hotels/Motels/Inns/Resorts,35,product,MCC
+3568,LADBROKE HOTELS,35,product,MCC
+3569,Hotels/Motels/Inns/Resorts,35,product,MCC
+3570,FORUM HOTELS,35,product,MCC
+3571,Hotels/Motels/Inns/Resorts,35,product,MCC
+3572,MIYAKO HOTELS,35,product,MCC
+3573,SANDMAN HOTELS,35,product,MCC
+3574,VENTURE INNS,35,product,MCC
+3575,VAGABOND HOTELS,35,product,MCC
+3576,Hotels/Motels/Inns/Resorts,35,product,MCC
+3577,MANDARIN ORIENTAL HOTEL,35,product,MCC
+3578,Hotels/Motels/Inns/Resorts,35,product,MCC
+3579,HOTEL MERCURE,35,product,MCC
+3580,Hotels/Motels/Inns/Resorts,35,product,MCC
+3581,DELTA HOTEL,35,product,MCC
+3582,Hotels/Motels/Inns/Resorts,35,product,MCC
+3583,SAS HOTELS,35,product,MCC
+3584,PRINCESS HOTELS INTERNATIONAL,35,product,MCC
+3585,HUNGAR HOTELS,35,product,MCC
+3586,SOKOS HOTELS,35,product,MCC
+3587,DORAL HOTELS,35,product,MCC
+3588,HELMSLEY HOTELS,35,product,MCC
+3589,Hotels/Motels/Inns/Resorts,35,product,MCC
+3590,FAIRMONT HOTELS,35,product,MCC
+3591,SONESTA HOTELS,35,product,MCC
+3592,OMNI HOTELS,35,product,MCC
+3593,CUNARD HOTELS,35,product,MCC
+3594,Hotels/Motels/Inns/Resorts,35,product,MCC
+3595,HOSPITALITY INTERNATIONAL,35,product,MCC
+3596,Hotels/Motels/Inns/Resorts,35,product,MCC
+3597,Hotels/Motels/Inns/Resorts,35,product,MCC
+3598,REGENT INTERNATIONAL HOTELS,35,product,MCC
+3599,PANNONIA HOTELS,35,product,MCC
+3600,Hotels/Motels/Inns/Resorts,36,product,MCC
+3601,Hotels/Motels/Inns/Resorts,36,product,MCC
+3602,Hotels/Motels/Inns/Resorts,36,product,MCC
+3603,NOAH’S HOTELS,36,product,MCC
+3604,Hotels/Motels/Inns/Resorts,36,product,MCC
+3605,Hotels/Motels/Inns/Resorts,36,product,MCC
+3606,Hotels/Motels/Inns/Resorts,36,product,MCC
+3607,Hotels/Motels/Inns/Resorts,36,product,MCC
+3608,Hotels/Motels/Inns/Resorts,36,product,MCC
+3609,Hotels/Motels/Inns/Resorts,36,product,MCC
+3610,Hotels/Motels/Inns/Resorts,36,product,MCC
+3611,Hotels/Motels/Inns/Resorts,36,product,MCC
+3612,MOVENPICK HOTELS,36,product,MCC
+3613,Hotels/Motels/Inns/Resorts,36,product,MCC
+3614,Hotels/Motels/Inns/Resorts,36,product,MCC
+3615,TRAVELODGE,36,product,MCC
+3616,Hotels/Motels/Inns/Resorts,36,product,MCC
+3617,Hotels/Motels/Inns/Resorts,36,product,MCC
+3618,Hotels/Motels/Inns/Resorts,36,product,MCC
+3619,Hotels/Motels/Inns/Resorts,36,product,MCC
+3620,TELFORD INTERNATIONAL,36,product,MCC
+3621,Hotels/Motels/Inns/Resorts,36,product,MCC
+3622,MERLIN HOTELS,36,product,MCC
+3623,DORINT HOTELS,36,product,MCC
+3624,Hotels/Motels/Inns/Resorts,36,product,MCC
+3625,HOTLE UNIVERSALE,36,product,MCC
+3626,PRINCE HOTELS,36,product,MCC
+3627,Hotels/Motels/Inns/Resorts,36,product,MCC
+3628,Hotels/Motels/Inns/Resorts,36,product,MCC
+3629,DAN HOTELS,36,product,MCC
+3630,Hotels/Motels/Inns/Resorts,36,product,MCC
+3631,Hotels/Motels/Inns/Resorts,36,product,MCC
+3632,Hotels/Motels/Inns/Resorts,36,product,MCC
+3633,RANK HOTELS,36,product,MCC
+3634,SWISSOTEL,36,product,MCC
+3635,RESO HOTELS,36,product,MCC
+3636,SAROVA HOTELS,36,product,MCC
+3637,"RAMADA INNS, RAMADA LIMITED",36,product,MCC
+3638,"HO JO INN, HOWARD JOHNSON",36,product,MCC
+3639,MOUNT CHARLOTTE THISTLE,36,product,MCC
+3640,HYATT HOTEL,36,product,MCC
+3641,SOFITEL HOTELS,36,product,MCC
+3642,NOVOTEL HOTELS,36,product,MCC
+3643,STEIGENBERGER HOTELS,36,product,MCC
+3644,ECONO LODGES,36,product,MCC
+3645,QUEENS MOAT HOUSES,36,product,MCC
+3646,SWALLOW HOTELS,36,product,MCC
+3647,HUSA HOTELS,36,product,MCC
+3648,DE VERE HOTELS,36,product,MCC
+3649,RADISSON HOTELS,36,product,MCC
+3650,RED ROOK INNS,36,product,MCC
+3651,IMPERIAL LONDON HOTEL,36,product,MCC
+3652,EMBASSY HOTELS,36,product,MCC
+3653,PENTA HOTELS,36,product,MCC
+3654,LOEWS HOTELS,36,product,MCC
+3655,SCANDIC HOTELS,36,product,MCC
+3656,SARA HOTELS,36,product,MCC
+3657,OBEROI HOTELS,36,product,MCC
+3658,OTANI HOTELS,36,product,MCC
+3659,TAJ HOTELS INTERNATIONAL,36,product,MCC
+3660,KNIGHTS INNS,36,product,MCC
+3661,METROPOLE HOTELS,36,product,MCC
+3662,Hotels/Motels/Inns/Resorts,36,product,MCC
+3663,HOTELES EL PRESIDENTS,36,product,MCC
+3664,FLAG INN,36,product,MCC
+3665,HAMPTON INNS,36,product,MCC
+3666,STAKIS HOTELS,36,product,MCC
+3667,Hotels/Motels/Inns/Resorts,36,product,MCC
+3668,MARITIM HOTELS,36,product,MCC
+3669,Hotels/Motels/Inns/Resorts,36,product,MCC
+3670,ARCARD HOTELS,36,product,MCC
+3671,ARCTIA HOTELS,36,product,MCC
+3672,CAMPANIEL HOTELS,36,product,MCC
+3673,IBUSZ HOTELS,36,product,MCC
+3674,RANTASIPI HOTELS,36,product,MCC
+3675,INTERHOTEL CEDOK,36,product,MCC
+3676,Hotels/Motels/Inns/Resorts,36,product,MCC
+3677,CLIMAT DE FRANCE HOTELS,36,product,MCC
+3678,CUMULUS HOTELS,36,product,MCC
+3679,DANUBIUS HOTEL,36,product,MCC
+3680,Hotels/Motels/Inns/Resorts,36,product,MCC
+3681,ADAMS MARK HOTELS,36,product,MCC
+3682,ALLSTAR INNS,36,product,MCC
+3683,Hotels/Motels/Inns/Resorts,36,product,MCC
+3684,BUDGET HOST INNS,36,product,MCC
+3685,BUDGETEL HOTELS,36,product,MCC
+3686,SUISSE CHALETS,36,product,MCC
+3687,CLARION HOTELS,36,product,MCC
+3688,COMPRI HOTELS,36,product,MCC
+3689,CONSORT HOTELS,36,product,MCC
+3690,COURTYARD BY MARRIOTT,36,product,MCC
+3691,DILLION INNS,36,product,MCC
+3692,DOUBLETREE HOTELS,36,product,MCC
+3693,DRURY INNS,36,product,MCC
+3694,ECONOMY INNS OF AMERICA,36,product,MCC
+3695,EMBASSY SUITES,36,product,MCC
+3696,EXEL INNS,36,product,MCC
+3697,FARFIELD HOTELS,36,product,MCC
+3698,HARLEY HOTELS,36,product,MCC
+3699,MIDWAY MOTOR LODGE,36,product,MCC
+3700,MOTEL 6,37,product,MCC
+3701,GUEST QUARTERS (Formally PICKETT SUITE HOTELS),37,product,MCC
+3702,THE REGISTRY HOTELS,37,product,MCC
+3703,RESIDENCE INNS,37,product,MCC
+3704,ROYCE HOTELS,37,product,MCC
+3705,SANDMAN INNS,37,product,MCC
+3706,SHILO INNS,37,product,MCC
+3707,SHONEY’S INNS,37,product,MCC
+3708,Hotels/Motels/Inns/Resorts,37,product,MCC
+3709,SUPER8 MOTELS,37,product,MCC
+3710,THE RITZ CARLTON HOTELS,37,product,MCC
+3711,FLAG INNS (AUSRALIA),37,product,MCC
+3712,GOLDEN CHAIN HOTEL,37,product,MCC
+3713,QUALITY PACIFIC HOTEL,37,product,MCC
+3714,FOUR SEASONS HOTEL (AUSTRALIA),37,product,MCC
+3715,FARIFIELD INN,37,product,MCC
+3716,CARLTON HOTELS,37,product,MCC
+3717,CITY LODGE HOTELS,37,product,MCC
+3718,KAROS HOTELS,37,product,MCC
+3719,PROTEA HOTELS,37,product,MCC
+3720,SOUTHERN SUN HOTELS,37,product,MCC
+3721,HILTON CONRAD,37,product,MCC
+3722,WYNDHAM HOTEL AND RESORTS,37,product,MCC
+3723,RICA HOTELS,37,product,MCC
+3724,INER NOR HOTELS,37,product,MCC
+3725,SEAINES PLANATION,37,product,MCC
+3726,RIO SUITES,37,product,MCC
+3727,BROADMOOR HOTEL,37,product,MCC
+3728,BALLY’S HOTEL AND CASINO,37,product,MCC
+3729,JOHN ASCUAGA’S NUGGET,37,product,MCC
+3730,MGM GRAND HOTEL,37,product,MCC
+3731,HARRAH’S HOTELS AND CASINOS,37,product,MCC
+3732,OPRYLAND HOTEL,37,product,MCC
+3733,BOCA RATON RESORT,37,product,MCC
+3734,HARVEY/BRISTOL HOTELS,37,product,MCC
+3735,Hotels/Motels/Inns/Resorts,37,product,MCC
+3736,COLORADO BELLE/EDGEWATER RESORT,37,product,MCC
+3737,RIVIERA HOTEL AND CASINO,37,product,MCC
+3738,TROPICANA RESORT AND CASINO,37,product,MCC
+3739,WOODSIDE HOTELS AND RESORTS,37,product,MCC
+3740,TOWNPLACE SUITES,37,product,MCC
+3741,MILLENIUM BROADWAY HOTEL,37,product,MCC
+3742,CLUB MED,37,product,MCC
+3743,BILTMORE HOTEL AND SUITES,37,product,MCC
+3744,CAREFREE RESORTS,37,product,MCC
+3745,ST. REGIS HOTEL,37,product,MCC
+3746,THE ELIOT HOTEL,37,product,MCC
+3747,CLUBCORP/CLUB RESORTS,37,product,MCC
+3748,WELESLEY INNS,37,product,MCC
+3749,THE BEVERLY HILLS HOTEL,37,product,MCC
+3750,CROWNE PLAZA HOTELS,37,product,MCC
+3751,HOMEWOOD SUITES,37,product,MCC
+3752,PEABODY HOTELS,37,product,MCC
+3753,GREENBRIAH RESORTS,37,product,MCC
+3754,AMELIA ISLAND PLANATION,37,product,MCC
+3755,THE HOMESTEAD,37,product,MCC
+3756,SOUTH SEAS RESORTS,37,product,MCC
+3757,Hotels/Motels/Inns/Resorts,37,product,MCC
+3758,Hotels/Motels/Inns/Resorts,37,product,MCC
+3759,Hotels/Motels/Inns/Resorts,37,product,MCC
+3760,Hotels/Motels/Inns/Resorts,37,product,MCC
+3761,Hotels/Motels/Inns/Resorts,37,product,MCC
+3762,Hotels/Motels/Inns/Resorts,37,product,MCC
+3763,Hotels/Motels/Inns/Resorts,37,product,MCC
+3764,Hotels/Motels/Inns/Resorts,37,product,MCC
+3765,Hotels/Motels/Inns/Resorts,37,product,MCC
+3766,Hotels/Motels/Inns/Resorts,37,product,MCC
+3767,Hotels/Motels/Inns/Resorts,37,product,MCC
+3768,Hotels/Motels/Inns/Resorts,37,product,MCC
+3769,Hotels/Motels/Inns/Resorts,37,product,MCC
+3770,Hotels/Motels/Inns/Resorts,37,product,MCC
+3771,Hotels/Motels/Inns/Resorts,37,product,MCC
+3772,Hotels/Motels/Inns/Resorts,37,product,MCC
+3773,Hotels/Motels/Inns/Resorts,37,product,MCC
+3774,Hotels/Motels/Inns/Resorts,37,product,MCC
+3775,Hotels/Motels/Inns/Resorts,37,product,MCC
+3776,Hotels/Motels/Inns/Resorts,37,product,MCC
+3777,Hotels/Motels/Inns/Resorts,37,product,MCC
+3778,Hotels/Motels/Inns/Resorts,37,product,MCC
+3779,Hotels/Motels/Inns/Resorts,37,product,MCC
+3780,Hotels/Motels/Inns/Resorts,37,product,MCC
+3781,Hotels/Motels/Inns/Resorts,37,product,MCC
+3782,Hotels/Motels/Inns/Resorts,37,product,MCC
+3783,Hotels/Motels/Inns/Resorts,37,product,MCC
+3784,Hotels/Motels/Inns/Resorts,37,product,MCC
+3785,Hotels/Motels/Inns/Resorts,37,product,MCC
+3786,Hotels/Motels/Inns/Resorts,37,product,MCC
+3787,Hotels/Motels/Inns/Resorts,37,product,MCC
+3788,Hotels/Motels/Inns/Resorts,37,product,MCC
+3789,Hotels/Motels/Inns/Resorts,37,product,MCC
+3790,Hotels/Motels/Inns/Resorts,37,product,MCC
+3816,Home2Suites,38,product,MCC
+3835,* MASTERS ECONOMY INNS,38,product,MCC
+4011,Railroads,40,product,MCC
+4111,"Local/Suburban Commuter Passenger Transportation – Railroads, Feries, Local Water Transportation.",41,product,MCC
+4112,Passenger Railways,41,product,MCC
+4119,Ambulance Services,41,product,MCC
+4121,Taxicabs and Limousines,41,product,MCC
+4131,"Bus Lines, Including Charters, Tour Buses",41,product,MCC
+4214,"Motor Freight Carriers, Moving and Storage Companies, Trucking – Local/Long Distance, Delivery Services – Local",42,product,MCC
+4215,"Courier Services – Air or Ground, Freight forwarders",42,product,MCC
+4225,"Public warehousing, Storage",42,product,MCC
+4411,Cruise and Steamship Lines,44,product,MCC
+4457,Boat Rentals and Leases,44,product,MCC
+4468,"Marinas, Marine Service, and Supplies",44,product,MCC
+4511,"Airlines, Air Carriers ( not listed elsewhere)",45,product,MCC
+4582,"Airports, Airport Terminals, Flying Fields",45,product,MCC
+4722,Travel Agencies and Tour Operations,47,product,MCC
+4723,Package Tour Operators (For use in Germany only),47,product,MCC
+4784,Toll and Bridge Fees,47,product,MCC
+4789,"Transportation Services, Not elsewhere classified)",47,product,MCC
+4812,Telecommunications Equipment including telephone sales,48,product,MCC
+4814,"Fax services, Telecommunication Services",48,product,MCC
+4815,VisaPhone,48,product,MCC
+4816,Computer Network Services,48,product,MCC
+4821,Telegraph services,48,product,MCC
+4829,Money Orders – Wire Transfer,48,product,MCC
+4899,Cable and other pay television (previously Cable Services),48,product,MCC
+4900,"Electric, Gas, Sanitary and Water Utilities",49,product,MCC
+5013,Motor vehicle supplies and new parts,50,product,MCC
+5021,Office and Commercial Furniture,50,product,MCC
+5039,"Construction Materials, Not Elsewhere Classified",50,product,MCC
+5044,"Office, Photographic, Photocopy, and Microfilm Equipment",50,product,MCC
+5045,"Computers, Computer Peripheral Equipment, Software",50,product,MCC
+5046,"Commercial Equipment, Not Elsewhere Classified",50,product,MCC
+5047,"Medical, Dental Ophthalmic, Hospital Equipment and Supplies",50,product,MCC
+5051,Metal Service Centers and Offices,50,product,MCC
+5065,Electrical Parts and Equipment,50,product,MCC
+5072,Hardware Equipment and Supplies,50,product,MCC
+5074,Plumbing and Heating Equipment and Supplies,50,product,MCC
+5085,"Industrial Supplies, Not Elsewhere Classified",50,product,MCC
+5094,"Precious Stones and Metals, Watches and Jewelry",50,product,MCC
+5099,"Durable Goods, Not Elsewhere Classified",50,product,MCC
+5111,"Stationery, Office Supplies, Printing, and Writing Paper",51,product,MCC
+5122,"Drugs, Drug Proprietors, and Druggist’s Sundries",51,product,MCC
+5131,"Piece Goods, Notions, and Other Dry Goods",51,product,MCC
+5137,Men’s Women’s and Children’s Uniforms and Commercial Clothing,51,product,MCC
+5139,Commercial Footwear,51,product,MCC
+5169,"Chemicals and Allied Products, Not Elsewhere Classified",51,product,MCC
+5172,Petroleum and Petroleum Products,51,product,MCC
+5192,"Books, Periodicals, and Newspapers",51,product,MCC
+5193,"Florists’ Supplies, Nursery Stock and Flowers",51,product,MCC
+5198,"Paints, Varnishes, and Supplies",51,product,MCC
+5199,"Non-durable Goods, Not Elsewhere Classified",51,product,MCC
+5200,Home Supply Warehouse Stores,52,product,MCC
+5211,Lumber and Building Materials Stores,52,product,MCC
+5231,"Glass, Paint, and Wallpaper Stores",52,product,MCC
+5251,Hardware Stores,52,product,MCC
+5261,Nurseries – Lawn and Garden Supply Store,52,product,MCC
+5271,Mobile Home Dealers,52,product,MCC
+5300,Wholesale Clubs,53,product,MCC
+5309,Duty Free Store,53,product,MCC
+5310,Discount Stores,53,product,MCC
+5311,Department Stores,53,product,MCC
+5331,Variety Stores,53,product,MCC
+5399,Misc. General Merchandise,53,product,MCC
+5411,"Grocery Stores, Supermarkets",54,product,MCC
+5422,Meat Provisioners – Freezer and Locker,54,product,MCC
+5441,"Candy, Nut, and Confectionery Stores",54,product,MCC
+5451,Dairy Products Stores,54,product,MCC
+5462,Bakeries,54,product,MCC
+5499,Misc. Food Stores – Convenience Stores and Specialty Markets,54,product,MCC
+5511,"Car and Truck Dealers (New and Used) Sales, Service, Repairs, Parts, and Leasing",55,product,MCC
+5521,Automobile and Truck Dealers (Used Only),55,product,MCC
+5531,Automobile Supply Stores,55,product,MCC
+5532,Automotive Tire Stores,55,product,MCC
+5533,"Automotive Parts, Accessories Stores",55,product,MCC
+5541,Service Stations ( with or without ancillary services),55,product,MCC
+5542,Automated Fuel Dispensers,55,product,MCC
+5551,Boat Dealers,55,product,MCC
+5561,"Recreational and Utility Trailers, Camp Dealers",55,product,MCC
+5571,Motorcycle Dealers,55,product,MCC
+5592,Motor Home Dealers,55,product,MCC
+5598,Snowmobile Dealers,55,product,MCC
+5599,Miscellaneous Auto Dealers,55,product,MCC
+5611,Men’s and Boy’s Clothing and Accessories Stores,56,product,MCC
+5621,Women’s Ready-to-Wear Stores,56,product,MCC
+5631,Women’s Accessory and Specialty Shops,56,product,MCC
+5641,Children’s and Infant’s Wear Stores,56,product,MCC
+5651,Family Clothing Stores,56,product,MCC
+5655,"Sports Apparel, Riding Apparel Stores",56,product,MCC
+5661,Shoe Stores,56,product,MCC
+5681,Furriers and Fur Shops,56,product,MCC
+5691,Men’s and Women’s Clothing Stores,56,product,MCC
+5697,"Tailors, Seamstress, Mending, and Alterations",56,product,MCC
+5698,Wig and Toupee Stores,56,product,MCC
+5699,Miscellaneous Apparel and Accessory Shops,56,product,MCC
+5712,"Furniture, Home Furnishings, and Equipment Stores, ExceptAppliances",57,product,MCC
+5713,Floor Covering Stores,57,product,MCC
+5714,"Drapery, Window Covering and Upholstery Stores",57,product,MCC
+5718,"Fireplace, Fireplace Screens, and Accessories Stores",57,product,MCC
+5719,Miscellaneous Home Furnishing Specialty Stores,57,product,MCC
+5722,Household Appliance Stores,57,product,MCC
+5732,Electronic Sales,57,product,MCC
+5733,"Music Stores, Musical Instruments, Piano Sheet Music",57,product,MCC
+5734,Computer Software Stores,57,product,MCC
+5735,Record Shops,57,product,MCC
+5811,Caterers,58,product,MCC
+5812,Eating places and Restaurants,58,product,MCC
+5813,"Drinking Places (Alcoholic Beverages), Bars, Taverns, Cocktail lounges, Nightclubs and Discotheques",58,product,MCC
+5814,Fast Food Restaurants,58,product,MCC
+5815,"Digital Goods: Media, Books, Movies, Music",58,product,MCC
+5816,Digital Goods: Games,58,product,MCC
+5817,Digital Goods: Applications (Excludes Games),58,product,MCC
+5818,Digital Goods: Large Digital Goods Merchant,58,product,MCC
+5832,"Antique Shops – Sales, Repairs, and Restoration Services",58,product,MCC
+5912,Drug Stores and Pharmacies,59,product,MCC
+5921,"Package Stores – Beer, Wine, and Liquor",59,product,MCC
+5931,Used Merchandise and Secondhand Stores,59,product,MCC
+5932,Antique Shops,59,product,MCC
+5933,Pawn Shops and Salvage Yards,59,product,MCC
+5935,Wrecking and Salvage Yards,59,product,MCC
+5937,Antique Reproductions,59,product,MCC
+5940,Bicycle Shops – Sales and Service,59,product,MCC
+5941,Sporting Goods Stores,59,product,MCC
+5942,Book Stores,59,product,MCC
+5943,"Stationery Stores, Office and School Supply Stores",59,product,MCC
+5944,"Watch, Clock, Jewelry, and Silverware Stores",59,product,MCC
+5945,"Hobby, Toy, and Game Shops",59,product,MCC
+5946,Camera and Photographic Supply Stores,59,product,MCC
+5947,"Card Shops, Gift, Novelty, and Souvenir Shops",59,product,MCC
+5948,Leather Goods Stores,59,product,MCC
+5949,"Sewing, Needle, Fabric, and Price Goods Stores",59,product,MCC
+5950,Glassware/Crystal Stores,59,product,MCC
+5960,Direct Marketing- Insurance Service,59,product,MCC
+5961,"Mail Order Houses Including Catalog Order Stores, Book/Record Clubs (No longer permitted for U.S. original presentments)",59,product,MCC
+5962,Direct Marketing – Travel Related Arrangements Services,59,product,MCC
+5963,Door-to-Door Sales,59,product,MCC
+5964,Direct Marketing – Catalog Merchant,59,product,MCC
+5965,Direct Marketing – Catalog and Catalog and Retail Merchant,59,product,MCC
+5966,Direct Marketing- Outbound Telemarketing Merchant,59,product,MCC
+5967,Direct Marketing – Inbound Teleservices Merchant,59,product,MCC
+5968,Direct Marketing – Continuity/Subscription Merchant,59,product,MCC
+5969,Direct Marketing – Not Elsewhere Classified,59,product,MCC
+5970,Artist’s Supply and Craft Shops,59,product,MCC
+5971,Art Dealers and Galleries,59,product,MCC
+5972,Stamp and Coin Stores – Philatelic and Numismatic Supplies,59,product,MCC
+5973,Religious Goods Stores,59,product,MCC
+5975,"Hearing Aids – Sales, Service, and Supply Stores",59,product,MCC
+5976,Orthopedic Goods Prosthetic Devices,59,product,MCC
+5977,Cosmetic Stores,59,product,MCC
+5978,"Typewriter Stores – Sales, Rental, Service",59,product,MCC
+5983,"Fuel – Fuel Oil, Wood, Coal, Liquefied Petroleum",59,product,MCC
+5992,Florists,59,product,MCC
+5993,Cigar Stores and Stands,59,product,MCC
+5994,News Dealers and Newsstands,59,product,MCC
+5995,"Pet Shops, Pet Foods, and Supplies Stores",59,product,MCC
+5996,"Swimming Pools – Sales, Service, and Supplies",59,product,MCC
+5997,Electric Razor Stores – Sales and Service,59,product,MCC
+5998,Tent and Awning Shops,59,product,MCC
+5999,Miscellaneous and Specialty Retail Stores,59,product,MCC
+6010,Financial Institutions – Manual Cash Disbursements,60,product,MCC
+6011,Financial Institutions – Manual Cash Disbursements,60,product,MCC
+6012,Financial Institutions – Merchandise and Services,60,product,MCC
+6051,"Non-Financial Institutions – Foreign Currency, Money Orders (not wire transfer) and Travelers Cheques",60,product,MCC
+6211,Security Brokers/Dealers,62,product,MCC
+6300,"Insurance Sales, Underwriting, and Premiums",63,product,MCC
+6381,"Insurance Premiums, (no longer valid for first presentment work)",63,product,MCC
+6399,"Insurance, Not Elsewhere Classified ( no longer valid forfirst presentment work)",63,product,MCC
+6513,Real Estate Agents and Managers - Rentals,65,product,MCC
+7011,"Lodging – Hotels, Motels, Resorts, Central Reservation Services (not elsewhere classified)",70,product,MCC
+7012,Timeshares,70,product,MCC
+7032,Sporting and Recreational Camps,70,product,MCC
+7033,Trailer Parks and Camp Grounds,70,product,MCC
+7210,"Laundry, Cleaning, and Garment Services",72,product,MCC
+7211,Laundry – Family and Commercial,72,product,MCC
+7216,Dry Cleaners,72,product,MCC
+7217,Carpet and Upholstery Cleaning,72,product,MCC
+7221,Photographic Studios,72,product,MCC
+7230,Barber and Beauty Shops,72,product,MCC
+7251,"Shop Repair Shops and Shoe Shine Parlors, and Hat Cleaning Shops",72,product,MCC
+7261,Funeral Service and Crematories,72,product,MCC
+7273,Dating and Escort Services,72,product,MCC
+7276,Tax Preparation Service,72,product,MCC
+7277,"Counseling Service – Debt, Marriage, Personal",72,product,MCC
+7278,"Buying/Shopping Services, Clubs",72,product,MCC
+7296,"Clothing Rental – Costumes, Formal Wear, Uniforms",72,product,MCC
+7297,Massage Parlors,72,product,MCC
+7298,Health and Beauty Shops,72,product,MCC
+7299,Miscellaneous Personal Services ( not elsewhere classifies),72,product,MCC
+7311,Advertising Services,73,product,MCC
+7321,Consumer Credit Reporting Agencies,73,product,MCC
+7332,Blueprinting and Photocopying Services,73,product,MCC
+7333,"Commercial Photography, Art and Graphics",73,product,MCC
+7338,"Quick Copy, Reproduction and Blueprinting Services",73,product,MCC
+7339,Stenographic and Secretarial Support Services,73,product,MCC
+7342,Exterminating and Disinfecting Services,73,product,MCC
+7349,"Cleaning and Maintenance, Janitorial Services",73,product,MCC
+7361,"Employment Agencies, Temporary Help Services",73,product,MCC
+7372,"Computer Programming, Integrated Systems Design and Data Processing Services",73,product,MCC
+7375,Information Retrieval Services,73,product,MCC
+7379,"Computer Maintenance and Repair Services, Not Elsewhere Classified",73,product,MCC
+7392,"Management, Consulting, and Public Relations Services",73,product,MCC
+7393,Protective and Security Services – Including Armored Carsand Guard Dogs,73,product,MCC
+7394,"Equipment Rental and Leasing Services, Tool Rental, Furniture Rental, and Appliance Rental",73,product,MCC
+7395,"Photofinishing Laboratories, Photo Developing",73,product,MCC
+7399,"Business Services, Not Elsewhere Classified",73,product,MCC
+7511,Truck Stop,75,product,MCC
+7512,Car Rental Companies ( Not Listed Below),75,product,MCC
+7513,Truck and Utility Trailer Rentals,75,product,MCC
+7519,Motor Home and Recreational Vehicle Rentals,75,product,MCC
+7523,Automobile Parking Lots and Garages,75,product,MCC
+7531,Automotive Body Repair Shops,75,product,MCC
+7534,Tire Re-treading and Repair Shops,75,product,MCC
+7535,Paint Shops – Automotive,75,product,MCC
+7538,Automotive Service Shops,75,product,MCC
+7542,Car Washes,75,product,MCC
+7549,Towing Services,75,product,MCC
+7622,Radio Repair Shops,76,product,MCC
+7623,Air Conditioning and Refrigeration Repair Shops,76,product,MCC
+7629,Electrical And Small Appliance Repair Shops,76,product,MCC
+7631,"Watch, Clock, and Jewelry Repair",76,product,MCC
+7641,"Furniture, Furniture Repair, and Furniture Refinishing",76,product,MCC
+7692,Welding Repair,76,product,MCC
+7699,Repair Shops and Related Services –Miscellaneous,76,product,MCC
+7800,Government-Owned Lotteries,78,product,MCC
+7801,Government-Licensed On-Line Casinos (On-Line Gambling),78,product,MCC
+7802,Government-Licensed Horse/Dog Racing,78,product,MCC
+7829,Motion Pictures and Video Tape Production and Distribution,78,product,MCC
+7832,Motion Picture Theaters,78,product,MCC
+7841,Video Tape Rental Stores,78,product,MCC
+7911,"Dance Halls, Studios and Schools",79,product,MCC
+7922,"Theatrical Producers (Except Motion Pictures), Ticket Agencies",79,product,MCC
+7929,"Bands, Orchestras, and Miscellaneous Entertainers (Not Elsewhere Classified)",79,product,MCC
+7932,Billiard and Pool Establishments,79,product,MCC
+7933,Bowling Alleys,79,product,MCC
+7941,"Commercial Sports, Athletic Fields, Professional Sport Clubs, and Sport Promoters",79,product,MCC
+7991,Tourist Attractions and Exhibits,79,product,MCC
+7992,Golf Courses – Public,79,product,MCC
+7993,Video Amusement Game Supplies,79,product,MCC
+7994,Video Game Arcades/Establishments,79,product,MCC
+7995,"Betting (including Lottery Tickets, Casino Gaming Chips, Off-track Betting and Wagers at Race Tracks)",79,product,MCC
+7996,"Amusement Parks, Carnivals, Circuses, Fortune Tellers",79,product,MCC
+7997,"Membership Clubs (Sports, Recreation, Athletic), Country Clubs, and Private Golf Courses",79,product,MCC
+7998,"Aquariums, Sea-aquariums, Dolphinariums",79,product,MCC
+7999,Recreation Services (Not Elsewhere Classified),79,product,MCC
+8011,Doctors and Physicians (Not Elsewhere Classified),80,product,MCC
+8021,Dentists and Orthodontists,80,product,MCC
+8031,Osteopaths,80,product,MCC
+8041,Chiropractors,80,product,MCC
+8042,Optometrists and Ophthalmologists,80,product,MCC
+8043,"Opticians, Opticians Goods and Eyeglasses",80,product,MCC
+8044,"Opticians, Optical Goods, and Eyeglasses (no longer validfor first presentments)",80,product,MCC
+8049,Podiatrists and Chiropodists,80,product,MCC
+8050,Nursing and Personal Care Facilities,80,product,MCC
+8062,Hospitals,80,product,MCC
+8071,Medical and Dental Laboratories,80,product,MCC
+8099,Medical Services and Health Practitioners (Not Elsewhere Classified),80,product,MCC
+8111,Legal Services and Attorneys,81,product,MCC
+8211,Elementary and Secondary Schools,82,product,MCC
+8220,"Colleges, Junior Colleges, Universities, and ProfessionalSchools",82,product,MCC
+8241,Correspondence Schools,82,product,MCC
+8244,Business and Secretarial Schools,82,product,MCC
+8249,Vocational Schools and Trade Schools,82,product,MCC
+8299,Schools and Educational Services ( Not Elsewhere Classified),82,product,MCC
+8351,Child Care Services,83,product,MCC
+8398,Charitable and Social Service Organizations,83,product,MCC
+8641,"Civic, Fraternal, and Social Associations",86,product,MCC
+8651,Political Organizations,86,product,MCC
+8661,Religious Organizations,86,product,MCC
+8675,Automobile Associations,86,product,MCC
+8699,Membership Organizations ( Not Elsewhere Classified),86,product,MCC
+8734,Testing Laboratories ( non-medical),87,product,MCC
+8911,Architectural – Engineering and Surveying Services,89,product,MCC
+8931,"Accounting, Auditing, and Bookkeeping Services",89,product,MCC
+8999,Professional Services ( Not Elsewhere Defined),89,product,MCC
+9211,"Court Costs, including Alimony and Child Support",92,product,MCC
+9222,Fines,92,product,MCC
+9223,Bail and Bond Payments,92,product,MCC
+9311,Tax Payments,93,product,MCC
+9399,Government Services ( Not Elsewhere Classified),93,product,MCC
+9402,Postal Services – Government Only,94,product,MCC
+9405,Intra – Government Transactions,94,product,MCC
+9700,Automated Referral Service ( For Visa Only),97,product,MCC
+9701,Visa Credential Service ( For Visa Only),97,product,MCC
+9702,GCAS Emergency Services ( For Visa Only),97,product,MCC
+9950,Intra – Company Purchases ( For Visa Only),99,product,MCC

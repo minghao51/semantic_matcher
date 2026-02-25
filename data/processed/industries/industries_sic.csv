@@ -1,0 +1,45 @@
+id,name,aliases,type,system
+01,Agricultural Production - Crops,01,industry,SIC
+10,Metal Mining,10,industry,SIC
+15,Building Construction - General Contractors,15,industry,SIC
+17,Construction - Special Trade Contractors,17,industry,SIC
+20,Food and Kindred Products,20,industry,SIC
+25,Furniture and Fixtures,25,industry,SIC
+27,"Printing, Publishing and Allied Industries",27,industry,SIC
+28,Chemicals and Allied Products,28,industry,SIC
+30,Rubber and Miscellaneous Plastics Products,30,industry,SIC
+33,Primary Metal Industries,33,industry,SIC
+35,Industrial and Commercial Machinery,35,industry,SIC
+36,Electronic and Other Electrical Equipment,36,industry,SIC
+37,Transportation Equipment,37,industry,SIC
+38,Instruments and Related Products,38,industry,SIC
+40,Railroad Transportation,40,industry,SIC
+42,Trucking and Warehousing,42,industry,SIC
+45,Transportation by Air,45,industry,SIC
+48,Communications,48,industry,SIC
+49,"Electric, Gas, and Sanitary Services",49,industry,SIC
+50,Wholesale Trade - Durable Goods,50,industry,SIC
+51,Wholesale Trade - Non-Durable Goods,51,industry,SIC
+52,Building Materials and Garden Supplies,52,industry,SIC
+53,General Merchandise Stores,53,industry,SIC
+54,Food Stores,54,industry,SIC
+55,Automotive Dealers and Gasoline Stations,55,industry,SIC
+56,Apparel and Accessory Stores,56,industry,SIC
+57,Furniture and Home Furnishings Stores,57,industry,SIC
+58,Eating and Drinking Places,58,industry,SIC
+60,Depository Institutions,60,industry,SIC
+61,Non-Depository Credit Institutions,61,industry,SIC
+62,Security and Commodity Brokers,62,industry,SIC
+63,Insurance Carriers,63,industry,SIC
+65,Real Estate,65,industry,SIC
+70,"Hotels, Rooming Houses, Camps",70,industry,SIC
+72,Personal Services,72,industry,SIC
+73,Business Services,73,industry,SIC
+75,Automotive Repair and Services,75,industry,SIC
+78,Motion Pictures,78,industry,SIC
+79,Amusement and Recreation Services,79,industry,SIC
+80,Health Services,80,industry,SIC
+82,Educational Services,82,industry,SIC
+83,Social Services,83,industry,SIC
+86,Membership Organizations,86,industry,SIC
+87,Engineering and Management Services,87,industry,SIC

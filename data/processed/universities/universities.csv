@@ -1,0 +1,51 @@
+id,name,aliases,type,country
+harvard_university,Harvard University,Harvard|Harvard Univ,university,US
+stanford_university,Stanford University,Stanford|Stanford Univ,university,US
+massachusetts_institute_of_technology,Massachusetts Institute of Technology,MIT,university,US
+university_of_cambridge,University of Cambridge,Cambridge University|Univ of Cambridge,university,GB
+university_of_oxford,University of Oxford,Oxford University|Univ of Oxford,university,GB
+yale_university,Yale University,Yale|Yale Univ,university,US
+princeton_university,Princeton University,Princeton|Princeton Univ,university,US
+columbia_university,Columbia University,Columbia|Columbia Univ,university,US
+university_of_chicago,University of Chicago,UChicago|Chicago University,university,US
+university_of_pennsylvania,University of Pennsylvania,UPenn|Penn,university,US
+california_institute_of_technology,California Institute of Technology,Caltech|California Tech,university,US
+johns_hopkins_university,Johns Hopkins University,JHU|Johns Hopkins,university,US
+cornell_university,Cornell University,Cornell|Cornell Univ,university,US
+university_of_michigan,University of Michigan,UMich|Michigan,university,US
+university_of_toronto,University of Toronto,UofT|Toronto,university,CA
+duke_university,Duke University,Duke|Duke Univ,university,US
+northwestern_university,Northwestern University,Northwestern|Northwestern Univ,university,US
+new_york_university,New York University,NYU|New York Univ,university,US
+university_of_california_berkeley,"University of California, Berkeley",UC Berkeley|Berkeley,university,US
+university_of_tokyo,University of Tokyo,UTokyo|Tokyo Univ,university,JP
+kyoto_university,Kyoto University,Kyoto Univ|KGU,university,JP
+university_of_melbourne,University of Melbourne,UniMelb|Melbourne,university,AU
+australian_national_university,Australian National University,ANU|Australian National Univ,university,AU
+eth_zurich,ETH Zurich,Swiss Federal Institute of Technology Zurich,university,CH
+university_of_edinburgh,University of Edinburgh,Edinburgh Univ|Edinburgh,university,GB
+university_of_manchester,University of Manchester,Manchester Univ|UMIST,university,GB
+university_of_sydney,University of Sydney,Sydney Univ|USYD,university,AU
+university_of_queensland,University of Queensland,UQ|Queensland,university,AU
+mcgill_university,McGill University,McGill|McGill Univ,university,CA
+university_of_british_columbia,University of British Columbia,UBC|Vancouver,university,CA
+national_university_of_singapore,National University of Singapore,NUS|National Univ of Singapore,university,SG
+nanyang_technological_university,Nanyang Technological University,NTU|Nanyang,university,SG
+technical_university_of_munich,Technical University of Munich,TUM|Munich Tech,university,DE
+heidelberg_university,Heidelberg University,Heidelberg Univ|Ruprecht Karls University,university,DE
+university_of_paris,University of Paris,Sorbonne|Paris University,university,FR
+sorbonne_university,Sorbonne University,Universite Sorbonne,university,FR
+ecole_polytechnique,Ecole Polytechnique,X|Polytechnique,university,FR
+university_of_hong_kong,University of Hong Kong,HKU|Hong Kong Univ,university,HK
+chinese_university_of_hong_kong,Chinese University of Hong Kong,CUHK|Chinese Univ HK,university,HK
+seoul_national_university,Seoul National University,SNU|Seoul Natl Univ,university,KR
+korea_university,Korea University,KU|Korea Univ,university,KR
+kaist,KAIST,Korea Advanced Institute of Science and Technology,university,KR
+tsinghua_university,Tsinghua University,Tsinghua|THU,university,CN
+peking_university,Peking University,Beijing University|PKU,university,CN
+fudan_university,Fudan University,Fudan|Fudan Univ,university,CN
+shanghai_jiao_tong_university,Shanghai Jiao Tong University,SJTU|Shanghai Jiao Tong,university,CN
+zhejiang_university,Zhejiang University,ZJU|Zhejiang Univ,university,CN
+indian_institute_of_technology_bombay,Indian Institute of Technology Bombay,IIT Bombay|IITB,university,IN
+indian_institute_of_technology_delhi,Indian Institute of Technology Delhi,IIT Delhi|IITD,university,IN
+indian_institute_of_science,Indian Institute of Science,IISc,university,IN

@@ -1,0 +1,308 @@
+id,name,aliases,type
+AFN,Afghani,AFN|971,currency
+EUR,Euro,EUR|978,currency
+ALL,Lek,ALL|008,currency
+DZD,Algerian Dinar,DZD|012,currency
+USD,US Dollar,USD|840,currency
+AOA,Kwanza,AOA|973,currency
+XCD,East Caribbean Dollar,XCD|951,currency
+XAD,Arab Accounting Dinar,XAD|396,currency
+ARS,Argentine Peso,ARS|032,currency
+AMD,Armenian Dram,AMD|051,currency
+AWG,Aruban Florin,AWG|533,currency
+AUD,Australian Dollar,AUD|036,currency
+AZN,Azerbaijan Manat,AZN|944,currency
+BSD,Bahamian Dollar,BSD|044,currency
+BHD,Bahraini Dinar,BHD|048,currency
+BDT,Taka,BDT|050,currency
+BBD,Barbados Dollar,BBD|052,currency
+BYN,Belarusian Ruble,BYN|933,currency
+BZD,Belize Dollar,BZD|084,currency
+XOF,CFA Franc BCEAO,XOF|952,currency
+BMD,Bermudian Dollar,BMD|060,currency
+INR,Indian Rupee,INR|356,currency
+BTN,Ngultrum,BTN|064,currency
+BOB,Boliviano,BOB|068,currency
+BOV,Mvdol,BOV|984,currency
+BAM,Convertible Mark,BAM|977,currency
+BWP,Pula,BWP|072,currency
+NOK,Norwegian Krone,NOK|578,currency
+BRL,Brazilian Real,BRL|986,currency
+BND,Brunei Dollar,BND|096,currency
+BIF,Burundi Franc,BIF|108,currency
+CVE,Cabo Verde Escudo,CVE|132,currency
+KHR,Riel,KHR|116,currency
+XAF,CFA Franc BEAC,XAF|950,currency
+CAD,Canadian Dollar,CAD|124,currency
+KYD,Cayman Islands Dollar,KYD|136,currency
+CLP,Chilean Peso,CLP|152,currency
+CLF,Unidad de Fomento,CLF|990,currency
+CNY,Yuan Renminbi,CNY|156,currency
+COP,Colombian Peso,COP|170,currency
+COU,Unidad de Valor Real,COU|970,currency
+KMF,Comorian Franc,KMF|174,currency
+CDF,Congolese Franc,CDF|976,currency
+NZD,New Zealand Dollar,NZD|554,currency
+CRC,Costa Rican Colon,CRC|188,currency
+CUP,Cuban Peso,CUP|192,currency
+XCG,Caribbean Guilder,XCG|532,currency
+CZK,Czech Koruna,CZK|203,currency
+DKK,Danish Krone,DKK|208,currency
+DJF,Djibouti Franc,DJF|262,currency
+DOP,Dominican Peso,DOP|214,currency
+EGP,Egyptian Pound,EGP|818,currency
+SVC,El Salvador Colon,SVC|222,currency
+ERN,Nakfa,ERN|232,currency
+SZL,Lilangeni,SZL|748,currency
+ETB,Ethiopian Birr,ETB|230,currency
+FKP,Falkland Islands Pound,FKP|238,currency
+FJD,Fiji Dollar,FJD|242,currency
+XPF,CFP Franc,XPF|953,currency
+GMD,Dalasi,GMD|270,currency
+GEL,Lari,GEL|981,currency
+GHS,Ghana Cedi,GHS|936,currency
+GIP,Gibraltar Pound,GIP|292,currency
+GTQ,Quetzal,GTQ|320,currency
+GBP,Pound Sterling,GBP|826,currency
+GNF,Guinean Franc,GNF|324,currency
+GYD,Guyana Dollar,GYD|328,currency
+HTG,Gourde,HTG|332,currency
+HNL,Lempira,HNL|340,currency
+HKD,Hong Kong Dollar,HKD|344,currency
+HUF,Forint,HUF|348,currency
+ISK,Iceland Krona,ISK|352,currency
+IDR,Rupiah,IDR|360,currency
+XDR,SDR (Special Drawing Right),XDR|960,currency
+IRR,Iranian Rial,IRR|364,currency
+IQD,Iraqi Dinar,IQD|368,currency
+ILS,New Israeli Sheqel,ILS|376,currency
+JMD,Jamaican Dollar,JMD|388,currency
+JPY,Yen,JPY|392,currency
+JOD,Jordanian Dinar,JOD|400,currency
+KZT,Tenge,KZT|398,currency
+KES,Kenyan Shilling,KES|404,currency
+KPW,North Korean Won,KPW|408,currency
+KRW,Won,KRW|410,currency
+KWD,Kuwaiti Dinar,KWD|414,currency
+KGS,Som,KGS|417,currency
+LAK,Lao Kip,LAK|418,currency
+LBP,Lebanese Pound,LBP|422,currency
+LSL,Loti,LSL|426,currency
+ZAR,Rand,ZAR|710,currency
+LRD,Liberian Dollar,LRD|430,currency
+LYD,Libyan Dinar,LYD|434,currency
+CHF,Swiss Franc,CHF|756,currency
+MOP,Pataca,MOP|446,currency
+MKD,Denar,MKD|807,currency
+MGA,Malagasy Ariary,MGA|969,currency
+MWK,Malawi Kwacha,MWK|454,currency
+MYR,Malaysian Ringgit,MYR|458,currency
+MVR,Rufiyaa,MVR|462,currency
+MRU,Ouguiya,MRU|929,currency
+MUR,Mauritius Rupee,MUR|480,currency
+XUA,ADB Unit of Account,XUA|965,currency
+MXN,Mexican Peso,MXN|484,currency
+MXV,Mexican Unidad de Inversion (UDI),MXV|979,currency
+MDL,Moldovan Leu,MDL|498,currency
+MNT,Tugrik,MNT|496,currency
+MAD,Moroccan Dirham,MAD|504,currency
+MZN,Mozambique Metical,MZN|943,currency
+MMK,Kyat,MMK|104,currency
+NAD,Namibia Dollar,NAD|516,currency
+NPR,Nepalese Rupee,NPR|524,currency
+NIO,Cordoba Oro,NIO|558,currency
+NGN,Naira,NGN|566,currency
+OMR,Rial Omani,OMR|512,currency
+PKR,Pakistan Rupee,PKR|586,currency
+PAB,Balboa,PAB|590,currency
+PGK,Kina,PGK|598,currency
+PYG,Guarani,PYG|600,currency
+PEN,Sol,PEN|604,currency
+PHP,Philippine Peso,PHP|608,currency
+PLN,Zloty,PLN|985,currency
+QAR,Qatari Rial,QAR|634,currency
+RON,Romanian Leu,RON|946,currency
+RUB,Russian Ruble,RUB|643,currency
+RWF,Rwanda Franc,RWF|646,currency
+SHP,Saint Helena Pound,SHP|654,currency
+WST,Tala,WST|882,currency
+STN,Dobra,STN|930,currency
+SAR,Saudi Riyal,SAR|682,currency
+RSD,Serbian Dinar,RSD|941,currency
+SCR,Seychelles Rupee,SCR|690,currency
+SLE,Leone,SLE|925,currency
+SGD,Singapore Dollar,SGD|702,currency
+XSU,Sucre,XSU|994,currency
+SBD,Solomon Islands Dollar,SBD|090,currency
+SOS,Somali Shilling,SOS|706,currency
+SSP,South Sudanese Pound,SSP|728,currency
+LKR,Sri Lanka Rupee,LKR|144,currency
+SDG,Sudanese Pound,SDG|938,currency
+SRD,Surinam Dollar,SRD|968,currency
+SEK,Swedish Krona,SEK|752,currency
+CHE,WIR Euro,CHE|947,currency
+CHW,WIR Franc,CHW|948,currency
+SYP,Syrian Pound,SYP|760,currency
+TWD,New Taiwan Dollar,TWD|901,currency
+TJS,Somoni,TJS|972,currency
+TZS,Tanzanian Shilling,TZS|834,currency
+THB,Baht,THB|764,currency
+TOP,Paâanga,TOP|776,currency
+TTD,Trinidad and Tobago Dollar,TTD|780,currency
+TND,Tunisian Dinar,TND|788,currency
+TRY,Turkish Lira,TRY|949,currency
+TMT,Turkmenistan New Manat,TMT|934,currency
+UGX,Uganda Shilling,UGX|800,currency
+UAH,Hryvnia,UAH|980,currency
+AED,UAE Dirham,AED|784,currency
+USN,US Dollar (Next day),USN|997,currency
+UYU,Peso Uruguayo,UYU|858,currency
+UYI,Uruguay Peso en Unidades Indexadas (UI),UYI|940,currency
+UYW,Unidad Previsional,UYW|927,currency
+UZS,Uzbekistan Sum,UZS|860,currency
+VUV,Vatu,VUV|548,currency
+VES,BolÃ­var Soberano,VES|928,currency
+VED,BolÃ­var Soberano,VED|926,currency
+VND,Dong,VND|704,currency
+YER,Yemeni Rial,YER|886,currency
+ZMW,Zambian Kwacha,ZMW|967,currency
+ZWG,Zimbabwe Gold,ZWG|924,currency
+XBA,Bond Markets Unit European Composite Unit (EURCO),XBA|955,currency
+XBB,Bond Markets Unit European Monetary Unit (E.M.U.-6),XBB|956,currency
+XBC,Bond Markets Unit European Unit of Account 9 (E.U.A.-9),XBC|957,currency
+XBD,Bond Markets Unit European Unit of Account 17 (E.U.A.-17),XBD|958,currency
+XTS,Codes specifically reserved for testing purposes,XTS|963,currency
+XXX,The codes assigned for transactions where no currency is involved,XXX|999,currency
+XAU,Gold,XAU|959,currency
+XPD,Palladium,XPD|964,currency
+XPT,Platinum,XPT|962,currency
+XAG,Silver,XAG|961,currency
+AFA,Afghani,AFA|004,currency
+FIM,Markka,FIM|246,currency
+ALK,Old Lek,ALK|008,currency
+ADP,Andorran Peseta,ADP|020,currency
+ESP,Spanish Peseta,ESP|724,currency
+FRF,French Franc,FRF|250,currency
+AOK,Kwanza,AOK|024,currency
+AON,New Kwanza,AON|024,currency
+AOR,Kwanza Reajustado,AOR|982,currency
+ARA,Austral,ARA|032,currency
+ARP,Peso Argentino,ARP|032,currency
+ARY,Peso,ARY|032,currency
+RUR,Russian Ruble,RUR|810,currency
+ATS,Schilling,ATS|040,currency
+AYM,Azerbaijan Manat,AYM|945,currency
+AZM,Azerbaijanian Manat,AZM|031,currency
+BYB,Belarusian Ruble,BYB|112,currency
+BYR,Belarusian Ruble,BYR|974,currency
+BEC,Convertible Franc,BEC|993,currency
+BEF,Belgian Franc,BEF|056,currency
+BEL,Financial Franc,BEL|992,currency
+BOP,Peso boliviano,BOP|068,currency
+BAD,Dinar,BAD|070,currency
+BRB,Cruzeiro,BRB|076,currency
+BRC,Cruzado,BRC|076,currency
+BRE,Cruzeiro,BRE|076,currency
+BRN,New Cruzado,BRN|076,currency
+BRR,Cruzeiro Real,BRR|987,currency
+BGJ,Lev A/52,BGJ|100,currency
+BGK,Lev A/62,BGK|100,currency
+BGL,Lev,BGL|100,currency
+BGN,Bulgarian Lev,BGN|975,currency
+BUK,Kyat,BUK|104,currency
+HRD,Croatian Dinar,HRD|191,currency
+HRK,Croatian Kuna,HRK|191,currency
+CUC,Peso Convertible,CUC|931,currency
+ANG,Netherlands Antillean Guilder,ANG|532,currency
+CYP,Cyprus Pound,CYP|196,currency
+CSJ,Krona A/53,CSJ|203,currency
+CSK,Koruna,CSK|200,currency
+ECS,Sucre,ECS|218,currency
+ECV,Unidad de Valor Constante (UVC),ECV|983,currency
+GQE,Ekwele,GQE|226,currency
+EEK,Kroon,EEK|233,currency
+XEU,European Currency Unit (E.C.U),XEU|954,currency
+GEK,Georgian Coupon,GEK|268,currency
+DDM,Mark der DDR,DDM|278,currency
+DEM,Deutsche Mark,DEM|276,currency
+GHC,Cedi,GHC|288,currency
+GHP,Ghana Cedi,GHP|939,currency
+GRD,Drachma,GRD|300,currency
+GNE,Syli,GNE|324,currency
+GNS,Syli,GNS|324,currency
+GWE,Guinea Escudo,GWE|624,currency
+GWP,Guinea-Bissau Peso,GWP|624,currency
+ITL,Italian Lira,ITL|380,currency
+ISJ,Old Krona,ISJ|352,currency
+IEP,Irish Pound,IEP|372,currency
+ILP,Pound,ILP|376,currency
+ILR,Old Shekel,ILR|376,currency
+LAJ,Pathet Lao Kip,LAJ|418,currency
+LVL,Latvian Lats,LVL|428,currency
+LVR,Latvian Ruble,LVR|428,currency
+LSM,Loti,LSM|426,currency
+ZAL,Financial Rand,ZAL|991,currency
+LTL,Lithuanian Litas,LTL|440,currency
+LTT,Talonas,LTT|440,currency
+LUC,Luxembourg Convertible Franc,LUC|989,currency
+LUF,Luxembourg Franc,LUF|442,currency
+LUL,Luxembourg Financial Franc,LUL|988,currency
+MGF,Malagasy Franc,MGF|450,currency
+MVQ,Maldive Rupee,MVQ|462,currency
+MLF,Mali Franc,MLF|466,currency
+MTL,Maltese Lira,MTL|470,currency
+MTP,Maltese Pound,MTP|470,currency
+MRO,Ouguiya,MRO|478,currency
+MXP,Mexican Peso,MXP|484,currency
+MZE,Mozambique Escudo,MZE|508,currency
+MZM,Mozambique Metical,MZM|508,currency
+NLG,Netherlands Guilder,NLG|528,currency
+NIC,Cordoba,NIC|558,currency
+PEH,Sol,PEH|604,currency
+PEI,Inti,PEI|604,currency
+PES,Sol,PES|604,currency
+PLZ,Zloty,PLZ|616,currency
+PTE,Portuguese Escudo,PTE|620,currency
+ROK,Leu A/52,ROK|642,currency
+ROL,Old Leu,ROL|642,currency
+STD,Dobra,STD|678,currency
+CSD,Serbian Dinar,CSD|891,currency
+SLL,Leone,SLL|694,currency
+SKK,Slovak Koruna,SKK|703,currency
+SIT,Tolar,SIT|705,currency
+RHD,Rhodesian Dollar,RHD|716,currency
+ESA,Spanish Peseta,ESA|996,currency
+ESB,"""A"" Account (convertible Peseta Account)",ESB|995,currency
+SDD,Sudanese Dinar,SDD|736,currency
+SDP,Sudanese Pound,SDP|736,currency
+SRG,Surinam Guilder,SRG|740,currency
+CHC,WIR Franc (for electronic),CHC|948,currency
+TJR,Tajik Ruble,TJR|762,currency
+TPE,Timor Escudo,TPE|626,currency
+TRL,Old Turkish Lira,TRL|792,currency
+TMM,Turkmenistan Manat,TMM|795,currency
+UGS,Uganda Shilling,UGS|800,currency
+UGW,Old Shilling,UGW|800,currency
+UAK,Karbovanet,UAK|804,currency
+SUR,Rouble,SUR|810,currency
+USS,US Dollar (Same day),USS|998,currency
+UYN,Old Uruguay Peso,UYN|858,currency
+UYP,Uruguayan Peso,UYP|858,currency
+VEB,Bolivar,VEB|862,currency
+VEF,Bolivar Fuerte,VEF|937,currency
+VNC,Old Dong,VNC|704,currency
+YDD,Yemeni Dinar,YDD|720,currency
+YUD,New Yugoslavian Dinar,YUD|890,currency
+YUM,New Dinar,YUM|891,currency
+YUN,Yugoslavian Dinar,YUN|890,currency
+ZRN,New Zaire,ZRN|180,currency
+ZRZ,Zaire,ZRZ|180,currency
+ZMK,Zambian Kwacha,ZMK|894,currency
+ZWC,Rhodesian Dollar,ZWC|716,currency
+ZWD,Zimbabwe Dollar (old),ZWD|716,currency
+ZWN,Zimbabwe Dollar (new),ZWN|942,currency
+ZWR,Zimbabwe Dollar,ZWR|935,currency
+ZWL,ZimbabweÂ Dollar,ZWL|932,currency
+XFO,Gold-Franc,XFO,currency
+XRE,RINET Funds Code,XRE,currency
+XFU,UIC-Franc,XFU,currency

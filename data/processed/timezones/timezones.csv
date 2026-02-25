@@ -1,0 +1,419 @@
+id,name,aliases,type,country_code
+Europe/Andorra,Andorra,Europe/Andorra|Europe|Europe,timezone,AD
+Asia/Dubai,Dubai,Asia/Dubai|Asia|Asia,timezone,AE
+Asia/Kabul,Kabul,Asia/Kabul|Asia|Asia,timezone,AF
+America/Antigua,Antigua,America/Antigua|America|America,timezone,AG
+America/Anguilla,Anguilla,America/Anguilla|America|America,timezone,AI
+Europe/Tirane,Tirane,Europe/Tirane|Europe|Europe,timezone,AL
+Asia/Yerevan,Yerevan,Asia/Yerevan|Asia|Asia,timezone,AM
+Africa/Luanda,Luanda,Africa/Luanda|Africa|Africa,timezone,AO
+Antarctica/McMurdo,McMurdo,Antarctica/McMurdo|Antarctica|Antarctica,timezone,AQ
+Antarctica/Casey,Casey,Antarctica/Casey|Antarctica|Antarctica,timezone,AQ
+Antarctica/Davis,Davis,Antarctica/Davis|Antarctica|Antarctica,timezone,AQ
+Antarctica/DumontDUrville,DumontDUrville,Antarctica/DumontDUrville|Antarctica|Antarctica,timezone,AQ
+Antarctica/Mawson,Mawson,Antarctica/Mawson|Antarctica|Antarctica,timezone,AQ
+Antarctica/Palmer,Palmer,Antarctica/Palmer|Antarctica|Antarctica,timezone,AQ
+Antarctica/Rothera,Rothera,Antarctica/Rothera|Antarctica|Antarctica,timezone,AQ
+Antarctica/Syowa,Syowa,Antarctica/Syowa|Antarctica|Antarctica,timezone,AQ
+Antarctica/Troll,Troll,Antarctica/Troll|Antarctica|Antarctica,timezone,AQ
+Antarctica/Vostok,Vostok,Antarctica/Vostok|Antarctica|Antarctica,timezone,AQ
+America/Argentina/Buenos_Aires,Buenos Aires,America/Argentina/Buenos Aires|America|America,timezone,AR
+America/Argentina/Cordoba,Cordoba,America/Argentina/Cordoba|America|America,timezone,AR
+America/Argentina/Salta,Salta,America/Argentina/Salta|America|America,timezone,AR
+America/Argentina/Jujuy,Jujuy,America/Argentina/Jujuy|America|America,timezone,AR
+America/Argentina/Tucuman,Tucuman,America/Argentina/Tucuman|America|America,timezone,AR
+America/Argentina/Catamarca,Catamarca,America/Argentina/Catamarca|America|America,timezone,AR
+America/Argentina/La_Rioja,La Rioja,America/Argentina/La Rioja|America|America,timezone,AR
+America/Argentina/San_Juan,San Juan,America/Argentina/San Juan|America|America,timezone,AR
+America/Argentina/Mendoza,Mendoza,America/Argentina/Mendoza|America|America,timezone,AR
+America/Argentina/San_Luis,San Luis,America/Argentina/San Luis|America|America,timezone,AR
+America/Argentina/Rio_Gallegos,Rio Gallegos,America/Argentina/Rio Gallegos|America|America,timezone,AR
+America/Argentina/Ushuaia,Ushuaia,America/Argentina/Ushuaia|America|America,timezone,AR
+Pacific/Pago_Pago,Pago Pago,Pacific/Pago Pago|Pacific|Pacific,timezone,AS
+Europe/Vienna,Vienna,Europe/Vienna|Europe|Europe,timezone,AT
+Australia/Lord_Howe,Lord Howe,Australia/Lord Howe|Australia|Australia,timezone,AU
+Antarctica/Macquarie,Macquarie,Antarctica/Macquarie|Antarctica|Antarctica,timezone,AU
+Australia/Hobart,Hobart,Australia/Hobart|Australia|Australia,timezone,AU
+Australia/Melbourne,Melbourne,Australia/Melbourne|Australia|Australia,timezone,AU
+Australia/Sydney,Sydney,Australia/Sydney|Australia|Australia,timezone,AU
+Australia/Broken_Hill,Broken Hill,Australia/Broken Hill|Australia|Australia,timezone,AU
+Australia/Brisbane,Brisbane,Australia/Brisbane|Australia|Australia,timezone,AU
+Australia/Lindeman,Lindeman,Australia/Lindeman|Australia|Australia,timezone,AU
+Australia/Adelaide,Adelaide,Australia/Adelaide|Australia|Australia,timezone,AU
+Australia/Darwin,Darwin,Australia/Darwin|Australia|Australia,timezone,AU
+Australia/Perth,Perth,Australia/Perth|Australia|Australia,timezone,AU
+Australia/Eucla,Eucla,Australia/Eucla|Australia|Australia,timezone,AU
+America/Aruba,Aruba,America/Aruba|America|America,timezone,AW
+Europe/Mariehamn,Mariehamn,Europe/Mariehamn|Europe|Europe,timezone,AX
+Asia/Baku,Baku,Asia/Baku|Asia|Asia,timezone,AZ
+Europe/Sarajevo,Sarajevo,Europe/Sarajevo|Europe|Europe,timezone,BA
+America/Barbados,Barbados,America/Barbados|America|America,timezone,BB
+Asia/Dhaka,Dhaka,Asia/Dhaka|Asia|Asia,timezone,BD
+Europe/Brussels,Brussels,Europe/Brussels|Europe|Europe,timezone,BE
+Africa/Ouagadougou,Ouagadougou,Africa/Ouagadougou|Africa|Africa,timezone,BF
+Europe/Sofia,Sofia,Europe/Sofia|Europe|Europe,timezone,BG
+Asia/Bahrain,Bahrain,Asia/Bahrain|Asia|Asia,timezone,BH
+Africa/Bujumbura,Bujumbura,Africa/Bujumbura|Africa|Africa,timezone,BI
+Africa/Porto-Novo,Porto-Novo,Africa/Porto-Novo|Africa|Africa,timezone,BJ
+America/St_Barthelemy,St Barthelemy,America/St Barthelemy|America|America,timezone,BL
+Atlantic/Bermuda,Bermuda,Atlantic/Bermuda|Atlantic|Atlantic,timezone,BM
+Asia/Brunei,Brunei,Asia/Brunei|Asia|Asia,timezone,BN
+America/La_Paz,La Paz,America/La Paz|America|America,timezone,BO
+America/Kralendijk,Kralendijk,America/Kralendijk|America|America,timezone,BQ
+America/Noronha,Noronha,America/Noronha|America|America,timezone,BR
+America/Belem,Belem,America/Belem|America|America,timezone,BR
+America/Fortaleza,Fortaleza,America/Fortaleza|America|America,timezone,BR
+America/Recife,Recife,America/Recife|America|America,timezone,BR
+America/Araguaina,Araguaina,America/Araguaina|America|America,timezone,BR
+America/Maceio,Maceio,America/Maceio|America|America,timezone,BR
+America/Bahia,Bahia,America/Bahia|America|America,timezone,BR
+America/Sao_Paulo,Sao Paulo,America/Sao Paulo|America|America,timezone,BR
+America/Campo_Grande,Campo Grande,America/Campo Grande|America|America,timezone,BR
+America/Cuiaba,Cuiaba,America/Cuiaba|America|America,timezone,BR
+America/Santarem,Santarem,America/Santarem|America|America,timezone,BR
+America/Porto_Velho,Porto Velho,America/Porto Velho|America|America,timezone,BR
+America/Boa_Vista,Boa Vista,America/Boa Vista|America|America,timezone,BR
+America/Manaus,Manaus,America/Manaus|America|America,timezone,BR
+America/Eirunepe,Eirunepe,America/Eirunepe|America|America,timezone,BR
+America/Rio_Branco,Rio Branco,America/Rio Branco|America|America,timezone,BR
+America/Nassau,Nassau,America/Nassau|America|America,timezone,BS
+Asia/Thimphu,Thimphu,Asia/Thimphu|Asia|Asia,timezone,BT
+Africa/Gaborone,Gaborone,Africa/Gaborone|Africa|Africa,timezone,BW
+Europe/Minsk,Minsk,Europe/Minsk|Europe|Europe,timezone,BY
+America/Belize,Belize,America/Belize|America|America,timezone,BZ
+America/St_Johns,St Johns,America/St Johns|America|America,timezone,CA
+America/Halifax,Halifax,America/Halifax|America|America,timezone,CA
+America/Glace_Bay,Glace Bay,America/Glace Bay|America|America,timezone,CA
+America/Moncton,Moncton,America/Moncton|America|America,timezone,CA
+America/Goose_Bay,Goose Bay,America/Goose Bay|America|America,timezone,CA
+America/Blanc-Sablon,Blanc-Sablon,America/Blanc-Sablon|America|America,timezone,CA
+America/Toronto,Toronto,America/Toronto|America|America,timezone,CA
+America/Iqaluit,Iqaluit,America/Iqaluit|America|America,timezone,CA
+America/Atikokan,Atikokan,America/Atikokan|America|America,timezone,CA
+America/Winnipeg,Winnipeg,America/Winnipeg|America|America,timezone,CA
+America/Resolute,Resolute,America/Resolute|America|America,timezone,CA
+America/Rankin_Inlet,Rankin Inlet,America/Rankin Inlet|America|America,timezone,CA
+America/Regina,Regina,America/Regina|America|America,timezone,CA
+America/Swift_Current,Swift Current,America/Swift Current|America|America,timezone,CA
+America/Edmonton,Edmonton,America/Edmonton|America|America,timezone,CA
+America/Cambridge_Bay,Cambridge Bay,America/Cambridge Bay|America|America,timezone,CA
+America/Inuvik,Inuvik,America/Inuvik|America|America,timezone,CA
+America/Creston,Creston,America/Creston|America|America,timezone,CA
+America/Dawson_Creek,Dawson Creek,America/Dawson Creek|America|America,timezone,CA
+America/Fort_Nelson,Fort Nelson,America/Fort Nelson|America|America,timezone,CA
+America/Whitehorse,Whitehorse,America/Whitehorse|America|America,timezone,CA
+America/Dawson,Dawson,America/Dawson|America|America,timezone,CA
+America/Vancouver,Vancouver,America/Vancouver|America|America,timezone,CA
+Indian/Cocos,Cocos,Indian/Cocos|Indian|Indian,timezone,CC
+Africa/Kinshasa,Kinshasa,Africa/Kinshasa|Africa|Africa,timezone,CD
+Africa/Lubumbashi,Lubumbashi,Africa/Lubumbashi|Africa|Africa,timezone,CD
+Africa/Bangui,Bangui,Africa/Bangui|Africa|Africa,timezone,CF
+Africa/Brazzaville,Brazzaville,Africa/Brazzaville|Africa|Africa,timezone,CG
+Europe/Zurich,Zurich,Europe/Zurich|Europe|Europe,timezone,CH
+Africa/Abidjan,Abidjan,Africa/Abidjan|Africa|Africa,timezone,CI
+Pacific/Rarotonga,Rarotonga,Pacific/Rarotonga|Pacific|Pacific,timezone,CK
+America/Santiago,Santiago,America/Santiago|America|America,timezone,CL
+America/Coyhaique,Coyhaique,America/Coyhaique|America|America,timezone,CL
+America/Punta_Arenas,Punta Arenas,America/Punta Arenas|America|America,timezone,CL
+Pacific/Easter,Easter,Pacific/Easter|Pacific|Pacific,timezone,CL
+Africa/Douala,Douala,Africa/Douala|Africa|Africa,timezone,CM
+Asia/Shanghai,Shanghai,Asia/Shanghai|Asia|Asia,timezone,CN
+Asia/Urumqi,Urumqi,Asia/Urumqi|Asia|Asia,timezone,CN
+America/Bogota,Bogota,America/Bogota|America|America,timezone,CO
+America/Costa_Rica,Costa Rica,America/Costa Rica|America|America,timezone,CR
+America/Havana,Havana,America/Havana|America|America,timezone,CU
+Atlantic/Cape_Verde,Cape Verde,Atlantic/Cape Verde|Atlantic|Atlantic,timezone,CV
+America/Curacao,Curacao,America/Curacao|America|America,timezone,CW
+Indian/Christmas,Christmas,Indian/Christmas|Indian|Indian,timezone,CX
+Asia/Nicosia,Nicosia,Asia/Nicosia|Asia|Asia,timezone,CY
+Asia/Famagusta,Famagusta,Asia/Famagusta|Asia|Asia,timezone,CY
+Europe/Prague,Prague,Europe/Prague|Europe|Europe,timezone,CZ
+Europe/Berlin,Berlin,Europe/Berlin|Europe|Europe,timezone,DE
+Europe/Busingen,Busingen,Europe/Busingen|Europe|Europe,timezone,DE
+Africa/Djibouti,Djibouti,Africa/Djibouti|Africa|Africa,timezone,DJ
+Europe/Copenhagen,Copenhagen,Europe/Copenhagen|Europe|Europe,timezone,DK
+America/Dominica,Dominica,America/Dominica|America|America,timezone,DM
+America/Santo_Domingo,Santo Domingo,America/Santo Domingo|America|America,timezone,DO
+Africa/Algiers,Algiers,Africa/Algiers|Africa|Africa,timezone,DZ
+America/Guayaquil,Guayaquil,America/Guayaquil|America|America,timezone,EC
+Pacific/Galapagos,Galapagos,Pacific/Galapagos|Pacific|Pacific,timezone,EC
+Europe/Tallinn,Tallinn,Europe/Tallinn|Europe|Europe,timezone,EE
+Africa/Cairo,Cairo,Africa/Cairo|Africa|Africa,timezone,EG
+Africa/El_Aaiun,El Aaiun,Africa/El Aaiun|Africa|Africa,timezone,EH
+Africa/Asmara,Asmara,Africa/Asmara|Africa|Africa,timezone,ER
+Europe/Madrid,Madrid,Europe/Madrid|Europe|Europe,timezone,ES
+Africa/Ceuta,Ceuta,Africa/Ceuta|Africa|Africa,timezone,ES
+Atlantic/Canary,Canary,Atlantic/Canary|Atlantic|Atlantic,timezone,ES
+Africa/Addis_Ababa,Addis Ababa,Africa/Addis Ababa|Africa|Africa,timezone,ET
+Europe/Helsinki,Helsinki,Europe/Helsinki|Europe|Europe,timezone,FI
+Pacific/Fiji,Fiji,Pacific/Fiji|Pacific|Pacific,timezone,FJ
+Atlantic/Stanley,Stanley,Atlantic/Stanley|Atlantic|Atlantic,timezone,FK
+Pacific/Chuuk,Chuuk,Pacific/Chuuk|Pacific|Pacific,timezone,FM
+Pacific/Pohnpei,Pohnpei,Pacific/Pohnpei|Pacific|Pacific,timezone,FM
+Pacific/Kosrae,Kosrae,Pacific/Kosrae|Pacific|Pacific,timezone,FM
+Atlantic/Faroe,Faroe,Atlantic/Faroe|Atlantic|Atlantic,timezone,FO
+Europe/Paris,Paris,Europe/Paris|Europe|Europe,timezone,FR
+Africa/Libreville,Libreville,Africa/Libreville|Africa|Africa,timezone,GA
+Europe/London,London,Europe/London|Europe|Europe,timezone,GB
+America/Grenada,Grenada,America/Grenada|America|America,timezone,GD
+Asia/Tbilisi,Tbilisi,Asia/Tbilisi|Asia|Asia,timezone,GE
+America/Cayenne,Cayenne,America/Cayenne|America|America,timezone,GF
+Europe/Guernsey,Guernsey,Europe/Guernsey|Europe|Europe,timezone,GG
+Africa/Accra,Accra,Africa/Accra|Africa|Africa,timezone,GH
+Europe/Gibraltar,Gibraltar,Europe/Gibraltar|Europe|Europe,timezone,GI
+America/Nuuk,Nuuk,America/Nuuk|America|America,timezone,GL
+America/Danmarkshavn,Danmarkshavn,America/Danmarkshavn|America|America,timezone,GL
+America/Scoresbysund,Scoresbysund,America/Scoresbysund|America|America,timezone,GL
+America/Thule,Thule,America/Thule|America|America,timezone,GL
+Africa/Banjul,Banjul,Africa/Banjul|Africa|Africa,timezone,GM
+Africa/Conakry,Conakry,Africa/Conakry|Africa|Africa,timezone,GN
+America/Guadeloupe,Guadeloupe,America/Guadeloupe|America|America,timezone,GP
+Africa/Malabo,Malabo,Africa/Malabo|Africa|Africa,timezone,GQ
+Europe/Athens,Athens,Europe/Athens|Europe|Europe,timezone,GR
+Atlantic/South_Georgia,South Georgia,Atlantic/South Georgia|Atlantic|Atlantic,timezone,GS
+America/Guatemala,Guatemala,America/Guatemala|America|America,timezone,GT
+Pacific/Guam,Guam,Pacific/Guam|Pacific|Pacific,timezone,GU
+Africa/Bissau,Bissau,Africa/Bissau|Africa|Africa,timezone,GW
+America/Guyana,Guyana,America/Guyana|America|America,timezone,GY
+Asia/Hong_Kong,Hong Kong,Asia/Hong Kong|Asia|Asia,timezone,HK
+America/Tegucigalpa,Tegucigalpa,America/Tegucigalpa|America|America,timezone,HN
+Europe/Zagreb,Zagreb,Europe/Zagreb|Europe|Europe,timezone,HR
+America/Port-au-Prince,Port-au-Prince,America/Port-au-Prince|America|America,timezone,HT
+Europe/Budapest,Budapest,Europe/Budapest|Europe|Europe,timezone,HU
+Asia/Jakarta,Jakarta,Asia/Jakarta|Asia|Asia,timezone,ID
+Asia/Pontianak,Pontianak,Asia/Pontianak|Asia|Asia,timezone,ID
+Asia/Makassar,Makassar,Asia/Makassar|Asia|Asia,timezone,ID
+Asia/Jayapura,Jayapura,Asia/Jayapura|Asia|Asia,timezone,ID
+Europe/Dublin,Dublin,Europe/Dublin|Europe|Europe,timezone,IE
+Asia/Jerusalem,Jerusalem,Asia/Jerusalem|Asia|Asia,timezone,IL
+Europe/Isle_of_Man,Isle of Man,Europe/Isle of Man|Europe|Europe,timezone,IM
+Asia/Kolkata,Kolkata,Asia/Kolkata|Asia|Asia,timezone,IN
+Indian/Chagos,Chagos,Indian/Chagos|Indian|Indian,timezone,IO
+Asia/Baghdad,Baghdad,Asia/Baghdad|Asia|Asia,timezone,IQ
+Asia/Tehran,Tehran,Asia/Tehran|Asia|Asia,timezone,IR
+Atlantic/Reykjavik,Reykjavik,Atlantic/Reykjavik|Atlantic|Atlantic,timezone,IS
+Europe/Rome,Rome,Europe/Rome|Europe|Europe,timezone,IT
+Europe/Jersey,Jersey,Europe/Jersey|Europe|Europe,timezone,JE
+America/Jamaica,Jamaica,America/Jamaica|America|America,timezone,JM
+Asia/Amman,Amman,Asia/Amman|Asia|Asia,timezone,JO
+Asia/Tokyo,Tokyo,Asia/Tokyo|Asia|Asia,timezone,JP
+Africa/Nairobi,Nairobi,Africa/Nairobi|Africa|Africa,timezone,KE
+Asia/Bishkek,Bishkek,Asia/Bishkek|Asia|Asia,timezone,KG
+Asia/Phnom_Penh,Phnom Penh,Asia/Phnom Penh|Asia|Asia,timezone,KH
+Pacific/Tarawa,Tarawa,Pacific/Tarawa|Pacific|Pacific,timezone,KI
+Pacific/Kanton,Kanton,Pacific/Kanton|Pacific|Pacific,timezone,KI
+Pacific/Kiritimati,Kiritimati,Pacific/Kiritimati|Pacific|Pacific,timezone,KI
+Indian/Comoro,Comoro,Indian/Comoro|Indian|Indian,timezone,KM
+America/St_Kitts,St Kitts,America/St Kitts|America|America,timezone,KN
+Asia/Pyongyang,Pyongyang,Asia/Pyongyang|Asia|Asia,timezone,KP
+Asia/Seoul,Seoul,Asia/Seoul|Asia|Asia,timezone,KR
+Asia/Kuwait,Kuwait,Asia/Kuwait|Asia|Asia,timezone,KW
+America/Cayman,Cayman,America/Cayman|America|America,timezone,KY
+Asia/Almaty,Almaty,Asia/Almaty|Asia|Asia,timezone,KZ
+Asia/Qyzylorda,Qyzylorda,Asia/Qyzylorda|Asia|Asia,timezone,KZ
+Asia/Qostanay,Qostanay,Asia/Qostanay|Asia|Asia,timezone,KZ
+Asia/Aqtobe,Aqtobe,Asia/Aqtobe|Asia|Asia,timezone,KZ
+Asia/Aqtau,Aqtau,Asia/Aqtau|Asia|Asia,timezone,KZ
+Asia/Atyrau,Atyrau,Asia/Atyrau|Asia|Asia,timezone,KZ
+Asia/Oral,Oral,Asia/Oral|Asia|Asia,timezone,KZ
+Asia/Vientiane,Vientiane,Asia/Vientiane|Asia|Asia,timezone,LA
+Asia/Beirut,Beirut,Asia/Beirut|Asia|Asia,timezone,LB
+America/St_Lucia,St Lucia,America/St Lucia|America|America,timezone,LC
+Europe/Vaduz,Vaduz,Europe/Vaduz|Europe|Europe,timezone,LI
+Asia/Colombo,Colombo,Asia/Colombo|Asia|Asia,timezone,LK
+Africa/Monrovia,Monrovia,Africa/Monrovia|Africa|Africa,timezone,LR
+Africa/Maseru,Maseru,Africa/Maseru|Africa|Africa,timezone,LS
+Europe/Vilnius,Vilnius,Europe/Vilnius|Europe|Europe,timezone,LT
+Europe/Luxembourg,Luxembourg,Europe/Luxembourg|Europe|Europe,timezone,LU
+Europe/Riga,Riga,Europe/Riga|Europe|Europe,timezone,LV
+Africa/Tripoli,Tripoli,Africa/Tripoli|Africa|Africa,timezone,LY
+Africa/Casablanca,Casablanca,Africa/Casablanca|Africa|Africa,timezone,MA
+Europe/Monaco,Monaco,Europe/Monaco|Europe|Europe,timezone,MC
+Europe/Chisinau,Chisinau,Europe/Chisinau|Europe|Europe,timezone,MD
+Europe/Podgorica,Podgorica,Europe/Podgorica|Europe|Europe,timezone,ME
+America/Marigot,Marigot,America/Marigot|America|America,timezone,MF
+Indian/Antananarivo,Antananarivo,Indian/Antananarivo|Indian|Indian,timezone,MG
+Pacific/Majuro,Majuro,Pacific/Majuro|Pacific|Pacific,timezone,MH
+Pacific/Kwajalein,Kwajalein,Pacific/Kwajalein|Pacific|Pacific,timezone,MH
+Europe/Skopje,Skopje,Europe/Skopje|Europe|Europe,timezone,MK
+Africa/Bamako,Bamako,Africa/Bamako|Africa|Africa,timezone,ML
+Asia/Yangon,Yangon,Asia/Yangon|Asia|Asia,timezone,MM
+Asia/Ulaanbaatar,Ulaanbaatar,Asia/Ulaanbaatar|Asia|Asia,timezone,MN
+Asia/Hovd,Hovd,Asia/Hovd|Asia|Asia,timezone,MN
+Asia/Macau,Macau,Asia/Macau|Asia|Asia,timezone,MO
+Pacific/Saipan,Saipan,Pacific/Saipan|Pacific|Pacific,timezone,MP
+America/Martinique,Martinique,America/Martinique|America|America,timezone,MQ
+Africa/Nouakchott,Nouakchott,Africa/Nouakchott|Africa|Africa,timezone,MR
+America/Montserrat,Montserrat,America/Montserrat|America|America,timezone,MS
+Europe/Malta,Malta,Europe/Malta|Europe|Europe,timezone,MT
+Indian/Mauritius,Mauritius,Indian/Mauritius|Indian|Indian,timezone,MU
+Indian/Maldives,Maldives,Indian/Maldives|Indian|Indian,timezone,MV
+Africa/Blantyre,Blantyre,Africa/Blantyre|Africa|Africa,timezone,MW
+America/Mexico_City,Mexico City,America/Mexico City|America|America,timezone,MX
+America/Cancun,Cancun,America/Cancun|America|America,timezone,MX
+America/Merida,Merida,America/Merida|America|America,timezone,MX
+America/Monterrey,Monterrey,America/Monterrey|America|America,timezone,MX
+America/Matamoros,Matamoros,America/Matamoros|America|America,timezone,MX
+America/Chihuahua,Chihuahua,America/Chihuahua|America|America,timezone,MX
+America/Ciudad_Juarez,Ciudad Juarez,America/Ciudad Juarez|America|America,timezone,MX
+America/Ojinaga,Ojinaga,America/Ojinaga|America|America,timezone,MX
+America/Mazatlan,Mazatlan,America/Mazatlan|America|America,timezone,MX
+America/Bahia_Banderas,Bahia Banderas,America/Bahia Banderas|America|America,timezone,MX
+America/Hermosillo,Hermosillo,America/Hermosillo|America|America,timezone,MX
+America/Tijuana,Tijuana,America/Tijuana|America|America,timezone,MX
+Asia/Kuala_Lumpur,Kuala Lumpur,Asia/Kuala Lumpur|Asia|Asia,timezone,MY
+Asia/Kuching,Kuching,Asia/Kuching|Asia|Asia,timezone,MY
+Africa/Maputo,Maputo,Africa/Maputo|Africa|Africa,timezone,MZ
+Africa/Windhoek,Windhoek,Africa/Windhoek|Africa|Africa,timezone,NA
+Pacific/Noumea,Noumea,Pacific/Noumea|Pacific|Pacific,timezone,NC
+Africa/Niamey,Niamey,Africa/Niamey|Africa|Africa,timezone,NE
+Pacific/Norfolk,Norfolk,Pacific/Norfolk|Pacific|Pacific,timezone,NF
+Africa/Lagos,Lagos,Africa/Lagos|Africa|Africa,timezone,NG
+America/Managua,Managua,America/Managua|America|America,timezone,NI
+Europe/Amsterdam,Amsterdam,Europe/Amsterdam|Europe|Europe,timezone,NL
+Europe/Oslo,Oslo,Europe/Oslo|Europe|Europe,timezone,NO
+Asia/Kathmandu,Kathmandu,Asia/Kathmandu|Asia|Asia,timezone,NP
+Pacific/Nauru,Nauru,Pacific/Nauru|Pacific|Pacific,timezone,NR
+Pacific/Niue,Niue,Pacific/Niue|Pacific|Pacific,timezone,NU
+Pacific/Auckland,Auckland,Pacific/Auckland|Pacific|Pacific,timezone,NZ
+Pacific/Chatham,Chatham,Pacific/Chatham|Pacific|Pacific,timezone,NZ
+Asia/Muscat,Muscat,Asia/Muscat|Asia|Asia,timezone,OM
+America/Panama,Panama,America/Panama|America|America,timezone,PA
+America/Lima,Lima,America/Lima|America|America,timezone,PE
+Pacific/Tahiti,Tahiti,Pacific/Tahiti|Pacific|Pacific,timezone,PF
+Pacific/Marquesas,Marquesas,Pacific/Marquesas|Pacific|Pacific,timezone,PF
+Pacific/Gambier,Gambier,Pacific/Gambier|Pacific|Pacific,timezone,PF
+Pacific/Port_Moresby,Port Moresby,Pacific/Port Moresby|Pacific|Pacific,timezone,PG
+Pacific/Bougainville,Bougainville,Pacific/Bougainville|Pacific|Pacific,timezone,PG
+Asia/Manila,Manila,Asia/Manila|Asia|Asia,timezone,PH
+Asia/Karachi,Karachi,Asia/Karachi|Asia|Asia,timezone,PK
+Europe/Warsaw,Warsaw,Europe/Warsaw|Europe|Europe,timezone,PL
+America/Miquelon,Miquelon,America/Miquelon|America|America,timezone,PM
+Pacific/Pitcairn,Pitcairn,Pacific/Pitcairn|Pacific|Pacific,timezone,PN
+America/Puerto_Rico,Puerto Rico,America/Puerto Rico|America|America,timezone,PR
+Asia/Gaza,Gaza,Asia/Gaza|Asia|Asia,timezone,PS
+Asia/Hebron,Hebron,Asia/Hebron|Asia|Asia,timezone,PS
+Europe/Lisbon,Lisbon,Europe/Lisbon|Europe|Europe,timezone,PT
+Atlantic/Madeira,Madeira,Atlantic/Madeira|Atlantic|Atlantic,timezone,PT
+Atlantic/Azores,Azores,Atlantic/Azores|Atlantic|Atlantic,timezone,PT
+Pacific/Palau,Palau,Pacific/Palau|Pacific|Pacific,timezone,PW
+America/Asuncion,Asuncion,America/Asuncion|America|America,timezone,PY
+Asia/Qatar,Qatar,Asia/Qatar|Asia|Asia,timezone,QA
+Indian/Reunion,Reunion,Indian/Reunion|Indian|Indian,timezone,RE
+Europe/Bucharest,Bucharest,Europe/Bucharest|Europe|Europe,timezone,RO
+Europe/Belgrade,Belgrade,Europe/Belgrade|Europe|Europe,timezone,RS
+Europe/Kaliningrad,Kaliningrad,Europe/Kaliningrad|Europe|Europe,timezone,RU
+Europe/Moscow,Moscow,Europe/Moscow|Europe|Europe,timezone,RU
+Europe/Simferopol,Simferopol,Europe/Simferopol|Europe|Europe,timezone,UA
+Europe/Kirov,Kirov,Europe/Kirov|Europe|Europe,timezone,RU
+Europe/Volgograd,Volgograd,Europe/Volgograd|Europe|Europe,timezone,RU
+Europe/Astrakhan,Astrakhan,Europe/Astrakhan|Europe|Europe,timezone,RU
+Europe/Saratov,Saratov,Europe/Saratov|Europe|Europe,timezone,RU
+Europe/Ulyanovsk,Ulyanovsk,Europe/Ulyanovsk|Europe|Europe,timezone,RU
+Europe/Samara,Samara,Europe/Samara|Europe|Europe,timezone,RU
+Asia/Yekaterinburg,Yekaterinburg,Asia/Yekaterinburg|Asia|Asia,timezone,RU
+Asia/Omsk,Omsk,Asia/Omsk|Asia|Asia,timezone,RU
+Asia/Novosibirsk,Novosibirsk,Asia/Novosibirsk|Asia|Asia,timezone,RU
+Asia/Barnaul,Barnaul,Asia/Barnaul|Asia|Asia,timezone,RU
+Asia/Tomsk,Tomsk,Asia/Tomsk|Asia|Asia,timezone,RU
+Asia/Novokuznetsk,Novokuznetsk,Asia/Novokuznetsk|Asia|Asia,timezone,RU
+Asia/Krasnoyarsk,Krasnoyarsk,Asia/Krasnoyarsk|Asia|Asia,timezone,RU
+Asia/Irkutsk,Irkutsk,Asia/Irkutsk|Asia|Asia,timezone,RU
+Asia/Chita,Chita,Asia/Chita|Asia|Asia,timezone,RU
+Asia/Yakutsk,Yakutsk,Asia/Yakutsk|Asia|Asia,timezone,RU
+Asia/Khandyga,Khandyga,Asia/Khandyga|Asia|Asia,timezone,RU
+Asia/Vladivostok,Vladivostok,Asia/Vladivostok|Asia|Asia,timezone,RU
+Asia/Ust-Nera,Ust-Nera,Asia/Ust-Nera|Asia|Asia,timezone,RU
+Asia/Magadan,Magadan,Asia/Magadan|Asia|Asia,timezone,RU
+Asia/Sakhalin,Sakhalin,Asia/Sakhalin|Asia|Asia,timezone,RU
+Asia/Srednekolymsk,Srednekolymsk,Asia/Srednekolymsk|Asia|Asia,timezone,RU
+Asia/Kamchatka,Kamchatka,Asia/Kamchatka|Asia|Asia,timezone,RU
+Asia/Anadyr,Anadyr,Asia/Anadyr|Asia|Asia,timezone,RU
+Africa/Kigali,Kigali,Africa/Kigali|Africa|Africa,timezone,RW
+Asia/Riyadh,Riyadh,Asia/Riyadh|Asia|Asia,timezone,SA
+Pacific/Guadalcanal,Guadalcanal,Pacific/Guadalcanal|Pacific|Pacific,timezone,SB
+Indian/Mahe,Mahe,Indian/Mahe|Indian|Indian,timezone,SC
+Africa/Khartoum,Khartoum,Africa/Khartoum|Africa|Africa,timezone,SD
+Europe/Stockholm,Stockholm,Europe/Stockholm|Europe|Europe,timezone,SE
+Asia/Singapore,Singapore,Asia/Singapore|Asia|Asia,timezone,SG
+Atlantic/St_Helena,St Helena,Atlantic/St Helena|Atlantic|Atlantic,timezone,SH
+Europe/Ljubljana,Ljubljana,Europe/Ljubljana|Europe|Europe,timezone,SI
+Arctic/Longyearbyen,Longyearbyen,Arctic/Longyearbyen|Arctic|Arctic,timezone,SJ
+Europe/Bratislava,Bratislava,Europe/Bratislava|Europe|Europe,timezone,SK
+Africa/Freetown,Freetown,Africa/Freetown|Africa|Africa,timezone,SL
+Europe/San_Marino,San Marino,Europe/San Marino|Europe|Europe,timezone,SM
+Africa/Dakar,Dakar,Africa/Dakar|Africa|Africa,timezone,SN
+Africa/Mogadishu,Mogadishu,Africa/Mogadishu|Africa|Africa,timezone,SO
+America/Paramaribo,Paramaribo,America/Paramaribo|America|America,timezone,SR
+Africa/Juba,Juba,Africa/Juba|Africa|Africa,timezone,SS
+Africa/Sao_Tome,Sao Tome,Africa/Sao Tome|Africa|Africa,timezone,ST
+America/El_Salvador,El Salvador,America/El Salvador|America|America,timezone,SV
+America/Lower_Princes,Lower Princes,America/Lower Princes|America|America,timezone,SX
+Asia/Damascus,Damascus,Asia/Damascus|Asia|Asia,timezone,SY
+Africa/Mbabane,Mbabane,Africa/Mbabane|Africa|Africa,timezone,SZ
+America/Grand_Turk,Grand Turk,America/Grand Turk|America|America,timezone,TC
+Africa/Ndjamena,Ndjamena,Africa/Ndjamena|Africa|Africa,timezone,TD
+Indian/Kerguelen,Kerguelen,Indian/Kerguelen|Indian|Indian,timezone,TF
+Africa/Lome,Lome,Africa/Lome|Africa|Africa,timezone,TG
+Asia/Bangkok,Bangkok,Asia/Bangkok|Asia|Asia,timezone,TH
+Asia/Dushanbe,Dushanbe,Asia/Dushanbe|Asia|Asia,timezone,TJ
+Pacific/Fakaofo,Fakaofo,Pacific/Fakaofo|Pacific|Pacific,timezone,TK
+Asia/Dili,Dili,Asia/Dili|Asia|Asia,timezone,TL
+Asia/Ashgabat,Ashgabat,Asia/Ashgabat|Asia|Asia,timezone,TM
+Africa/Tunis,Tunis,Africa/Tunis|Africa|Africa,timezone,TN
+Pacific/Tongatapu,Tongatapu,Pacific/Tongatapu|Pacific|Pacific,timezone,TO
+Europe/Istanbul,Istanbul,Europe/Istanbul|Europe|Europe,timezone,TR
+America/Port_of_Spain,Port of Spain,America/Port of Spain|America|America,timezone,TT
+Pacific/Funafuti,Funafuti,Pacific/Funafuti|Pacific|Pacific,timezone,TV
+Asia/Taipei,Taipei,Asia/Taipei|Asia|Asia,timezone,TW
+Africa/Dar_es_Salaam,Dar es Salaam,Africa/Dar es Salaam|Africa|Africa,timezone,TZ
+Europe/Kyiv,Kyiv,Europe/Kyiv|Europe|Europe,timezone,UA
+Africa/Kampala,Kampala,Africa/Kampala|Africa|Africa,timezone,UG
+Pacific/Midway,Midway,Pacific/Midway|Pacific|Pacific,timezone,UM
+Pacific/Wake,Wake,Pacific/Wake|Pacific|Pacific,timezone,UM
+America/New_York,New York,America/New York|America|America,timezone,US
+America/Detroit,Detroit,America/Detroit|America|America,timezone,US
+America/Kentucky/Louisville,Louisville,America/Kentucky/Louisville|America|America,timezone,US
+America/Kentucky/Monticello,Monticello,America/Kentucky/Monticello|America|America,timezone,US
+America/Indiana/Indianapolis,Indianapolis,America/Indiana/Indianapolis|America|America,timezone,US
+America/Indiana/Vincennes,Vincennes,America/Indiana/Vincennes|America|America,timezone,US
+America/Indiana/Winamac,Winamac,America/Indiana/Winamac|America|America,timezone,US
+America/Indiana/Marengo,Marengo,America/Indiana/Marengo|America|America,timezone,US
+America/Indiana/Petersburg,Petersburg,America/Indiana/Petersburg|America|America,timezone,US
+America/Indiana/Vevay,Vevay,America/Indiana/Vevay|America|America,timezone,US
+America/Chicago,Chicago,America/Chicago|America|America,timezone,US
+America/Indiana/Tell_City,Tell City,America/Indiana/Tell City|America|America,timezone,US
+America/Indiana/Knox,Knox,America/Indiana/Knox|America|America,timezone,US
+America/Menominee,Menominee,America/Menominee|America|America,timezone,US
+America/North_Dakota/Center,Center,America/North Dakota/Center|America|America,timezone,US
+America/North_Dakota/New_Salem,New Salem,America/North Dakota/New Salem|America|America,timezone,US
+America/North_Dakota/Beulah,Beulah,America/North Dakota/Beulah|America|America,timezone,US
+America/Denver,Denver,America/Denver|America|America,timezone,US
+America/Boise,Boise,America/Boise|America|America,timezone,US
+America/Phoenix,Phoenix,America/Phoenix|America|America,timezone,US
+America/Los_Angeles,Los Angeles,America/Los Angeles|America|America,timezone,US
+America/Anchorage,Anchorage,America/Anchorage|America|America,timezone,US
+America/Juneau,Juneau,America/Juneau|America|America,timezone,US
+America/Sitka,Sitka,America/Sitka|America|America,timezone,US
+America/Metlakatla,Metlakatla,America/Metlakatla|America|America,timezone,US
+America/Yakutat,Yakutat,America/Yakutat|America|America,timezone,US
+America/Nome,Nome,America/Nome|America|America,timezone,US
+America/Adak,Adak,America/Adak|America|America,timezone,US
+Pacific/Honolulu,Honolulu,Pacific/Honolulu|Pacific|Pacific,timezone,US
+America/Montevideo,Montevideo,America/Montevideo|America|America,timezone,UY
+Asia/Samarkand,Samarkand,Asia/Samarkand|Asia|Asia,timezone,UZ
+Asia/Tashkent,Tashkent,Asia/Tashkent|Asia|Asia,timezone,UZ
+Europe/Vatican,Vatican,Europe/Vatican|Europe|Europe,timezone,VA
+America/St_Vincent,St Vincent,America/St Vincent|America|America,timezone,VC
+America/Caracas,Caracas,America/Caracas|America|America,timezone,VE
+America/Tortola,Tortola,America/Tortola|America|America,timezone,VG
+America/St_Thomas,St Thomas,America/St Thomas|America|America,timezone,VI
+Asia/Ho_Chi_Minh,Ho Chi Minh,Asia/Ho Chi Minh|Asia|Asia,timezone,VN
+Pacific/Efate,Efate,Pacific/Efate|Pacific|Pacific,timezone,VU
+Pacific/Wallis,Wallis,Pacific/Wallis|Pacific|Pacific,timezone,WF
+Pacific/Apia,Apia,Pacific/Apia|Pacific|Pacific,timezone,WS
+Asia/Aden,Aden,Asia/Aden|Asia|Asia,timezone,YE
+Indian/Mayotte,Mayotte,Indian/Mayotte|Indian|Indian,timezone,YT
+Africa/Johannesburg,Johannesburg,Africa/Johannesburg|Africa|Africa,timezone,ZA
+Africa/Lusaka,Lusaka,Africa/Lusaka|Africa|Africa,timezone,ZM
+Africa/Harare,Harare,Africa/Harare|Africa|Africa,timezone,ZW

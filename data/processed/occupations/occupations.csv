@@ -1,0 +1,23 @@
+id,name,aliases,type,system
+11-0000,Management Occupations,11|11-0,occupation,O*NET-SOC
+13-0000,Business and Financial Operations Occupations,13|13-0,occupation,O*NET-SOC
+15-0000,Computer and Mathematical Occupations,15|15-0,occupation,O*NET-SOC
+17-0000,Architecture and Engineering Occupations,17|17-0,occupation,O*NET-SOC
+19-0000,"Life, Physical, and Social Science Occupations",19|19-0,occupation,O*NET-SOC
+21-0000,Community and Social Service Occupations,21|21-0,occupation,O*NET-SOC
+23-0000,Legal Occupations,23|23-0,occupation,O*NET-SOC
+25-0000,Educational Instruction and Library Occupations,25|25-0,occupation,O*NET-SOC
+27-0000,"Arts, Design, Entertainment, Sports, and Media Occupations",27|27-0,occupation,O*NET-SOC
+29-0000,Healthcare Practitioners and Technical Occupations,29|29-0,occupation,O*NET-SOC
+31-0000,Healthcare Support Occupations,31|31-0,occupation,O*NET-SOC
+33-0000,Protective Service Occupations,33|33-0,occupation,O*NET-SOC
+35-0000,Food Preparation and Serving Related Occupations,35|35-0,occupation,O*NET-SOC
+37-0000,Building and Grounds Cleaning and Maintenance Occupations,37|37-0,occupation,O*NET-SOC
+39-0000,Personal Care and Service Occupations,39|39-0,occupation,O*NET-SOC
+41-0000,Sales and Related Occupations,41|41-0,occupation,O*NET-SOC
+43-0000,Office and Administrative Support Occupations,43|43-0,occupation,O*NET-SOC
+45-0000,"Farming, Fishing, and Forestry Occupations",45|45-0,occupation,O*NET-SOC
+47-0000,Construction and Extraction Occupations,47|47-0,occupation,O*NET-SOC
+49-0000,"Installation, Maintenance, and Repair Occupations",49|49-0,occupation,O*NET-SOC
+51-0000,Production Occupations,51|51-0,occupation,O*NET-SOC
+53-0000,Transportation and Material Moving Occupations,53|53-0,occupation,O*NET-SOC

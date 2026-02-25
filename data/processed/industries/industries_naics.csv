@@ -1,0 +1,20 @@
+id,name,aliases,type,system
+11,"Agriculture, Forestry, Fishing and Hunting",11,industry,NAICS
+21,"Mining, Quarrying, and Oil and Gas Extraction",21,industry,NAICS
+22,Utilities,22,industry,NAICS
+23,Construction,23,industry,NAICS
+31-33,Manufacturing,31|31-,industry,NAICS
+42,Wholesale Trade,42,industry,NAICS
+44-45,Retail Trade,44|44-,industry,NAICS
+48-49,Transportation and Warehousing,48|48-,industry,NAICS
+51,Information,51,industry,NAICS
+52,Finance and Insurance,52,industry,NAICS
+53,Real Estate and Rental and Leasing,53,industry,NAICS
+54,"Professional, Scientific, and Technical Services",54,industry,NAICS
+55,Management of Companies and Enterprises,55,industry,NAICS
+56,Administrative and Support and Waste Management,56,industry,NAICS
+61,Educational Services,61,industry,NAICS
+62,Health Care and Social Assistance,62,industry,NAICS
+71,"Arts, Entertainment, and Recreation",71,industry,NAICS
+72,Accommodation and Food Services,72,industry,NAICS
+81,Other Services (except Public Administration),81,industry,NAICS

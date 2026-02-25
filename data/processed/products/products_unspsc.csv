@@ -1,0 +1,43 @@
+id,name,aliases,type,system
+10,Live animals and livestock,10,product,UNSPSC
+11,Crops,11,product,UNSPSC
+12,Forestry products,12,product,UNSPSC
+13,Fishing and hunting,13,product,UNSPSC
+14,Mining and ore dressing,14,product,UNSPSC
+15,Coal and petroleum,15,product,UNSPSC
+16,Crude petroleum and natural gas,16,product,UNSPSC
+17,Primary metal manufacturing,17,product,UNSPSC
+18,Food products,18,product,UNSPSC
+19,Beverage and tobacco products,19,product,UNSPSC
+20,Wood and paper products,20,product,UNSPSC
+21,Chemicals,21,product,UNSPSC
+22,Rubber and plastics,22,product,UNSPSC
+23,Non-metallic mineral products,23,product,UNSPSC
+24,Metal products,24,product,UNSPSC
+25,Machinery and equipment,25,product,UNSPSC
+26,Computer and office equipment,26,product,UNSPSC
+27,Electronic components,27,product,UNSPSC
+28,Communications equipment,28,product,UNSPSC
+29,Scientific and medical equipment,29,product,UNSPSC
+30,Transportation equipment,30,product,UNSPSC
+31,Furniture and fixtures,31,product,UNSPSC
+32,Paper and paper products,32,product,UNSPSC
+33,Printing and publishing,33,product,UNSPSC
+34,Textiles and apparel,34,product,UNSPSC
+35,Leather and leather products,35,product,UNSPSC
+36,Glass and glass products,36,product,UNSPSC
+37,Sporting and recreational equipment,37,product,UNSPSC
+38,Toys and games,38,product,UNSPSC
+39,Jewelry and precious metals,39,product,UNSPSC
+40,Financial and insurance services,40,product,UNSPSC
+41,Real estate services,41,product,UNSPSC
+42,Rental and leasing services,42,product,UNSPSC
+43,Professional services,43,product,UNSPSC
+44,Education services,44,product,UNSPSC
+45,Healthcare services,45,product,UNSPSC
+46,Food services,46,product,UNSPSC
+47,Accommodation services,47,product,UNSPSC
+48,Transportation services,48,product,UNSPSC
+49,Communication services,49,product,UNSPSC
+50,Wholesale trade services,50,product,UNSPSC
+51,Retail trade services,51,product,UNSPSC

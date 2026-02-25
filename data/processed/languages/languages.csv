@@ -1,0 +1,184 @@
+id,name,aliases,type
+aa,Afar,aa,language
+ab,Abkhazian,ab|abkhaze,language
+af,Afrikaans,af,language
+ak,Akan,ak,language
+sq,Albanian,sq|albanais,language
+am,Amharic,am|amharique,language
+ar,Arabic,ar|arabe,language
+an,Aragonese,an|aragonais,language
+hy,Armenian,hy|armÃ©nien,language
+as,Assamese,as|assamais,language
+av,Avaric,av|avar,language
+ae,Avestan,ae|avestique,language
+ay,Aymara,ay,language
+az,Azerbaijani,az|azÃ©ri,language
+ba,Bashkir,ba|bachkir,language
+bm,Bambara,bm,language
+eu,Basque,eu,language
+be,Belarusian,be|biÃ©lorusse,language
+bn,Bengali,bn,language
+bi,Bislama,bi|bichlamar,language
+bs,Bosnian,bs|bosniaque,language
+br,Breton,br,language
+bg,Bulgarian,bg|bulgare,language
+my,Burmese,my|birman,language
+ca,Catalan; Valencian,ca|catalan; valencien,language
+ch,Chamorro,ch,language
+ce,Chechen,ce|tchÃ©tchÃ¨ne,language
+zh,Chinese,zh|chinois,language
+cu,Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic,cu|slavon d'Ã©glise; vieux slave; slavon liturgique; vieux bulgare,language
+cv,Chuvash,cv|tchouvache,language
+kw,Cornish,kw|cornique,language
+co,Corsican,co|corse,language
+cr,Cree,cr,language
+cs,Czech,cs|tchÃ¨que,language
+da,Danish,da|danois,language
+dv,Divehi; Dhivehi; Maldivian,dv|maldivien,language
+nl,Dutch; Flemish,nl|nÃ©erlandais; flamand,language
+dz,Dzongkha,dz,language
+en,English,en|anglais,language
+eo,Esperanto,eo|espÃ©ranto,language
+et,Estonian,et|estonien,language
+ee,Ewe,ee|Ã©wÃ©,language
+fo,Faroese,fo|fÃ©roÃ¯en,language
+fj,Fijian,fj|fidjien,language
+fi,Finnish,fi|finnois,language
+fr,French,fr|franÃ§ais,language
+fy,Western Frisian,fy|frison occidental,language
+ff,Fulah,ff|peul,language
+ka,Georgian,ka|gÃ©orgien,language
+de,German,de|allemand,language
+gd,Gaelic; Scottish Gaelic,gd|gaÃ©lique; gaÃ©lique Ã©cossais,language
+ga,Irish,ga|irlandais,language
+gl,Galician,gl|galicien,language
+gv,Manx,gv|manx; mannois,language
+el,"Greek, Modern (1453-)",el|grec moderne (aprÃ¨s 1453),language
+gn,Guarani,gn,language
+gu,Gujarati,gu|goudjrati,language
+ht,Haitian; Haitian Creole,ht|haÃ¯tien; crÃ©ole haÃ¯tien,language
+ha,Hausa,ha|haoussa,language
+he,Hebrew,he|hÃ©breu,language
+hz,Herero,hz,language
+hi,Hindi,hi,language
+ho,Hiri Motu,ho,language
+hr,Croatian,hr|croate,language
+hu,Hungarian,hu|hongrois,language
+ig,Igbo,ig,language
+is,Icelandic,is|islandais,language
+io,Ido,io,language
+ii,Sichuan Yi; Nuosu,ii|yi de Sichuan,language
+iu,Inuktitut,iu,language
+ie,Interlingue; Occidental,ie|interlingue,language
+ia,Interlingua (International Auxiliary Language Association),ia|interlingua (langue auxiliaire internationale),language
+id,Indonesian,id|indonÃ©sien,language
+ik,Inupiaq,ik,language
+it,Italian,it|italien,language
+jv,Javanese,jv|javanais,language
+ja,Japanese,ja|japonais,language
+kl,Kalaallisut; Greenlandic,kl|groenlandais,language
+kn,Kannada,kn,language
+ks,Kashmiri,ks,language
+kr,Kanuri,kr|kanouri,language
+kk,Kazakh,kk,language
+km,Central Khmer,km|khmer central,language
+ki,Kikuyu; Gikuyu,ki|kikuyu,language
+rw,Kinyarwanda,rw|rwanda,language
+ky,Kirghiz; Kyrgyz,ky|kirghiz,language
+kv,Komi,kv|kom,language
+kg,Kongo,kg,language
+ko,Korean,ko|corÃ©en,language
+kj,Kuanyama; Kwanyama,kj,language
+ku,Kurdish,ku|kurde,language
+lo,Lao,lo,language
+la,Latin,la,language
+lv,Latvian,lv|letton,language
+li,Limburgan; Limburger; Limburgish,li|limbourgeois,language
+ln,Lingala,ln,language
+lt,Lithuanian,lt|lituanien,language
+lb,Luxembourgish; Letzeburgesch,lb|luxembourgeois,language
+lu,Luba-Katanga,lu,language
+lg,Ganda,lg,language
+mk,Macedonian,mk|macÃ©donien,language
+mh,Marshallese,mh|marshall,language
+ml,Malayalam,ml,language
+mi,Maori,mi,language
+mr,Marathi,mr|marathe,language
+ms,Malay,ms|malais,language
+mg,Malagasy,mg|malgache,language
+mt,Maltese,mt|maltais,language
+mn,Mongolian,mn|mongol,language
+na,Nauru,na|nauruan,language
+nv,Navajo; Navaho,nv|navaho,language
+nr,"Ndebele, South; South Ndebele",nr|ndÃ©bÃ©lÃ© du Sud,language
+nd,"Ndebele, North; North Ndebele",nd|ndÃ©bÃ©lÃ© du Nord,language
+ng,Ndonga,ng,language
+ne,Nepali,ne|nÃ©palais,language
+nn,"Norwegian Nynorsk; Nynorsk, Norwegian","nn|norvÃ©gien nynorsk; nynorsk, norvÃ©gien",language
+nb,"BokmÃ¥l, Norwegian; Norwegian BokmÃ¥l",nb|norvÃ©gien bokmÃ¥l,language
+no,Norwegian,no|norvÃ©gien,language
+ny,Chichewa; Chewa; Nyanja,ny,language
+oc,Occitan (post 1500),oc|occitan (aprÃ¨s 1500),language
+oj,Ojibwa,oj,language
+or,Oriya,or,language
+om,Oromo,om|galla,language
+os,Ossetian; Ossetic,os|ossÃ¨te,language
+pa,Panjabi; Punjabi,pa|pendjabi,language
+fa,Persian,fa|persan,language
+pi,Pali,pi,language
+pl,Polish,pl|polonais,language
+pt,Portuguese,pt|portugais,language
+ps,Pushto; Pashto,ps|pachto,language
+qu,Quechua,qu,language
+rm,Romansh,rm|romanche,language
+ro,Romanian; Moldavian; Moldovan,ro|roumain; moldave,language
+rn,Rundi,rn,language
+ru,Russian,ru|russe,language
+sg,Sango,sg,language
+sa,Sanskrit,sa,language
+si,Sinhala; Sinhalese,si|singhalais,language
+sk,Slovak,sk|slovaque,language
+sl,Slovenian,sl|slovÃ¨ne,language
+se,Northern Sami,se|sami du Nord,language
+sm,Samoan,sm,language
+sn,Shona,sn,language
+sd,Sindhi,sd,language
+so,Somali,so,language
+st,"Sotho, Southern",st|sotho du Sud,language
+es,Spanish; Castilian,es|espagnol; castillan,language
+sc,Sardinian,sc|sarde,language
+sr,Serbian,sr|serbe,language
+ss,Swati,ss,language
+su,Sundanese,su|soundanais,language
+sw,Swahili,sw,language
+sv,Swedish,sv|suÃ©dois,language
+ty,Tahitian,ty|tahitien,language
+ta,Tamil,ta|tamoul,language
+tt,Tatar,tt,language
+te,Telugu,te|tÃ©lougou,language
+tg,Tajik,tg|tadjik,language
+tl,Tagalog,tl,language
+th,Thai,th|thaÃ¯,language
+bo,Tibetan,bo|tibÃ©tain,language
+ti,Tigrinya,ti|tigrigna,language
+to,Tonga (Tonga Islands),to|tongan (Ãles Tonga),language
+tn,Tswana,tn,language
+ts,Tsonga,ts,language
+tk,Turkmen,tk|turkmÃ¨ne,language
+tr,Turkish,tr|turc,language
+tw,Twi,tw,language
+ug,Uighur; Uyghur,ug|ouÃ¯gour,language
+uk,Ukrainian,uk|ukrainien,language
+ur,Urdu,ur|ourdou,language
+uz,Uzbek,uz|ouszbek,language
+ve,Venda,ve,language
+vi,Vietnamese,vi|vietnamien,language
+vo,VolapÃ¼k,vo,language
+cy,Welsh,cy|gallois,language
+wa,Walloon,wa|wallon,language
+wo,Wolof,wo,language
+xh,Xhosa,xh,language
+yi,Yiddish,yi,language
+yo,Yoruba,yo,language
+za,Zhuang; Chuang,za,language
+zu,Zulu,zu|zoulou,language
