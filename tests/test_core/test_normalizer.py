@@ -1,4 +1,3 @@
-import pytest
 from semanticmatcher.core.normalizer import TextNormalizer
 
 

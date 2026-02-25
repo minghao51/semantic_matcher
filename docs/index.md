@@ -7,10 +7,10 @@ This folder is organized by audience and task.
 - [`quickstart.md`](./quickstart.md): official package wrapper API (`EmbeddingMatcher`, `EntityMatcher`)
 - [`troubleshooting.md`](./troubleshooting.md): common install and first-run errors
 
-## Experiments (`notebooks/`)
+## Experiments & Notebooks
 
-- [`notebooks.md`](./notebooks.md): canonical index for all experiment assets in `notebooks/` (`.py` scripts + `.ipynb`)
-- [`country-classifier-scripts.md`](./country-classifier-scripts.md): deep dive on the country classifier experiment scripts now located in `notebooks/`
+- [`notebooks.md`](./notebooks.md): canonical index for `experiments/` Python scripts and `notebooks/` Jupyter notebooks
+- [`country-classifier-scripts.md`](./country-classifier-scripts.md): deep dive on the country classifier experiment scripts in `experiments/country_classifier/`
 
 ## Advanced / Raw Examples
 
@@ -37,7 +37,7 @@ This folder is organized by audience and task.
 
 1. Read [`notebooks.md`](./notebooks.md) for the experiment inventory and prerequisites
 2. If you want country matching benchmarks, read [`country-classifier-scripts.md`](./country-classifier-scripts.md)
-3. Run the corresponding file from `notebooks/`
+3. Run the corresponding file from `experiments/` (scripts) or open a notebook from `notebooks/`
 
 ### I want lower-level control
 
@@ -47,6 +47,6 @@ This folder is organized by audience and task.
 
 ## Notes
 
-- The package code lives in `semanticmatcher/` (not `src/`).
-- Previous experiment path `notebook/` was merged into `notebooks/`.
+- The package code lives in `src/semanticmatcher/` (src-layout).
+- Script experiments live in `experiments/`; `notebooks/` is reserved for Jupyter notebooks.
 - Some backend integrations are documented as future/planned capabilities and may not be fully wired.

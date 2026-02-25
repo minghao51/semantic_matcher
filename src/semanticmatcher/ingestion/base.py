@@ -2,8 +2,11 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 import csv
+
+
+PathLike = Union[str, Path]
 
 
 class BaseFetcher(ABC):
@@ -51,3 +54,16 @@ class BaseFetcher(ABC):
 
         print(f"Done! Saved {len(processed_data)} records to {output_path}")
         return output_path
+
+
+def resolve_output_dirs(
+    dataset: str,
+    raw_dir: Optional[PathLike] = None,
+    processed_dir: Optional[PathLike] = None,
+) -> tuple[Path, Path]:
+    """Resolve per-dataset output directories without relying on repo layout."""
+    raw_base = Path(raw_dir) if raw_dir is not None else Path.cwd() / "data" / "raw"
+    processed_base = (
+        Path(processed_dir) if processed_dir is not None else Path.cwd() / "data" / "processed"
+    )
+    return raw_base / dataset, processed_base / dataset

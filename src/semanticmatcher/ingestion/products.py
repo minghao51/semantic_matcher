@@ -1,14 +1,11 @@
 """Ingestion script for UNSPSC/MCC product categories."""
 
-import sys
-from pathlib import Path
 from typing import Any
 import csv
 import json
 import requests
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.ingestion.base import BaseFetcher
+from .base import BaseFetcher, resolve_output_dirs
 
 
 class UNSPSCFetcher(BaseFetcher):
@@ -332,11 +329,9 @@ class MCCFetcher(BaseFetcher):
         return entities
 
 
-def run():
+def run(raw_dir=None, processed_dir=None):
     """Execute product data ingestion."""
-    base_path = Path(__file__).parent.parent.parent
-    raw_dir = base_path / "data" / "raw" / "products"
-    processed_dir = base_path / "data" / "processed" / "products"
+    raw_dir, processed_dir = resolve_output_dirs("products", raw_dir, processed_dir)
 
     fetcher = UNSPSCFetcher(raw_dir, processed_dir)
     fetcher.run("products_unspsc.csv")

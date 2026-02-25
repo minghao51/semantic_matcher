@@ -1,14 +1,11 @@
 """Ingestion script for NAICS/SIC industry codes."""
 
-import sys
-from pathlib import Path
 from typing import Any
 import csv
 import json
 import requests
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.ingestion.base import BaseFetcher
+from .base import BaseFetcher, resolve_output_dirs
 
 
 class IndustriesFetcher(BaseFetcher):
@@ -202,12 +199,9 @@ class SICFetcher(BaseFetcher):
         return entities
 
 
-def run():
+def run(raw_dir=None, processed_dir=None):
     """Execute industry data ingestion."""
-    base_path = Path(__file__).parent.parent.parent
-    
-    raw_dir = base_path / "data" / "raw" / "industries"
-    processed_dir = base_path / "data" / "processed" / "industries"
+    raw_dir, processed_dir = resolve_output_dirs("industries", raw_dir, processed_dir)
 
     fetcher = IndustriesFetcher(raw_dir, processed_dir)
     fetcher.run("industries_naics.csv")

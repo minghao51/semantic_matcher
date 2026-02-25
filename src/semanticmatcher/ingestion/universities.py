@@ -1,14 +1,10 @@
 """Ingestion script for university/institution data."""
 
-import sys
-from pathlib import Path
 from typing import Any
-import csv
 import json
 import requests
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.ingestion.base import BaseFetcher
+from .base import BaseFetcher, resolve_output_dirs
 
 
 class UniversitiesFetcher(BaseFetcher):
@@ -127,7 +123,6 @@ class UniversitiesFetcher(BaseFetcher):
                     aliases = item.get("aliases", "").strip()
                     country = item.get("country", "").strip()
                 else:
-                    uri = item.get("university", {}).get("value", "") if isinstance(item.get("university"), dict) else str(item.get("university", ""))
                     name = item.get("name", {}).get("value", "").strip() if isinstance(item.get("name"), dict) else str(item.get("name", ""))
                     country_raw = item.get("country", {}).get("value", "") if isinstance(item.get("country"), dict) else str(item.get("country", ""))
                     country = country_raw.split("/")[-1] if country_raw else ""
@@ -191,11 +186,9 @@ class TopUniversitiesFetcher(BaseFetcher):
         return entities
 
 
-def run():
+def run(raw_dir=None, processed_dir=None):
     """Execute university data ingestion."""
-    base_path = Path(__file__).parent.parent.parent
-    raw_dir = base_path / "data" / "raw" / "universities"
-    processed_dir = base_path / "data" / "processed" / "universities"
+    raw_dir, processed_dir = resolve_output_dirs("universities", raw_dir, processed_dir)
 
     fetcher = UniversitiesFetcher(raw_dir, processed_dir)
     fetcher.run("universities.csv")

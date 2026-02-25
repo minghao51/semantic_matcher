@@ -2,7 +2,7 @@
 
 import functools
 import time
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 
 def track_performance(func: Callable) -> Callable:

@@ -28,7 +28,33 @@ pip install semantic-matcher
 Optional tools you may also need for experiments/notebooks:
 
 - `jupyter` for `.ipynb` notebooks
-- `geograpy` for `notebooks/geograpy.ipynb`
+
+## Project Layout
+
+```text
+semantic_matcher/              # Repository root
+├── src/semanticmatcher/       # Python package (import path: `semanticmatcher`)
+├── tests/                     # Automated tests
+├── examples/                  # Runnable user-facing examples
+├── experiments/               # Exploratory Python scripts (non-product workflows)
+├── notebooks/                 # Jupyter notebooks only (reserved for `.ipynb`)
+├── data/                      # Sample/raw/processed datasets for demos/ingestion
+├── docs/                      # Hand-written docs (source); generated docs output is ignored
+└── pyproject.toml             # Packaging, dependencies, and tool config
+```
+
+### Repo Conventions
+
+- Project/package distribution name (PyPI): `semantic-matcher`
+- Python import path: `semanticmatcher`
+- Repository folder name: `semantic_matcher`
+
+These names differ because Python packaging conventions (distribution names vs import/module names) commonly use hyphens for PyPI and underscores/no hyphens for imports/filesystem paths.
+
+## Where To Start
+
+- Users: start here in `README.md`, then [`docs/quickstart.md`](docs/quickstart.md), then [`examples/basic_usage.py`](examples/basic_usage.py)
+- Contributors: start with [`docs/architecture.md`](docs/architecture.md), then `src/semanticmatcher/`, then `tests/`
 
 ## Minimal Example (Official Package Wrapper API)
 
@@ -95,13 +121,13 @@ final_results = reranker.rerank(query, candidates, top_k=5)
 | `EntityMatcher` (few-shot training) | Better accuracy with labeled examples | [`docs/quickstart.md`](docs/quickstart.md) |
 | `HybridMatcher` (three-stage pipeline) | Large datasets, maximum accuracy | [`examples/hybrid_matching_demo.py`](examples/hybrid_matching_demo.py) |
 | `CrossEncoderReranker` | Rerank candidates for precision | See Hybrid example above |
-| `notebooks/` experiments (scripts + Jupyter) | Reproducing experiments and explorations | [`docs/notebooks.md`](docs/notebooks.md) |
+| `experiments/` + `notebooks/` | Reproducing exploratory scripts and Jupyter work | [`docs/notebooks.md`](docs/notebooks.md) |
 | Advanced/raw examples (`examples/`) | Lower-level SetFit / sentence-transformers workflows | [`docs/examples.md`](docs/examples.md) |
 
 ## Official vs Advanced Examples
 
 - Official beginner path: `semanticmatcher` package wrappers (`EmbeddingMatcher`, `EntityMatcher`)
-- Advanced/raw path: direct `setfit` / `sentence-transformers` usage in `examples/` and some notebooks
+- Advanced/raw path: direct `setfit` / `sentence-transformers` usage in `examples/`, `experiments/`, and optional notebooks
 
 ## Documentation
 
@@ -115,9 +141,18 @@ final_results = reranker.rerank(query, candidates, top_k=5)
 
 ## Development
 
-- Package code: `semanticmatcher/`
+- Package code: `src/semanticmatcher/`
 - Tests: `tests/`
-- Experiments (scripts + Jupyter): `notebooks/`
+- Script experiments: `experiments/`
+- Jupyter notebooks: `notebooks/` (reserved for `.ipynb`)
+- CLI ingestion entrypoint: `semanticmatcher-ingest` -> `src/semanticmatcher/ingestion/cli.py`
+- Contributor guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+
+Set up the dev environment (preferred):
+
+```bash
+uv sync --group dev
+```
 
 Run tests (environment permitting):
 

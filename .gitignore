@@ -12,6 +12,7 @@ htmlcov/
 # Build / packaging
 build/
 dist/
+docs/build/
 wheels/
 *.egg-info/
 .eggs/

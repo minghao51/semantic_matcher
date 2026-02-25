@@ -2,7 +2,7 @@
 
 Related docs: [`quickstart.md`](./quickstart.md) | [`notebooks.md`](./notebooks.md) | [`index.md`](./index.md)
 
-This page covers common setup and first-run issues for the package and experiment notebooks.
+This page covers common setup and first-run issues for the package plus exploratory scripts/notebooks.
 
 ## Import Errors (`setfit`, `datasets`, `torch`, `sentence-transformers`)
 
@@ -24,13 +24,13 @@ First run often downloads model weights from Hugging Face. This can take time de
 What to expect:
 
 - Small examples: may still pause while downloading
-- Advanced notebooks (`qwen_embedding.ipynb`): much larger downloads and slower startup
+- Some advanced experiments/notebooks may require larger model downloads and slower startup
 
 ## CPU vs GPU Expectations
 
 - CPU works for basic testing and small examples.
 - SetFit training and large embedding models can be significantly slower on CPU.
-- GPU is optional but helpful for the country classifier experiments and Qwen embedding notebook.
+- GPU is optional but helpful for the country classifier experiments and larger embedding experiments.
 
 ## `EmbeddingMatcher` Error: Index Not Built
 
@@ -69,18 +69,20 @@ result = matcher.predict("query")
 
 ### `geograpy`
 
-- `notebooks/geograpy.ipynb` is an external exploration notebook
-- It may require extra installs and dependency troubleshooting beyond the core project
+- If you add a local `geograpy` notebook experiment, expect extra installs and dependency troubleshooting beyond the core project
 
-## Path Migration Note (`notebook/` -> `notebooks/`)
+## Path Migration Note (`notebook/` -> `experiments/` / `notebooks/`)
 
-The old experiment script path `notebook/...` has been merged into `notebooks/...`.
+The old experiment script path `notebook/...` is now split by artifact type:
+
+- script experiments -> `experiments/...`
+- Jupyter notebooks -> `notebooks/...`
 
 Updated examples:
 
-- `notebooks/country_classifier.py`
-- `notebooks/country_classifier_quick.py`
-- `notebooks/country_classifier_advanced.py`
+- `experiments/country_classifier/country_classifier.py`
+- `experiments/country_classifier/country_classifier_quick.py`
+- `experiments/country_classifier/country_classifier_advanced.py`
 
 ## `EmbeddingMatcher` Threshold Confusion
 

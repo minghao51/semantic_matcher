@@ -1,4 +1,3 @@
-import pytest
 from semanticmatcher.utils.preprocessing import (
     tokenize,
     remove_stopwords,

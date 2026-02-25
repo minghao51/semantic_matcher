@@ -1,12 +1,9 @@
 """CLI for running data ingestion scripts."""
 
 import argparse
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from src.ingestion import (
+from semanticmatcher.ingestion import (
     run_languages,
     run_currencies,
     run_industries,
@@ -29,7 +26,7 @@ INGESTORS = {
 }
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description="Ingest external datasets")
     parser.add_argument(
         "dataset",
@@ -43,8 +40,20 @@ def main():
         action="store_true",
         help="List available datasets",
     )
+    parser.add_argument(
+        "--raw-dir",
+        type=Path,
+        default=None,
+        help="Base directory for raw downloads (defaults to ./data/raw)",
+    )
+    parser.add_argument(
+        "--processed-dir",
+        type=Path,
+        default=None,
+        help="Base directory for processed outputs (defaults to ./data/processed)",
+    )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.list:
         print("Available datasets:")
@@ -61,17 +70,17 @@ def main():
             print(f"Ingesting {name}...")
             print("=" * 50)
             try:
-                func()
+                func(raw_dir=args.raw_dir, processed_dir=args.processed_dir)
             except Exception as e:
                 print(f"Error ingesting {name}: {e}")
         print("\nAll ingestions complete!")
     else:
         func = INGESTORS.get(args.dataset)
         if func:
-            func()
+            func(raw_dir=args.raw_dir, processed_dir=args.processed_dir)
         else:
             print(f"Unknown dataset: {args.dataset}")
-            sys.exit(1)
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":

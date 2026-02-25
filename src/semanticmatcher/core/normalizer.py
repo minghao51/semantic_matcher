@@ -1,6 +1,5 @@
 import unicodedata
 import re
-from typing import Optional
 
 
 class TextNormalizer:

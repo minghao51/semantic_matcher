@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional
+from typing import List
 
 __all__ = ["tokenize", "remove_stopwords", "lemmatize", "clean_text", "extract_aliases"]
 
@@ -7,7 +7,6 @@ try:
     import nltk
     from nltk.corpus import stopwords
     from nltk.stem import WordNetLemmatizer
-    from nltk.tokenize import word_tokenize
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False

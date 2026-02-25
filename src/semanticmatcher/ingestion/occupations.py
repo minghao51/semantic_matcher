@@ -1,14 +1,10 @@
 """Ingestion script for SOC occupation codes (O*NET)."""
 
-import sys
-from pathlib import Path
 from typing import Any
 import csv
-import json
 import requests
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.ingestion.base import BaseFetcher
+from .base import BaseFetcher, resolve_output_dirs
 
 
 class OccupationsFetcher(BaseFetcher):
@@ -134,11 +130,9 @@ class SOCDirectFetcher(BaseFetcher):
         return []
 
 
-def run():
+def run(raw_dir=None, processed_dir=None):
     """Execute occupation data ingestion."""
-    base_path = Path(__file__).parent.parent.parent
-    raw_dir = base_path / "data" / "raw" / "occupations"
-    processed_dir = base_path / "data" / "processed" / "occupations"
+    raw_dir, processed_dir = resolve_output_dirs("occupations", raw_dir, processed_dir)
 
     fetcher = OccupationsFetcher(raw_dir, processed_dir)
     fetcher.run("occupations.csv")

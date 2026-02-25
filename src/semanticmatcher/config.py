@@ -99,12 +99,11 @@ class Config:
                     return config_path
         return None
 
-    def _package_default_config(self) -> Optional[Path]:
+    def _package_default_config(self) -> Optional[Any]:
         try:
             from importlib import resources
 
-            resource = resources.files("semanticmatcher").joinpath("data/default_config.json")
-            return Path(resource)
+            return resources.files("semanticmatcher").joinpath("data/default_config.json")
         except (ImportError, FileNotFoundError, ModuleNotFoundError, TypeError):
             return None
 
@@ -112,19 +111,25 @@ class Config:
         cwd_path = Path.cwd() / "config.yaml"
         return cwd_path if cwd_path.exists() else None
 
-    def _safe_load_file(self, path: Path) -> Optional[Dict[str, Any]]:
+    def _safe_load_file(self, path: Any) -> Optional[Dict[str, Any]]:
         try:
             return self._load_file(path)
         except (OSError, yaml.YAMLError, json.JSONDecodeError, ValueError):
             return None
 
-    def _load_file(self, path: PathLike) -> Dict[str, Any]:
-        file_path = Path(path)
-        text = file_path.read_text()
+    def _load_file(self, path: Any) -> Dict[str, Any]:
+        if isinstance(path, (str, Path)):
+            file_path = Path(path)
+            text = file_path.read_text(encoding="utf-8")
+            suffix = file_path.suffix.lower()
+        else:
+            text = path.read_text(encoding="utf-8")
+            suffix = Path(getattr(path, "name", "")).suffix.lower()
+
         if not text.strip():
             return {}
 
-        if file_path.suffix.lower() == ".json":
+        if suffix == ".json":
             loaded = json.loads(text)
         else:
             loaded = yaml.safe_load(text)

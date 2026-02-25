@@ -8,7 +8,7 @@ Related docs: [`index.md`](./index.md) | [`notebooks.md`](./notebooks.md) | [`ex
 pip install semantic-matcher
 ```
 
-Use this page for the official package wrapper API. If you want experiment notebooks/scripts, see [`notebooks.md`](./notebooks.md). If you want lower-level raw `setfit` examples, see [`examples.md`](./examples.md).
+Use this page for the official package wrapper API. If you want exploratory scripts or Jupyter notebooks, see [`notebooks.md`](./notebooks.md). If you want lower-level raw `setfit` examples, see [`examples.md`](./examples.md).
 
 ## Choose a Matcher
 
