@@ -8,6 +8,56 @@ import yaml
 PathLike = Union[str, Path]
 
 
+# Model registries for easy model selection
+MODEL_REGISTRY = {
+    "bge-base": "BAAI/bge-base-en-v1.5",
+    "bge-m3": "BAAI/bge-m3",
+    "nomic": "nomic-ai/nomic-embed-text-v1",
+    "mpnet": "sentence-transformers/all-mpnet-base-v2",
+    "minilm": "sentence-transformers/all-MiniLM-L6-v2",
+    "default": "sentence-transformers/all-mpnet-base-v2",
+}
+
+RERANKER_REGISTRY = {
+    "bge-m3": "BAAI/bge-reranker-v2-m3",
+    "bge-large": "BAAI/bge-reranker-large",
+    "ms-marco": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "default": "BAAI/bge-reranker-v2-m3",
+}
+
+
+def resolve_model_alias(model_name: str) -> str:
+    """Resolve model alias to full model name."""
+    return MODEL_REGISTRY.get(model_name, model_name)
+
+
+def resolve_reranker_alias(model_name: str) -> str:
+    """Resolve reranker alias to full model name."""
+    return RERANKER_REGISTRY.get(model_name, model_name)
+
+
+def recommend_model(use_case: str = "general", language: str = "en") -> str:
+    """
+    Recommend appropriate model based on use case and language.
+
+    Args:
+        use_case: Type of matching - "general", "fast", "multilingual", "accurate"
+        language: Primary language - "en", "zh", "multilingual"
+
+    Returns:
+        Model alias or full model name
+    """
+    recommendations = {
+        ("general", "en"): "mpnet",
+        ("general", "multilingual"): "bge-m3",
+        ("fast", "en"): "minilm",
+        ("fast", "multilingual"): "bge-m3",
+        ("accurate", "en"): "bge-base",
+        ("accurate", "multilingual"): "bge-m3",
+    }
+    return recommendations.get((use_case, language), "mpnet")
+
+
 class Config:
     """Configuration loader with optional custom override merging."""
 

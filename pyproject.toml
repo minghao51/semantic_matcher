@@ -13,6 +13,10 @@ dependencies = [
     "datasets>=2.14.0",
     "torch>=2.0.0",
     "nltk>=3.9.2",
+    "requests>=2.31.0",
+    "rank-bm25>=0.2.2",
+    "rapidfuzz>=3.0.0",
+    "tqdm>=4.66.0",
 ]
 
 [project.optional-dependencies]
@@ -24,5 +28,8 @@ dev = [
 
 [dependency-groups]
 dev = [
+    "beautifulsoup4>=4.14.3",
+    "html-to-markdown>=1.8.0",
+    "patchright>=1.58.0",
     "pytest>=8.4.2",
 ]

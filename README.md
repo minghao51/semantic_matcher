@@ -2,8 +2,10 @@
 
 Map messy text to canonical entities using:
 
-- `EntityMatcher` for few-shot SetFit training
 - `EmbeddingMatcher` for embedding similarity matching (no training)
+- `EntityMatcher` for few-shot SetFit training
+- `CrossEncoderReranker` for high-precision reranking
+- `HybridMatcher` for three-stage waterfall pipelines
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/semantic-matcher)](https://pypi.org/project/semantic-matcher/)
@@ -30,6 +32,8 @@ Optional tools you may also need for experiments/notebooks:
 
 ## Minimal Example (Official Package Wrapper API)
 
+### Basic Embedding Matching
+
 ```python
 from semanticmatcher import EmbeddingMatcher
 
@@ -44,12 +48,53 @@ matcher.build_index()
 print(matcher.match("America"))  # {"id": "US", "score": ...}
 ```
 
+### Hybrid Matching Pipeline (New!)
+
+For maximum accuracy with large datasets, use the three-stage pipeline:
+
+```python
+from semanticmatcher import HybridMatcher, BM25Blocking
+
+matcher = HybridMatcher(
+    entities=products,
+    blocking_strategy=BM25Blocking(),  # Fast lexical filtering
+    retriever_model="bge-base",        # Semantic search
+    reranker_model="bge-m3",            # Precise reranking
+)
+
+results = matcher.match(
+    "iPhone 15 case",
+    blocking_top_k=1000,    # Candidates after blocking
+    retrieval_top_k=50,     # Candidates after retrieval
+    final_top_k=5           # Final results
+)
+```
+
+### Cross-Encoder Reranking (New!)
+
+Rerank top candidates for higher precision:
+
+```python
+from semanticmatcher import EmbeddingMatcher, CrossEncoderReranker
+
+# Initial retrieval
+retriever = EmbeddingMatcher(entities)
+retriever.build_index()
+candidates = retriever.match(query, top_k=50)
+
+# Rerank with cross-encoder
+reranker = CrossEncoderReranker(model="bge-m3")
+final_results = reranker.rerank(query, candidates, top_k=5)
+```
+
 ## Choose Your Path
 
 | Path | Best For | Start Here |
 |---|---|---|
 | `EmbeddingMatcher` (no training) | Fast prototypes, simple setup | [`docs/quickstart.md`](docs/quickstart.md) |
 | `EntityMatcher` (few-shot training) | Better accuracy with labeled examples | [`docs/quickstart.md`](docs/quickstart.md) |
+| `HybridMatcher` (three-stage pipeline) | Large datasets, maximum accuracy | [`examples/hybrid_matching_demo.py`](examples/hybrid_matching_demo.py) |
+| `CrossEncoderReranker` | Rerank candidates for precision | See Hybrid example above |
 | `notebooks/` experiments (scripts + Jupyter) | Reproducing experiments and explorations | [`docs/notebooks.md`](docs/notebooks.md) |
 | Advanced/raw examples (`examples/`) | Lower-level SetFit / sentence-transformers workflows | [`docs/examples.md`](docs/examples.md) |
 

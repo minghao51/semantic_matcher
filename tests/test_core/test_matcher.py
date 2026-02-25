@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from semanticmatcher.core.matcher import EntityMatcher, EmbeddingMatcher
 
 
@@ -132,3 +133,57 @@ class TestEmbeddingMatcher:
         matcher.build_index()
         result = matcher.match("Deutchland")
         assert result["id"] == "DE"
+
+    def test_embedding_matcher_top_k_deduplicates_alias_hits(self, sample_entities, monkeypatch):
+        vectors = {
+            "Germany": [1.0, 0.0],
+            "Deutschland": [1.0, 0.0],
+            "Deutchland": [1.0, 0.0],
+            "France": [0.0, 1.0],
+            "Frankreich": [0.0, 1.0],
+            "United States": [0.7, 0.7],
+            "USA": [0.7, 0.7],
+            "America": [0.7, 0.7],
+        }
+
+        class FakeModel:
+            def __init__(self, *_args, **_kwargs):
+                pass
+
+            def get_sentence_embedding_dimension(self):
+                return 2
+
+            def encode(self, texts):
+                if isinstance(texts, str):
+                    texts = [texts]
+                encoded = [vectors.get(text, [1.0, 0.0]) for text in texts]
+                return np.array(encoded, dtype=float)
+
+        monkeypatch.setattr("semanticmatcher.core.matcher.SentenceTransformer", FakeModel)
+
+        matcher = EmbeddingMatcher(entities=sample_entities, normalize=False, threshold=0.0)
+        matcher.build_index()
+        results = matcher.match("Germany", top_k=2)
+
+        assert [r["id"] for r in results] == ["DE", "US"]
+
+    def test_embedding_matcher_empty_candidates_returns_empty(self, sample_entities, monkeypatch):
+        class FakeModel:
+            def __init__(self, *_args, **_kwargs):
+                pass
+
+            def get_sentence_embedding_dimension(self):
+                return 2
+
+            def encode(self, texts):
+                if isinstance(texts, str):
+                    texts = [texts]
+                return np.ones((len(texts), 2), dtype=float)
+
+        monkeypatch.setattr("semanticmatcher.core.matcher.SentenceTransformer", FakeModel)
+
+        matcher = EmbeddingMatcher(entities=sample_entities, normalize=False, threshold=0.0)
+        matcher.build_index()
+
+        assert matcher.match("Germany", candidates=[]) is None
+        assert matcher.match("Germany", candidates=[], top_k=2) == []

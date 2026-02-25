@@ -16,6 +16,10 @@ This folder is organized by audience and task.
 
 - [`examples.md`](./examples.md): guide to `examples/` (direct `setfit` / `sentence-transformers` workflows)
 
+## Research & Planning
+
+- [`20260225-alternative-methods-roadmap.md`](./20260225-alternative-methods-roadmap.md): comprehensive analysis of alternative semantic matching methods (traditional NLP, cross-encoder rerankers, contrastive learning, graph neural networks, hybrid pipelines) with implementation guidance and future outlook for 2026-2027
+
 ## Contributors / Maintainers
 
 - [`architecture.md`](./architecture.md): module layout and internals

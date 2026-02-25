@@ -1,5 +1,6 @@
 from .base import EmbeddingBackend, RerankerBackend
 from .sentencetransformer import HFEmbedding, HFReranker
+from .reranker_st import STReranker
 # from .ollama import OllamaEmbedding, OllamaReranker
 # from .litellm import LiteLLMEmbedding, LiteLLMReranker
 
@@ -8,6 +9,7 @@ __all__ = [
     "RerankerBackend",
     "HFEmbedding",
     "HFReranker",
+    "STReranker",
     "get_embedding_backend",
     "get_reranker_backend",
 ]
