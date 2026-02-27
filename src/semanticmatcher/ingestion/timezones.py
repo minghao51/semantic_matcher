@@ -71,7 +71,7 @@ class TimezonesFetcher(BaseFetcher):
 class WorldTimeAPIFetcher(BaseFetcher):
     """Fetch timezone offset data from WorldTimeAPI."""
 
-    TZ_LIST_URL = "http://worldtimeapi.org/api/timezone"
+    TZ_LIST_URL = "https://worldtimeapi.org/api/timezone"
 
     def fetch(self) -> list[dict[str, Any]]:
         """Download timezone list."""

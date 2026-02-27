@@ -20,4 +20,8 @@ class HFReranker(RerankerBackend):
         self.model = CrossEncoder(model_name)
 
     def score(self, query, docs):
-        return self.model.rank(query, docs)
+        pairs = [[query, doc] for doc in docs]
+        scores = self.model.predict(pairs)
+        if hasattr(scores, "tolist"):
+            scores = scores.tolist()
+        return [float(score) for score in scores]

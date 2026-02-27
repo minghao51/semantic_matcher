@@ -31,7 +31,7 @@ class STReranker(RerankerBackend):
         self.model_name = model_name
         self.device = device
         self.batch_size = batch_size
-        self.model = CrossEncoder(model_name)
+        self.model = CrossEncoder(model_name, device=device)
 
     def score(self, query: str, docs: list[str]) -> List[float]:
         """
