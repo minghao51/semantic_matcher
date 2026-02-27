@@ -77,16 +77,13 @@ class SetFitClassifier:
     def predict_proba(self, text: str) -> np.ndarray:
         if not self.is_trained or self.model is None:
             raise RuntimeError("Model not trained. Call train() first.")
-
-        embeddings = self.model.body([text])
-        logits = self.model.head(embeddings)
-        probs = 1 / (1 + np.exp(-logits))
-        return probs[0]
+        probs = self.model.predict_proba([text])
+        return np.asarray(probs)[0]
 
     def save(self, path: str):
         if not self.is_trained or self.model is None:
             raise RuntimeError("Model not trained. Call train() first.")
-        self.model.save(path)
+        self.model.save_pretrained(path)
 
     @classmethod
     def load(cls, path: str) -> "SetFitClassifier":

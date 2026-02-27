@@ -10,6 +10,7 @@ from ..utils.validation import (
     validate_model_name,
     validate_threshold,
 )
+from ..utils.embeddings import ModelCache, get_default_cache
 
 
 TextInput = Union[str, List[str]]
@@ -118,6 +119,10 @@ class EntityMatcher:
         predictions = []
         for text in texts:
             try:
+                proba = self.classifier.predict_proba(text)
+                if float(np.max(proba)) < self.threshold:
+                    predictions.append(None)
+                    continue
                 pred = self.classifier.predict(text)
                 predictions.append(pred)
             except ValueError:
@@ -136,7 +141,19 @@ class EmbeddingMatcher:
         threshold: float = 0.7,
         normalize: bool = True,
         embedding_dim: Optional[int] = None,
+        cache: Optional[ModelCache] = None,
     ):
+        """
+        Initialize the embedding matcher.
+        
+        Args:
+            entities: List of entity dictionaries with 'id' and 'name' keys
+            model_name: Name of the sentence-transformer model
+            threshold: Minimum similarity score threshold (0-1)
+            normalize: Whether to normalize text
+            embedding_dim: Optional dimension for Matryoshka embeddings
+            cache: Optional ModelCache instance. If None, uses global default cache.
+        """
         validate_entities(entities)
         validate_model_name(model_name)
 
@@ -147,13 +164,24 @@ class EmbeddingMatcher:
         self.embedding_dim = embedding_dim  # Matryoshka support
 
         self.normalizer = TextNormalizer() if normalize else None
+        self.cache = cache if cache is not None else get_default_cache()
         self.model: Optional[SentenceTransformer] = None
         self.entity_texts: List[str] = []
         self.entity_ids: List[str] = []
         self.embeddings: Optional[np.ndarray] = None
 
-    def build_index(self):
-        self.model = SentenceTransformer(self.model_name)
+    def build_index(self, batch_size: Optional[int] = None):
+        """
+        Build the embedding index from entities.
+
+        Args:
+            batch_size: Batch size for encoding. None = use model's default.
+        """
+        # Use cache to get or load the model
+        self.model = self.cache.get_or_load(
+            self.model_name,
+            lambda: SentenceTransformer(self.model_name)
+        )
 
         # Validate embedding_dim if provided
         if self.embedding_dim is not None:
@@ -161,7 +189,7 @@ class EmbeddingMatcher:
             actual_dim = self.model.get_sentence_embedding_dimension()
 
             # Validate against model's actual dimension
-            if self.embedding_dim > actual_dim:
+            if actual_dim is not None and self.embedding_dim > actual_dim:
                 raise ValueError(
                     f"embedding_dim ({self.embedding_dim}) cannot exceed "
                     f"model embedding dimension ({actual_dim})"
@@ -178,7 +206,10 @@ class EmbeddingMatcher:
             self.entity_texts, self.normalizer, self.normalize
         )
 
-        self.embeddings = self.model.encode(self.entity_texts)
+        if batch_size is not None:
+            self.embeddings = self.model.encode(self.entity_texts, batch_size=batch_size)
+        else:
+            self.embeddings = self.model.encode(self.entity_texts)
 
         # Matryoshka embedding support: truncate to specified dimension
         if self.embedding_dim is not None and self.embeddings.shape[1] > self.embedding_dim:
@@ -189,6 +220,7 @@ class EmbeddingMatcher:
         texts: TextInput,
         candidates: Optional[List[Dict[str, Any]]] = None,
         top_k: int = 1,
+        batch_size: Optional[int] = None,
     ) -> Any:
         """
         Match texts against indexed entities.
@@ -197,6 +229,7 @@ class EmbeddingMatcher:
             texts: Query text(s) to match
             candidates: Optional list of candidate entities to restrict search
             top_k: Number of top results to return
+            batch_size: Batch size for encoding queries. None = use model's default.
 
         Returns:
             Matched entity/ies with scores
@@ -224,7 +257,10 @@ class EmbeddingMatcher:
         candidate_embeddings = self.embeddings[candidate_indices]
         candidate_ids_list = [self.entity_ids[i] for i in candidate_indices]
 
-        query_embeddings = self.model.encode(texts)
+        if batch_size is not None:
+            query_embeddings = self.model.encode(texts, batch_size=batch_size)
+        else:
+            query_embeddings = self.model.encode(texts)
 
         # Ensure both query and candidate embeddings use same dimension
         # Use the smaller of: model's output dim or configured embedding_dim

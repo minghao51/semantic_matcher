@@ -1,5 +1,7 @@
 """Hybrid matching pipeline with blocking, retrieval, and reranking."""
 
+import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List, Optional
 
 from .matcher import EmbeddingMatcher
@@ -130,6 +132,8 @@ class HybridMatcher:
         blocking_top_k: int = 1000,
         retrieval_top_k: int = 50,
         final_top_k: int = 5,
+        n_jobs: int = -1,
+        chunk_size: Optional[int] = None,
     ) -> List[List[Dict[str, Any]]]:
         """
         Batch matching for multiple queries.
@@ -139,16 +143,45 @@ class HybridMatcher:
             blocking_top_k: Number of candidates after blocking stage
             retrieval_top_k: Number of candidates after retrieval stage
             final_top_k: Number of final results after reranking
+            n_jobs: Number of parallel workers. -1 = use all CPU cores, 1 = sequential.
+            chunk_size: Number of queries per chunk when using parallel processing.
 
         Returns:
             List of matched entity lists (one per query)
         """
-        return [
-            self.match(
-                q,
-                blocking_top_k,
-                retrieval_top_k,
-                final_top_k
-            )
-            for q in queries
-        ]
+        if n_jobs == 1 or len(queries) == 0:
+            return [
+                self.match(
+                    q,
+                    blocking_top_k,
+                    retrieval_top_k,
+                    final_top_k
+                )
+                for q in queries
+            ]
+
+        # Determine number of workers
+        if n_jobs <= 0:
+            num_workers = os.cpu_count() or 1
+        else:
+            num_workers = n_jobs
+
+        # Determine chunk size
+        if chunk_size is None:
+            chunk_size = max(1, len(queries) // (num_workers * 4))
+
+        # Process in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            futures = [
+                executor.submit(
+                    self.match,
+                    q,
+                    blocking_top_k,
+                    retrieval_top_k,
+                    final_top_k
+                )
+                for q in queries
+            ]
+            results = [future.result() for future in futures]
+
+        return results
