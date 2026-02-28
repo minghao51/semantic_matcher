@@ -1,222 +1,392 @@
-# SemanticMatcher Code Conventions
+# Conventions
 
 ## Code Style
 
 ### Formatting
-- **Tool**: black
-- **Line Length**: 88 characters (black default)
-- **Config**: `pyproject.toml`
+
+**Tool**: Black (via `ruff format` or standalone)
+
+**Configuration**:
+```toml
+[tool.ruff]
+line-length = 88  # Black default
+```
+
+**Usage**:
+```bash
+# Format code
+ruff format src/ tests/
+
+# Check formatting
+ruff format --check src/ tests/
+```
 
 ### Linting
-- **Tool**: ruff
-- **Config**: `pyproject.toml`
-- **Minimum Version**: ruff≥0.1.0
+
+**Tool**: Ruff (fast Python linter)
+
+**Configuration** in `pyproject.toml`:
+- Uses Ruff defaults
+- Line length: 88 characters
+- Python 3.9+ compatibility
+
+**Usage**:
+```bash
+# Lint code
+ruff check src/ tests/
+
+# Fix auto-fixable issues
+ruff check --fix src/ tests/
+```
 
 ## Type Hints
 
-### Required Annotations
-- **Function Parameters**: Always typed
-- **Return Types**: Always specified
-- **Class Attributes**: Typed where appropriate
+### Standard Practices
 
-### Common Type Patterns
+**Extensive Type Annotations**:
+- All public APIs have type hints
+- Use `Optional` for nullable returns
+- Use `List`, `Dict`, `Any` from `typing` module
+
+**Examples**:
 ```python
-from typing import Optional, Union, List, Dict, Any
+from typing import List, Dict, Any, Optional, Union
 
 def match(
     self,
-    texts: Union[str, List[str]],
+    query: str,
+    top_k: int = 10,
     threshold: Optional[float] = None,
-) -> List[Dict[str, Any]]:
+) -> Optional[List[Dict[str, Any]]]:
+    """Match query against entities."""
     pass
 ```
 
-### Type Imports
-```python
-# Consolidated imports
-from typing import Dict, List, Optional, Union
-```
+**Return Types**:
+- Explicit return types on all functions
+- `-> None` for void functions
+- `-> List[Dict[str, Any]]` for structured results
 
-## Naming Conventions
+## Naming Patterns
 
 ### Classes
-- **Pattern**: `CamelCase`
-- **Examples**: `EntityMatcher`, `SetFitClassifier`, `TextNormalizer`
 
-### Functions & Methods
-- **Pattern**: `lowercase_with_underscores`
-- **Public**: `match()`, `train()`, `normalize()`
-- **Private**: `_load_model()`, `_validate_input()`
+**Pattern**: `CamelCase`
+
+**Suffixes indicate type**:
+- `*Matcher` - Matching classes (EntityMatcher, EmbeddingMatcher)
+- `*Blocking` - Blocking strategies (BM25Blocking, TFIDFBlocking)
+- `*Reranker` - Reranking classes (CrossEncoderReranker)
+- `*Normalizer` - Text normalization (TextNormalizer)
+- `*Classifier` - Classification (SetFitClassifier)
+
+### Functions/Methods
+
+**Pattern**: `snake_case`
+
+**Common prefixes**:
+- `get_*` - Retrieve cached values (get_default_cache)
+- `resolve_*` - Resolve aliases (resolve_model_alias)
+- `recommend_*` - Recommendations (recommend_model)
+- `build_*` - Construct/initialize (build_index)
+- `train` - Model training
+- `predict` / `match` - Inference methods
 
 ### Constants
-- **Pattern**: `UPPER_CASE_WITH_UNDERSCORES`
-- **Examples**: `DEFAULT_MODEL`, `DEFAULT_THRESHOLD`
 
-### Variables
-- **Pattern**: `lowercase_with_underscores`
-- **Descriptive**: `entity_id` not `eid`
+**Pattern**: `UPPER_CASE`
+
+**Examples**:
+```python
+MODEL_REGISTRY = {...}
+RERANKER_REGISTRY = {...}
+SOURCE_URL = "https://..."
+DEFAULT_THRESHOLD = 0.7
+```
+
+### Private Members
+
+**Pattern**: `_leading_underscore`
+
+**Levels of privacy**:
+- `_protected` - Internal but not strict (single underscore)
+- `__private__` - Dunder methods (Python protocol)
+- `__mangled` - Name mangling (rarely used)
 
 ## Error Handling
 
-### Exception Types
-```python
-# Specific exceptions
-raise ValueError("Entity must have 'id' field")
-raise RuntimeError("Model not trained. Call train() first.")
+### Validation Strategy
 
-# Error checking before operation
-if not self.is_trained or self.classifier is None:
-    raise RuntimeError("Model not trained")
+**Input Validation**:
+- Located in `src/semanticmatcher/utils/validation.py`
+- Validates entities, queries, training data
+- Type checking with defensive programming
+
+**Example Pattern**:
+```python
+def validate_entities(entities: List[Dict[str, Any]]) -> None:
+    if not isinstance(entities, list):
+        raise TypeError("entities must be a list")
+    for entity in entities:
+        if "id" not in entity:
+            raise ValueError("entity missing 'id' field")
 ```
 
-### Validation Pattern
-```python
-# Input validation utilities
-from semanticmatcher.utils import validation
+### Exception Propagation
 
-if not validation.is_valid_entity(entity):
-    raise ValueError("Invalid entity format")
+**No Custom Exception Hierarchy**:
+- Let ML framework exceptions bubble up
+- Users handle `sentence-transformers` and `SetFit` errors
+- No wrapping in custom exceptions
+
+**Common Exceptions**:
+- `ValueError` - Invalid input parameters
+- `TypeError` - Wrong type passed
+- `RuntimeError` - Model loading failures
+
+### Error Messages
+
+**Descriptive Messages**:
+```python
+raise ValueError(f"entities must have 'text' or 'name' field, got: {entity}")
 ```
 
-### Exception Catching
-- **Specific**: Catch specific exception types
-- **Generic**: Use `Exception` sparingly
-- **Location**: `matcher.py:77` (one generic catch)
+## Documentation
 
-## Code Patterns
+### Docstring Format
 
-### Optional Dependencies
+**Google Style (preferred)**:
 ```python
-# Pattern: Check availability
-try:
-    import nltk
-    NLTK_AVAILABLE = True
-except ImportError:
-    NLTK_AVAILABLE = False
-
-# Usage with fallback
-if NLTK_AVAILABLE:
-    nltk.word_tokenize(text)
-else:
-    text.split()
-```
-
-### Configuration Access
-```python
-# Singleton pattern
-from semanticmatcher.config import Config
-
-config = Config()  # Returns single instance
-model = config.get("default_model")
-```
-
-### Model Loading
-```python
-# Pattern: Lazy load with caching
-if self.model is None:
-    self.model = SentenceTransformer(model_name)
-```
-
-## Docstrings
-
-### Function Docstrings
-```python
-def match(self, texts: Union[str, List[str]]) -> List[Dict]:
+def match(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
     """
-    Match texts to trained entities.
+    Match query against entities.
 
     Args:
-        texts: Single text or list of texts to match
+        query: Query text to match
+        top_k: Number of results to return
 
     Returns:
-        List of matches with entity IDs and scores
+        List of matched entities with scores
+
+    Raises:
+        ValueError: If query is empty
     """
     pass
 ```
 
-### Class Docstrings
-```python
-class EntityMatcher:
-    """
-    Few-shot semantic entity matcher using SetFit.
+### Module Docstrings
 
-    Trains on 8-16 examples per entity.
-    """
+**All modules have descriptive docstrings**:
+```python
+"""Hybrid matching pipeline with blocking, retrieval, and reranking."""
 ```
 
-## Import Organization
+### Example Code in Docstrings
+
+**Doctest-style examples**:
+```python
+def resolve_model_alias(model_name: str) -> str:
+    """
+    Resolve model alias to full model name.
+
+    Example:
+        >>> resolve_model_alias("bge-base")
+        'BAAI/bge-base-en-v1.5'
+    """
+    return MODEL_REGISTRY.get(model_name, model_name)
+```
+
+## Import Conventions
 
 ### Import Order
-1. Standard library
+
+**Standard layout**:
+1. Standard library imports
 2. Third-party imports
 3. Local imports
 
-### Example
 ```python
-# Standard library
-import os
-from typing import List, Optional
+# 1. Standard library
+from pathlib import Path
+from typing import List, Dict, Any
 
-# Third-party
+# 2. Third-party
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-# Local
-from semanticmatcher.backends import base
-from semanticmatcher.utils import validation
+# 3. Local
+from .classifier import SetFitClassifier
+from ..utils.validation import validate_entities
 ```
 
-## Constants & Defaults
+### Import Style
 
-### Default Values
+**Prefer explicit imports**:
 ```python
-DEFAULT_MODEL = "sentence-transformers/paraphrase-mpnet-base-v2"
-DEFAULT_THRESHOLD = 0.7
-DEFAULT_EPOCHS = 4
-DEFAULT_BATCH_SIZE = 16
+from typing import List, Dict, Any, Optional
+
+# Avoid:
+from typing import *
 ```
 
-### Configuration Fallback
+**Relative imports in package**:
 ```python
-# Pattern: Config -> Default
-threshold = threshold or config.get("threshold", DEFAULT_THRESHOLD)
+from .classifier import SetFitClassifier  # sibling
+from ..utils import validation  # parent/child
 ```
 
-## Testing Conventions
+## Code Organization
 
-### Test Organization
-- **Path**: `tests/test_<module>/`
-- **File**: `test_<module>.py`
-- **Class**: `Test<ClassName>`
+### File Length Guidelines
 
-### Test Patterns
+**Preferred**: < 200 lines per file
+**Acceptable**: 200-300 lines
+**Review needed**: > 300 lines
+
+**Current largest files**:
+- `ingestion/universities.py` (371 lines) - Contains hardcoded data
+- `ingestion/products.py` (356 lines) - Contains hardcoded data
+- `core/matcher.py` (320 lines) - Core logic, could be modularized
+
+### Class Organization
+
+**Standard structure**:
 ```python
-# Fixture pattern
-@pytest.fixture
-def sample_entities():
-    return [{"id": "us", "examples": ["USA", "United States"]}]
+class MyClass:
+    """Docstring."""
 
-# Exception testing
-with pytest.raises(ValueError):
-    matcher.train(invalid_data)
+    def __init__(self, ...):
+        """Initialize."""
 
-# Float comparison
-assert score == pytest.approx(0.85)
+    # Public methods
+    def public_method(self):
+        """Public API."""
+
+    # Private methods
+    def _private_method(self):
+        """Internal helper."""
+
+    # Properties
+    @property
+    def my_property(self):
+        """Property getter."""
 ```
 
 ## Logging
 
-### Current State
-- **Implementation**: Minimal
-- **Usage**: Mostly in example files
-- **Pattern**: `print()` statements (to be improved)
+**Current Status**: Minimal logging
+- Progress bars via `tqdm` for long operations
+- No structured logging framework
+- Print statements for debugging (should be replaced with `logging`)
 
-### Recommended Pattern
+**Recommended Enhancement**:
 ```python
 import logging
 
 logger = logging.getLogger(__name__)
 
-logger.info("Training started")
-logger.error("Model loading failed")
+logger.info("Loading model...")
+logger.debug(f"Candidates after blocking: {len(candidates)}")
 ```
+
+## Testing Patterns
+
+### Test Structure
+
+**Mirror Source Structure**:
+```
+tests/test_core/        → src/semanticmatcher/core/
+tests/test_backends/    → src/semanticmatcher/backends/
+tests/test_utils/       → src/semanticmatcher/utils/
+```
+
+### Test Naming
+
+**Pattern**: `test_<function>_<scenario>`
+
+```python
+def test_match_returns_top_k_results():
+    """Test that match returns exactly top_k results."""
+    pass
+
+def test_match_filters_below_threshold():
+    """Test that match filters results below threshold."""
+    pass
+```
+
+### AAA Pattern
+
+**Arrange-Act-Assert**:
+```python
+def test_match_with_valid_query():
+    # Arrange
+    matcher = EmbeddingMatcher(entities=TEST_ENTITIES)
+    matcher.build_index()
+    query = "test query"
+
+    # Act
+    results = matcher.match(query, top_k=3)
+
+    # Assert
+    assert len(results) == 3
+    assert "score" in results[0]
+```
+
+## Performance Patterns
+
+### Caching
+
+**ModelCache** (`utils/embeddings.py`):
+- Thread-safe singleton pattern
+- TTL-based expiration
+- Memory limits
+- Shared across instances
+
+### Lazy Loading
+
+**Package imports** (`__init__.py`):
+- Lazy import via `__getattr__`
+- Reduces initial import time
+- Optional dependencies not loaded until needed
+
+### Parallel Processing
+
+**ThreadPoolExecutor**:
+- Used in `HybridMatcher` for bulk operations
+- Concurrent blocking/retrieval/reranking
+- Configurable worker count
+
+## Configuration
+
+### YAML Configuration
+
+**Config Class** (`config.py`):
+- Loads YAML files
+- Model registries
+- Path resolution
+
+### Environment Variables
+
+**Currently**: Not used
+**Future consideration**: API keys for LiteLLM backend
+
+## Git Conventions
+
+**Commit Format**:
+- Conventional commits (feat:, fix:, docs:, refactor:)
+- Descriptive body for major changes
+
+**Branch Structure**:
+- `main` - Stable production code
+- Feature branches - `feature/` or `codex/` prefixes
+
+## Code Review Priorities
+
+When reviewing code, check:
+1. Type hints present and accurate
+2. Docstrings for public APIs
+3. Input validation
+4. Error handling
+5. No hardcoded secrets
+6. Test coverage
+7. Adherence to naming conventions

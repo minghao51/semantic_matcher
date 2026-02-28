@@ -61,7 +61,7 @@ def train_country_matcher(model_name: str = "paraphrase-mpnet-base-v2"):
     args = TrainingArguments(
         num_epochs=4,
         batch_size=16,
-        eval_strategy="epoch",
+        eval_strategy="no",  # Disable evaluation for this demo (no eval_dataset provided)
     )
 
     trainer = Trainer(

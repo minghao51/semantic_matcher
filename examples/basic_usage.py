@@ -42,7 +42,7 @@ def basic_entity_matching():
     args = TrainingArguments(
         num_epochs=4,
         batch_size=16,
-        eval_strategy="epoch",
+        eval_strategy="no",  # Disable evaluation for this demo (no eval_dataset provided)
     )
 
     trainer = Trainer(

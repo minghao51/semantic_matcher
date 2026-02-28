@@ -68,7 +68,7 @@ def train_and_eval(train_data, test_data, labels, name, model_name, epochs, head
     preds = model.predict(texts)
     acc = accuracy_score(true_labels, preds)
 
-    print(f"  Accuracy: {acc:.2%} ({time.time()-start:.1f}s)")
+    print(f"  Accuracy: {acc:.2%} ({time.time() - start:.1f}s)")
     return acc, preds
 
 

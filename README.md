@@ -1,11 +1,11 @@
 # SemanticMatcher
 
-Map messy text to canonical entities using:
+Map messy text to canonical entities using semantic matching:
 
 - `EmbeddingMatcher` for embedding similarity matching (no training)
 - `EntityMatcher` for few-shot SetFit training
-- `CrossEncoderReranker` for high-precision reranking
 - `HybridMatcher` for three-stage waterfall pipelines
+- `CrossEncoderReranker` for high-precision reranking
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/semantic-matcher)](https://pypi.org/project/semantic-matcher/)
@@ -17,7 +17,7 @@ Map messy text to canonical entities using:
 - Map text to canonical IDs (for example, country code matching)
 - Run locally with Sentence Transformers + SetFit
 
-Example: `"Deutchland"` -> `DE`
+Example: `"Deutchland"` → `DE`
 
 ## Installation
 
@@ -25,143 +25,91 @@ Example: `"Deutchland"` -> `DE`
 pip install semantic-matcher
 ```
 
-Optional tools you may also need for experiments/notebooks:
+## Quick Start
 
-- `jupyter` for `.ipynb` notebooks
+### EmbeddingMatcher (No Training)
 
-## Project Layout
-
-```text
-semantic_matcher/              # Repository root
-├── src/semanticmatcher/       # Python package (import path: `semanticmatcher`)
-├── tests/                     # Automated tests
-├── examples/                  # Runnable user-facing examples
-├── experiments/               # Exploratory Python scripts (non-product workflows)
-├── notebooks/                 # Jupyter notebooks only (reserved for `.ipynb`)
-├── data/                      # Sample/raw/processed datasets for demos/ingestion
-├── docs/                      # Hand-written docs (source); generated docs output is ignored
-└── pyproject.toml             # Packaging, dependencies, and tool config
-```
-
-### Repo Conventions
-
-- Project/package distribution name (PyPI): `semantic-matcher`
-- Python import path: `semanticmatcher`
-- Repository folder name: `semantic_matcher`
-
-These names differ because Python packaging conventions (distribution names vs import/module names) commonly use hyphens for PyPI and underscores/no hyphens for imports/filesystem paths.
-
-## Where To Start
-
-- Users: start here in `README.md`, then [`docs/quickstart.md`](docs/quickstart.md), then [`examples/basic_usage.py`](examples/basic_usage.py)
-- Contributors: start with [`docs/architecture.md`](docs/architecture.md), then `src/semanticmatcher/`, then `tests/`
-
-## Minimal Example (Official Package Wrapper API)
-
-### Basic Embedding Matching
+Fastest way to get started. No training required.
 
 ```python
 from semanticmatcher import EmbeddingMatcher
 
 entities = [
-    {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
+    {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
     {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
 ]
 
 matcher = EmbeddingMatcher(entities=entities)
 matcher.build_index()
 
-print(matcher.match("America"))  # {"id": "US", "score": ...}
+print(matcher.match("America"))  # {"id": "US", "score": 1.0}
 ```
 
-### Hybrid Matching Pipeline (New!)
+### EntityMatcher (Few-Shot Training)
 
-For maximum accuracy with large datasets, use the three-stage pipeline:
+For higher accuracy with labeled examples.
 
 ```python
-from semanticmatcher import HybridMatcher, BM25Blocking
+from semanticmatcher import EntityMatcher
 
-matcher = HybridMatcher(
-    entities=products,
-    blocking_strategy=BM25Blocking(),  # Fast lexical filtering
-    retriever_model="bge-base",        # Semantic search
-    reranker_model="bge-m3",            # Precise reranking
-)
+training_data = [
+    {"text": "Germany", "label": "DE"},
+    {"text": "Deutschland", "label": "DE"},
+    {"text": "USA", "label": "US"},
+]
 
-results = matcher.match(
-    "iPhone 15 case",
-    blocking_top_k=1000,    # Candidates after blocking
-    retrieval_top_k=50,     # Candidates after retrieval
-    final_top_k=5           # Final results
-)
+matcher = EntityMatcher(entities=entities)
+matcher.train(training_data)
+
+print(matcher.predict("Deutschland"))  # "DE"
 ```
 
-### Cross-Encoder Reranking (New!)
+## Feature Comparison
 
-Rerank top candidates for higher precision:
+| Matcher | Training | Speed | Best For |
+|---|---|---|---|---|
+| `EmbeddingMatcher` | No | Fast (~50 q/s) | Prototyping, simple matching |
+| `EntityMatcher` | Yes (3-5 examples/entity) | Medium (~30 q/s) | Production, complex variations |
+| `HybridMatcher` | No | Medium (3-stage) | Large datasets (>10k entities) |
 
-```python
-from semanticmatcher import EmbeddingMatcher, CrossEncoderReranker
-
-# Initial retrieval
-retriever = EmbeddingMatcher(entities)
-retriever.build_index()
-candidates = retriever.match(query, top_k=50)
-
-# Rerank with cross-encoder
-reranker = CrossEncoderReranker(model="bge-m3")
-final_results = reranker.rerank(query, candidates, top_k=5)
-```
-
-## Choose Your Path
-
-| Path | Best For | Start Here |
-|---|---|---|
-| `EmbeddingMatcher` (no training) | Fast prototypes, simple setup | [`docs/quickstart.md`](docs/quickstart.md) |
-| `EntityMatcher` (few-shot training) | Better accuracy with labeled examples | [`docs/quickstart.md`](docs/quickstart.md) |
-| `HybridMatcher` (three-stage pipeline) | Large datasets, maximum accuracy | [`examples/hybrid_matching_demo.py`](examples/hybrid_matching_demo.py) |
-| `CrossEncoderReranker` | Rerank candidates for precision | See Hybrid example above |
-| `experiments/` + `notebooks/` | Reproducing exploratory scripts and Jupyter work | [`docs/notebooks.md`](docs/notebooks.md) |
-| Advanced/raw examples (`examples/`) | Lower-level SetFit / sentence-transformers workflows | [`docs/examples.md`](docs/examples.md) |
-
-## Official vs Advanced Examples
-
-- Official beginner path: `semanticmatcher` package wrappers (`EmbeddingMatcher`, `EntityMatcher`)
-- Advanced/raw path: direct `setfit` / `sentence-transformers` usage in `examples/`, `experiments/`, and optional notebooks
+**Choosing a matcher**:
+- Need results immediately? → `EmbeddingMatcher`
+- Have labeled examples? → `EntityMatcher`
+- Very large dataset? → `HybridMatcher`
 
 ## Documentation
 
-- [Docs Index](docs/index.md)
-- [Quick Start Guide](docs/quickstart.md)
-- [Notebook & Experiment Index](docs/notebooks.md)
-- [Advanced Examples Guide](docs/examples.md)
-- [Country Classifier Scripts](docs/country-classifier-scripts.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Architecture](docs/architecture.md)
+- [Quick Start Guide](docs/quickstart.md) - Complete getting started guide
+- [Examples Catalog](docs/examples.md) - All examples with difficulty ratings
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and fixes
+- [Architecture](docs/architecture.md) - Module layout and design
+
+## Where To Start
+
+1. **New Users**: [Quick Start Guide](docs/quickstart.md)
+2. **Working Examples**: [examples/embedding_matcher_demo.py](examples/embedding_matcher_demo.py)
+3. **Advanced**: [docs/examples.md](docs/examples.md)
+
+## Project Layout
+
+```text
+semantic_matcher/              # Repository root
+├── src/semanticmatcher/       # Python package
+├── examples/                  # Runnable examples (wrapper API)
+├── experiments/               # Exploratory scripts
+├── tests/                     # Automated tests
+├── docs/                      # Documentation
+└── pyproject.toml             # Packaging config
+```
 
 ## Development
 
-- Package code: `src/semanticmatcher/`
-- Tests: `tests/`
-- Script experiments: `experiments/`
-- Jupyter notebooks: `notebooks/` (reserved for `.ipynb`)
-- CLI ingestion entrypoint: `semanticmatcher-ingest` -> `src/semanticmatcher/ingestion/cli.py`
-- Contributor guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
-
-Set up the dev environment (preferred):
-
 ```bash
+# Install dev dependencies
 uv sync --group dev
-```
 
-Run tests (environment permitting):
-
-```bash
+# Run tests
 uv run python -m pytest
 ```
 
-## First-Run Expectations
-
-- First run may download models from Hugging Face (network required).
-- CPU works for small examples; training can be much slower than GPU.
-- Some experiments/notebooks use extra libraries not required for core package usage.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contributor guidelines.

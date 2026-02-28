@@ -231,11 +231,11 @@ if __name__ == "__main__":
 
         stats = benchmark_latency(matcher, queries)
         print(f"\nLatency Benchmark for {model}:")
-        print(f"  Average: {stats['avg_time']*1000:.2f} ms/query")
-        print(f"  Min:     {stats['min_time']*1000:.2f} ms/query")
-        print(f"  Max:     {stats['max_time']*1000:.2f} ms/query")
-        print(f"  P95:     {stats['p95_time']*1000:.2f} ms/query")
-        print(f"  P99:     {stats['p99_time']*1000:.2f} ms/query")
+        print(f"  Average: {stats['avg_time'] * 1000:.2f} ms/query")
+        print(f"  Min:     {stats['min_time'] * 1000:.2f} ms/query")
+        print(f"  Max:     {stats['max_time'] * 1000:.2f} ms/query")
+        print(f"  P95:     {stats['p95_time'] * 1000:.2f} ms/query")
+        print(f"  P99:     {stats['p99_time'] * 1000:.2f} ms/query")
 
     else:
         print(f"Unknown command: {command}")
