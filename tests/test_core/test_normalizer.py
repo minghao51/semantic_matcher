@@ -12,9 +12,7 @@ class TestTextNormalizer:
 
     def test_normalizer_init_custom(self):
         normalizer = TextNormalizer(
-            lowercase=False,
-            remove_accents=True,
-            remove_punctuation=True
+            lowercase=False, remove_accents=True, remove_punctuation=True
         )
         assert normalizer.lowercase is False
         assert normalizer.remove_accents is True
@@ -38,9 +36,7 @@ class TestTextNormalizer:
 
     def test_normalizer_combined(self):
         normalizer = TextNormalizer(
-            lowercase=True,
-            remove_accents=True,
-            remove_punctuation=True
+            lowercase=True, remove_accents=True, remove_punctuation=True
         )
         assert normalizer.normalize("HELLO, World!") == "hello world"
 
@@ -63,8 +59,9 @@ class TestTextNormalizer:
 
     def test_normalize_entity_name_full(self):
         normalizer = TextNormalizer(
-            lowercase=True,
-            remove_accents=True,
-            remove_punctuation=True
+            lowercase=True, remove_accents=True, remove_punctuation=True
         )
-        assert normalizer.normalize_entity_name("United States (USA)") == "united states usa"
+        assert (
+            normalizer.normalize_entity_name("United States (USA)")
+            == "united states usa"
+        )

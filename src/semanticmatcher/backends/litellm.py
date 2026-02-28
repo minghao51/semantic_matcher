@@ -6,10 +6,12 @@ from .base import EmbeddingBackend, RerankerBackend
 
 try:
     from litellm import embedding, rerank
+
     LITELLM_AVAILABLE = True
 except ImportError:
     LITELLM_AVAILABLE = False
     embedding = rerank = None  # type: ignore[assignment]
+
 
 class LiteLLMEmbedding(EmbeddingBackend):
     def __init__(self, model: str, api_key: Optional[str] = None):
@@ -21,7 +23,8 @@ class LiteLLMEmbedding(EmbeddingBackend):
 
     def encode(self, texts):
         response = embedding(model=self.model, input=texts)
-        return [item['embedding'] for item in response['data']]
+        return [item["embedding"] for item in response["data"]]
+
 
 class LiteLLMReranker(RerankerBackend):
     def __init__(self, model: str, api_key: Optional[str] = None):
@@ -32,5 +35,7 @@ class LiteLLMReranker(RerankerBackend):
         self.model = model
 
     def score(self, query, docs):
-        response = rerank(model=self.model, query=query, documents=docs, return_documents=False)
-        return [pair['relevance_score'] for pair in response['results']]
+        response = rerank(
+            model=self.model, query=query, documents=docs, return_documents=False
+        )
+        return [pair["relevance_score"] for pair in response["results"]]

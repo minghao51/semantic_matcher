@@ -14,27 +14,69 @@ class OccupationsFetcher(BaseFetcher):
 
     FALLBACK_OCCUPATIONS = [
         {"O*NET-SOC Code": "11-0000", "Title": "Management Occupations"},
-        {"O*NET-SOC Code": "13-0000", "Title": "Business and Financial Operations Occupations"},
+        {
+            "O*NET-SOC Code": "13-0000",
+            "Title": "Business and Financial Operations Occupations",
+        },
         {"O*NET-SOC Code": "15-0000", "Title": "Computer and Mathematical Occupations"},
-        {"O*NET-SOC Code": "17-0000", "Title": "Architecture and Engineering Occupations"},
-        {"O*NET-SOC Code": "19-0000", "Title": "Life, Physical, and Social Science Occupations"},
-        {"O*NET-SOC Code": "21-0000", "Title": "Community and Social Service Occupations"},
+        {
+            "O*NET-SOC Code": "17-0000",
+            "Title": "Architecture and Engineering Occupations",
+        },
+        {
+            "O*NET-SOC Code": "19-0000",
+            "Title": "Life, Physical, and Social Science Occupations",
+        },
+        {
+            "O*NET-SOC Code": "21-0000",
+            "Title": "Community and Social Service Occupations",
+        },
         {"O*NET-SOC Code": "23-0000", "Title": "Legal Occupations"},
-        {"O*NET-SOC Code": "25-0000", "Title": "Educational Instruction and Library Occupations"},
-        {"O*NET-SOC Code": "27-0000", "Title": "Arts, Design, Entertainment, Sports, and Media Occupations"},
-        {"O*NET-SOC Code": "29-0000", "Title": "Healthcare Practitioners and Technical Occupations"},
+        {
+            "O*NET-SOC Code": "25-0000",
+            "Title": "Educational Instruction and Library Occupations",
+        },
+        {
+            "O*NET-SOC Code": "27-0000",
+            "Title": "Arts, Design, Entertainment, Sports, and Media Occupations",
+        },
+        {
+            "O*NET-SOC Code": "29-0000",
+            "Title": "Healthcare Practitioners and Technical Occupations",
+        },
         {"O*NET-SOC Code": "31-0000", "Title": "Healthcare Support Occupations"},
         {"O*NET-SOC Code": "33-0000", "Title": "Protective Service Occupations"},
-        {"O*NET-SOC Code": "35-0000", "Title": "Food Preparation and Serving Related Occupations"},
-        {"O*NET-SOC Code": "37-0000", "Title": "Building and Grounds Cleaning and Maintenance Occupations"},
+        {
+            "O*NET-SOC Code": "35-0000",
+            "Title": "Food Preparation and Serving Related Occupations",
+        },
+        {
+            "O*NET-SOC Code": "37-0000",
+            "Title": "Building and Grounds Cleaning and Maintenance Occupations",
+        },
         {"O*NET-SOC Code": "39-0000", "Title": "Personal Care and Service Occupations"},
         {"O*NET-SOC Code": "41-0000", "Title": "Sales and Related Occupations"},
-        {"O*NET-SOC Code": "43-0000", "Title": "Office and Administrative Support Occupations"},
-        {"O*NET-SOC Code": "45-0000", "Title": "Farming, Fishing, and Forestry Occupations"},
-        {"O*NET-SOC Code": "47-0000", "Title": "Construction and Extraction Occupations"},
-        {"O*NET-SOC Code": "49-0000", "Title": "Installation, Maintenance, and Repair Occupations"},
+        {
+            "O*NET-SOC Code": "43-0000",
+            "Title": "Office and Administrative Support Occupations",
+        },
+        {
+            "O*NET-SOC Code": "45-0000",
+            "Title": "Farming, Fishing, and Forestry Occupations",
+        },
+        {
+            "O*NET-SOC Code": "47-0000",
+            "Title": "Construction and Extraction Occupations",
+        },
+        {
+            "O*NET-SOC Code": "49-0000",
+            "Title": "Installation, Maintenance, and Repair Occupations",
+        },
         {"O*NET-SOC Code": "51-0000", "Title": "Production Occupations"},
-        {"O*NET-SOC Code": "53-0000", "Title": "Transportation and Material Moving Occupations"},
+        {
+            "O*NET-SOC Code": "53-0000",
+            "Title": "Transportation and Material Moving Occupations",
+        },
     ]
 
     def fetch(self) -> list[dict[str, Any]]:
@@ -54,7 +96,9 @@ class OccupationsFetcher(BaseFetcher):
                 print(f"O*NET fetch failed: {e}, using fallback data")
                 fallback_path = self.raw_dir / "occupation_data.txt"
                 with open(fallback_path, "w", encoding="utf-8") as f:
-                    writer = csv.DictWriter(f, fieldnames=["O*NET-SOC Code", "Title"], delimiter="\t")
+                    writer = csv.DictWriter(
+                        f, fieldnames=["O*NET-SOC Code", "Title"], delimiter="\t"
+                    )
                     writer.writeheader()
                     writer.writerows(self.FALLBACK_OCCUPATIONS)
                 return self.FALLBACK_OCCUPATIONS
@@ -97,13 +141,15 @@ class OccupationsFetcher(BaseFetcher):
                 if minor_group != major_group:
                     aliases.append(minor_group)
 
-            entities.append({
-                "id": code,
-                "name": title,
-                "aliases": "|".join(aliases) if aliases else "",
-                "type": "occupation",
-                "system": "O*NET-SOC"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": title,
+                    "aliases": "|".join(aliases) if aliases else "",
+                    "type": "occupation",
+                    "system": "O*NET-SOC",
+                }
+            )
 
         return entities
 

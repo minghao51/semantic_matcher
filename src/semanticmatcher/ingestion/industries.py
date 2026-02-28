@@ -35,7 +35,7 @@ class IndustriesFetcher(BaseFetcher):
         {"Code": "62", "Title": "Health Care and Social Assistance"},
         {"Code": "71", "Title": "Arts, Entertainment, and Recreation"},
         {"Code": "72", "Title": "Accommodation and Food Services"},
-        {"Code": "81", "Title": "Other Services (except Public Administration)"}
+        {"Code": "81", "Title": "Other Services (except Public Administration)"},
     ]
 
     def fetch(self) -> list[dict[str, Any]]:
@@ -85,13 +85,15 @@ class IndustriesFetcher(BaseFetcher):
                 if subsector != sector:
                     aliases.append(subsector)
 
-            entities.append({
-                "id": code,
-                "name": title,
-                "aliases": "|".join(aliases) if aliases else "",
-                "type": "industry",
-                "system": "NAICS"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": title,
+                    "aliases": "|".join(aliases) if aliases else "",
+                    "type": "industry",
+                    "system": "NAICS",
+                }
+            )
 
         return entities
 
@@ -104,31 +106,58 @@ class SICFetcher(BaseFetcher):
     FALLBACK_SIC = [
         {"SIC Code": "01", "SIC Industry Title": "Agricultural Production - Crops"},
         {"SIC Code": "10", "SIC Industry Title": "Metal Mining"},
-        {"SIC Code": "15", "SIC Industry Title": "Building Construction - General Contractors"},
-        {"SIC Code": "17", "SIC Industry Title": "Construction - Special Trade Contractors"},
+        {
+            "SIC Code": "15",
+            "SIC Industry Title": "Building Construction - General Contractors",
+        },
+        {
+            "SIC Code": "17",
+            "SIC Industry Title": "Construction - Special Trade Contractors",
+        },
         {"SIC Code": "20", "SIC Industry Title": "Food and Kindred Products"},
         {"SIC Code": "25", "SIC Industry Title": "Furniture and Fixtures"},
-        {"SIC Code": "27", "SIC Industry Title": "Printing, Publishing and Allied Industries"},
+        {
+            "SIC Code": "27",
+            "SIC Industry Title": "Printing, Publishing and Allied Industries",
+        },
         {"SIC Code": "28", "SIC Industry Title": "Chemicals and Allied Products"},
-        {"SIC Code": "30", "SIC Industry Title": "Rubber and Miscellaneous Plastics Products"},
+        {
+            "SIC Code": "30",
+            "SIC Industry Title": "Rubber and Miscellaneous Plastics Products",
+        },
         {"SIC Code": "33", "SIC Industry Title": "Primary Metal Industries"},
         {"SIC Code": "35", "SIC Industry Title": "Industrial and Commercial Machinery"},
-        {"SIC Code": "36", "SIC Industry Title": "Electronic and Other Electrical Equipment"},
+        {
+            "SIC Code": "36",
+            "SIC Industry Title": "Electronic and Other Electrical Equipment",
+        },
         {"SIC Code": "37", "SIC Industry Title": "Transportation Equipment"},
         {"SIC Code": "38", "SIC Industry Title": "Instruments and Related Products"},
         {"SIC Code": "40", "SIC Industry Title": "Railroad Transportation"},
         {"SIC Code": "42", "SIC Industry Title": "Trucking and Warehousing"},
         {"SIC Code": "45", "SIC Industry Title": "Transportation by Air"},
         {"SIC Code": "48", "SIC Industry Title": "Communications"},
-        {"SIC Code": "49", "SIC Industry Title": "Electric, Gas, and Sanitary Services"},
+        {
+            "SIC Code": "49",
+            "SIC Industry Title": "Electric, Gas, and Sanitary Services",
+        },
         {"SIC Code": "50", "SIC Industry Title": "Wholesale Trade - Durable Goods"},
         {"SIC Code": "51", "SIC Industry Title": "Wholesale Trade - Non-Durable Goods"},
-        {"SIC Code": "52", "SIC Industry Title": "Building Materials and Garden Supplies"},
+        {
+            "SIC Code": "52",
+            "SIC Industry Title": "Building Materials and Garden Supplies",
+        },
         {"SIC Code": "53", "SIC Industry Title": "General Merchandise Stores"},
         {"SIC Code": "54", "SIC Industry Title": "Food Stores"},
-        {"SIC Code": "55", "SIC Industry Title": "Automotive Dealers and Gasoline Stations"},
+        {
+            "SIC Code": "55",
+            "SIC Industry Title": "Automotive Dealers and Gasoline Stations",
+        },
         {"SIC Code": "56", "SIC Industry Title": "Apparel and Accessory Stores"},
-        {"SIC Code": "57", "SIC Industry Title": "Furniture and Home Furnishings Stores"},
+        {
+            "SIC Code": "57",
+            "SIC Industry Title": "Furniture and Home Furnishings Stores",
+        },
         {"SIC Code": "58", "SIC Industry Title": "Eating and Drinking Places"},
         {"SIC Code": "60", "SIC Industry Title": "Depository Institutions"},
         {"SIC Code": "61", "SIC Industry Title": "Non-Depository Credit Institutions"},
@@ -161,7 +190,9 @@ class SICFetcher(BaseFetcher):
             except Exception as e:
                 print(f"BLS fetch failed: {e}, using fallback data")
                 with open(output_path, "w", encoding="utf-8") as f:
-                    writer = csv.DictWriter(f, fieldnames=["SIC Code", "SIC Industry Title"])
+                    writer = csv.DictWriter(
+                        f, fieldnames=["SIC Code", "SIC Industry Title"]
+                    )
                     writer.writeheader()
                     writer.writerows(self.FALLBACK_SIC)
 
@@ -188,13 +219,15 @@ class SICFetcher(BaseFetcher):
             if len(code) >= 2:
                 aliases.append(code[:2])
 
-            entities.append({
-                "id": code,
-                "name": title,
-                "aliases": "|".join(aliases) if aliases else "",
-                "type": "industry",
-                "system": "SIC"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": title,
+                    "aliases": "|".join(aliases) if aliases else "",
+                    "type": "industry",
+                    "system": "SIC",
+                }
+            )
 
         return entities
 

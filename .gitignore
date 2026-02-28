@@ -30,6 +30,12 @@ venv/
 # OS/editor noise
 .DS_Store
 
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
 # ML / training artifacts
 checkpoints/
 **/checkpoints/
@@ -42,3 +48,7 @@ checkpoints/
 # Local runtime outputs
 tmp/
 logs/
+
+# Local config (user-specific)
+config.yaml
+.python-version

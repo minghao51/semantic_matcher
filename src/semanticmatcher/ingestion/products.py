@@ -62,8 +62,10 @@ class UNSPSCFetcher(BaseFetcher):
         """Download UNSPSC codes from UNdata."""
         output_path = self.raw_dir / "unspsc.json"
 
-        common_url = "https://raw.githubusercontent.com/papermax/UNSPSC/master/UNSPSC_en.json"
-        
+        common_url = (
+            "https://raw.githubusercontent.com/papermax/UNSPSC/master/UNSPSC_en.json"
+        )
+
         if not output_path.exists():
             try:
                 response = requests.get(common_url, timeout=30)
@@ -107,13 +109,15 @@ class UNSPSCFetcher(BaseFetcher):
                 if class_code != family:
                     aliases.append(class_code)
 
-            entities.append({
-                "id": code,
-                "name": title,
-                "aliases": "|".join(aliases) if aliases else "",
-                "type": "product",
-                "system": "UNSPSC"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": title,
+                    "aliases": "|".join(aliases) if aliases else "",
+                    "type": "product",
+                    "system": "UNSPSC",
+                }
+            )
 
         return entities
 
@@ -128,7 +132,10 @@ class MCCFetcher(BaseFetcher):
     FALLBACK_MCC = [
         {"mcc": "0742", "description": "Veterinary Services"},
         {"mcc": "0780", "description": "Landscaping and Horticultural Services"},
-        {"mcc": "1520", "description": "General Contractors - Residential and Commercial"},
+        {
+            "mcc": "1520",
+            "description": "General Contractors - Residential and Commercial",
+        },
         {"mcc": "1731", "description": "Electrical Contractors"},
         {"mcc": "1750", "description": "Carpentry Contractors"},
         {"mcc": "1761", "description": "Roofing and Siding Contractors"},
@@ -251,7 +258,10 @@ class MCCFetcher(BaseFetcher):
         {"mcc": "5962", "description": "Direct Marketing - Travel"},
         {"mcc": "5963", "description": "Direct Marketing - Other"},
         {"mcc": "5964", "description": "Direct Marketing - Catalog Merchant"},
-        {"mcc": "5965", "description": "Direct Marketing - Catalog and Direct Response"},
+        {
+            "mcc": "5965",
+            "description": "Direct Marketing - Catalog and Direct Response",
+        },
         {"mcc": "5966", "description": "Direct Marketing - Outbound Telemarketing"},
         {"mcc": "5967", "description": "Direct Marketing - Inbound Telemarketing"},
         {"mcc": "5969", "description": "Direct Marketing - Other Direct Marketing"},
@@ -305,10 +315,10 @@ class MCCFetcher(BaseFetcher):
         for row in raw_data:
             code = row.get("mcc", "").strip() or row.get("MCC", "").strip()
             description = (
-                row.get("description", "").strip() or 
-                row.get("Description", "").strip() or
-                row.get("edited_description", "").strip() or
-                row.get("combined_description", "").strip()
+                row.get("description", "").strip()
+                or row.get("Description", "").strip()
+                or row.get("edited_description", "").strip()
+                or row.get("combined_description", "").strip()
             )
 
             if not code or not description:
@@ -318,13 +328,15 @@ class MCCFetcher(BaseFetcher):
             if len(code) >= 2:
                 aliases.append(code[:2])
 
-            entities.append({
-                "id": code,
-                "name": description,
-                "aliases": "|".join(aliases),
-                "type": "product",
-                "system": "MCC"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": description,
+                    "aliases": "|".join(aliases),
+                    "type": "product",
+                    "system": "MCC",
+                }
+            )
 
         return entities
 

@@ -1,6 +1,12 @@
 from typing import List, Dict, Any
 
-__all__ = ["validate_entity", "validate_entities", "validate_threshold", "validate_model_name"]
+__all__ = [
+    "validate_entity",
+    "validate_entities",
+    "validate_threshold",
+    "validate_model_name",
+]
+
 
 def validate_entity(entity: Dict[str, Any]) -> bool:
     """Validate a single entity dictionary."""
@@ -15,14 +21,14 @@ def validate_entities(entities: List[Dict[str, Any]]) -> bool:
     """Validate a list of entities."""
     if not entities:
         raise ValueError("entities list cannot be empty")
-    
+
     for entity in entities:
         validate_entity(entity)
-    
+
     ids = [e["id"] for e in entities]
     if len(ids) != len(set(ids)):
         raise ValueError("Entity IDs must be unique")
-    
+
     return True
 
 

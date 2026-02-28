@@ -77,7 +77,9 @@ class CrossEncoderReranker:
         if not candidates:
             return []
 
-        return self.backend.rerank(query, candidates, top_k=top_k, text_field=text_field)
+        return self.backend.rerank(
+            query, candidates, top_k=top_k, text_field=text_field
+        )
 
     def rerank_batch(
         self,

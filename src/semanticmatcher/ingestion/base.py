@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 import csv
 
-
 PathLike = Union[str, Path]
 
 
@@ -64,6 +63,8 @@ def resolve_output_dirs(
     """Resolve per-dataset output directories without relying on repo layout."""
     raw_base = Path(raw_dir) if raw_dir is not None else Path.cwd() / "data" / "raw"
     processed_base = (
-        Path(processed_dir) if processed_dir is not None else Path.cwd() / "data" / "processed"
+        Path(processed_dir)
+        if processed_dir is not None
+        else Path.cwd() / "data" / "processed"
     )
     return raw_base / dataset, processed_base / dataset

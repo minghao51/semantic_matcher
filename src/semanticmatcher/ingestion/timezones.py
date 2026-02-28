@@ -31,11 +31,13 @@ class TimezonesFetcher(BaseFetcher):
                     continue
                 parts = line.split("\t")
                 if len(parts) >= 3:
-                    data.append({
-                        "country": parts[0],
-                        "coordinates": parts[1],
-                        "timezone": parts[2]
-                    })
+                    data.append(
+                        {
+                            "country": parts[0],
+                            "coordinates": parts[1],
+                            "timezone": parts[2],
+                        }
+                    )
 
         return data
 
@@ -57,13 +59,15 @@ class TimezonesFetcher(BaseFetcher):
                 aliases.append(region)
                 aliases.append(region.replace("_", " "))
 
-            entities.append({
-                "id": tz,
-                "name": name.replace("_", " "),
-                "aliases": "|".join(aliases),
-                "type": "timezone",
-                "country_code": item.get("country", "")
-            })
+            entities.append(
+                {
+                    "id": tz,
+                    "name": name.replace("_", " "),
+                    "aliases": "|".join(aliases),
+                    "type": "timezone",
+                    "country_code": item.get("country", ""),
+                }
+            )
 
         return entities
 
@@ -107,12 +111,14 @@ class WorldTimeAPIFetcher(BaseFetcher):
             if len(parts) > 1:
                 aliases.append(parts[0])
 
-            entities.append({
-                "id": tz,
-                "name": name.replace("_", " "),
-                "aliases": "|".join(aliases),
-                "type": "timezone"
-            })
+            entities.append(
+                {
+                    "id": tz,
+                    "name": name.replace("_", " "),
+                    "aliases": "|".join(aliases),
+                    "type": "timezone",
+                }
+            )
 
         return entities
 

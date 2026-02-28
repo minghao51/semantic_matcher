@@ -33,7 +33,7 @@ class TestEntityMatcher:
     def test_entity_matcher_with_model(self, sample_entities):
         matcher = EntityMatcher(
             entities=sample_entities,
-            model_name="sentence-transformers/paraphrase-mpnet-base-v2"
+            model_name="sentence-transformers/paraphrase-mpnet-base-v2",
         )
         assert matcher.model_name == "sentence-transformers/paraphrase-mpnet-base-v2"
 
@@ -67,7 +67,9 @@ class TestEntityMatcher:
         results = matcher.predict(["Deutchland", "America", "France"])
         assert results == ["DE", "US", "FR"]
 
-    def test_entity_matcher_predict_below_threshold(self, sample_entities, training_data):
+    def test_entity_matcher_predict_below_threshold(
+        self, sample_entities, training_data
+    ):
         matcher = EntityMatcher(entities=sample_entities, threshold=0.99)
         matcher.train(training_data, num_epochs=1)
         result = matcher.predict("UnknownCountry123")
@@ -94,10 +96,7 @@ class TestEmbeddingMatcher:
         assert matcher.model_name == "sentence-transformers/paraphrase-mpnet-base-v2"
 
     def test_embedding_matcher_custom_model(self, sample_entities):
-        matcher = EmbeddingMatcher(
-            entities=sample_entities,
-            model_name="BAAI/bge-m3"
-        )
+        matcher = EmbeddingMatcher(entities=sample_entities, model_name="BAAI/bge-m3")
         assert matcher.model_name == "BAAI/bge-m3"
 
     def test_embedding_matcher_build_index(self, sample_entities):
@@ -134,7 +133,9 @@ class TestEmbeddingMatcher:
         result = matcher.match("Deutchland")
         assert result["id"] == "DE"
 
-    def test_embedding_matcher_top_k_deduplicates_alias_hits(self, sample_entities, monkeypatch):
+    def test_embedding_matcher_top_k_deduplicates_alias_hits(
+        self, sample_entities, monkeypatch
+    ):
         vectors = {
             "Germany": [1.0, 0.0],
             "Deutschland": [1.0, 0.0],
@@ -159,15 +160,21 @@ class TestEmbeddingMatcher:
                 encoded = [vectors.get(text, [1.0, 0.0]) for text in texts]
                 return np.array(encoded, dtype=float)
 
-        monkeypatch.setattr("semanticmatcher.core.matcher.SentenceTransformer", FakeModel)
+        monkeypatch.setattr(
+            "semanticmatcher.core.matcher.SentenceTransformer", FakeModel
+        )
 
-        matcher = EmbeddingMatcher(entities=sample_entities, normalize=False, threshold=0.0)
+        matcher = EmbeddingMatcher(
+            entities=sample_entities, normalize=False, threshold=0.0
+        )
         matcher.build_index()
         results = matcher.match("Germany", top_k=2)
 
         assert [r["id"] for r in results] == ["DE", "US"]
 
-    def test_embedding_matcher_empty_candidates_returns_empty(self, sample_entities, monkeypatch):
+    def test_embedding_matcher_empty_candidates_returns_empty(
+        self, sample_entities, monkeypatch
+    ):
         class FakeModel:
             def __init__(self, *_args, **_kwargs):
                 pass
@@ -180,9 +187,13 @@ class TestEmbeddingMatcher:
                     texts = [texts]
                 return np.ones((len(texts), 2), dtype=float)
 
-        monkeypatch.setattr("semanticmatcher.core.matcher.SentenceTransformer", FakeModel)
+        monkeypatch.setattr(
+            "semanticmatcher.core.matcher.SentenceTransformer", FakeModel
+        )
 
-        matcher = EmbeddingMatcher(entities=sample_entities, normalize=False, threshold=0.0)
+        matcher = EmbeddingMatcher(
+            entities=sample_entities, normalize=False, threshold=0.0
+        )
         matcher.build_index()
 
         assert matcher.match("Germany", candidates=[]) is None

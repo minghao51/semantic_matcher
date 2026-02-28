@@ -14,10 +14,7 @@ class BlockingStrategy(ABC):
 
     @abstractmethod
     def block(
-        self,
-        query: str,
-        entities: List[Dict[str, Any]],
-        top_k: int
+        self, query: str, entities: List[Dict[str, Any]], top_k: int
     ) -> List[Dict[str, Any]]:
         """
         Return top_k candidate entities for the query.
@@ -41,10 +38,7 @@ class NoOpBlocking(BlockingStrategy):
     """
 
     def block(
-        self,
-        query: str,
-        entities: List[Dict[str, Any]],
-        top_k: int
+        self, query: str, entities: List[Dict[str, Any]], top_k: int
     ) -> List[Dict[str, Any]]:
         """Return all entities or top_k if smaller."""
         if len(entities) <= top_k:
@@ -80,26 +74,22 @@ class BM25Blocking(BlockingStrategy):
 
         # Compute hash for efficient comparison
         entity_tuples = sorted(
-            (e['id'], e.get('text', e.get('name', ''))) for e in entities
+            (e["id"], e.get("text", e.get("name", ""))) for e in entities
         )
         self._entity_hash = hash(tuple(entity_tuples))
 
         tokenized_corpus = [
-            self._tokenize(e.get('text', e.get('name', '')))
-            for e in entities
+            self._tokenize(e.get("text", e.get("name", ""))) for e in entities
         ]
         self.bm25 = BM25Okapi(tokenized_corpus, k1=self.k1, b=self.b)
 
     def block(
-        self,
-        query: str,
-        entities: List[Dict[str, Any]],
-        top_k: int
+        self, query: str, entities: List[Dict[str, Any]], top_k: int
     ) -> List[Dict[str, Any]]:
         """Return top_k candidates using BM25 scores."""
         # Compute hash for current entities
         entity_tuples = sorted(
-            (e['id'], e.get('text', e.get('name', ''))) for e in entities
+            (e["id"], e.get("text", e.get("name", ""))) for e in entities
         )
         current_hash = hash(tuple(entity_tuples))
 
@@ -143,24 +133,21 @@ class TFIDFBlocking(BlockingStrategy):
 
         # Compute hash for efficient comparison
         entity_tuples = sorted(
-            (e['id'], e.get('text', e.get('name', ''))) for e in entities
+            (e["id"], e.get("text", e.get("name", ""))) for e in entities
         )
         self._entity_hash = hash(tuple(entity_tuples))
 
-        texts = [e.get('text', e.get('name', '')) for e in entities]
+        texts = [e.get("text", e.get("name", "")) for e in entities]
         self.vectorizer = TfidfVectorizer()
         self.matrix = self.vectorizer.fit_transform(texts)
 
     def block(
-        self,
-        query: str,
-        entities: List[Dict[str, Any]],
-        top_k: int
+        self, query: str, entities: List[Dict[str, Any]], top_k: int
     ) -> List[Dict[str, Any]]:
         """Return top_k candidates using TF-IDF scores."""
         # Compute hash for current entities
         entity_tuples = sorted(
-            (e['id'], e.get('text', e.get('name', ''))) for e in entities
+            (e["id"], e.get("text", e.get("name", ""))) for e in entities
         )
         current_hash = hash(tuple(entity_tuples))
 
@@ -196,25 +183,23 @@ class FuzzyBlocking(BlockingStrategy):
         self.score_cutoff = score_cutoff
 
     def block(
-        self,
-        query: str,
-        entities: List[Dict[str, Any]],
-        top_k: int
+        self, query: str, entities: List[Dict[str, Any]], top_k: int
     ) -> List[Dict[str, Any]]:
         """Return top_k candidates using fuzzy matching."""
-        texts = [e.get('text', e.get('name', '')) for e in entities]
+        texts = [e.get("text", e.get("name", "")) for e in entities]
 
         # Extract top matches with indices
         # process.extract returns list of (match, score, index) tuples
         results = process.extract(
-            query,
-            texts,
-            scorer=fuzz.token_sort_ratio,
-            limit=top_k
+            query, texts, scorer=fuzz.token_sort_ratio, limit=top_k
         )
 
         # Filter by score cutoff, preserving indices
-        filtered = [(text, score, idx) for text, score, idx in results if score >= self.score_cutoff]
+        filtered = [
+            (text, score, idx)
+            for text, score, idx in results
+            if score >= self.score_cutoff
+        ]
 
         # Return matching entities using correct indices
         return [entities[idx] for _, _, idx in filtered]

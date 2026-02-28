@@ -4,16 +4,22 @@ import time
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-__all__ = ["compute_embeddings", "cosine_sim", "batch_encode", "ModelCache", "get_default_cache"]
+__all__ = [
+    "compute_embeddings",
+    "cosine_sim",
+    "batch_encode",
+    "ModelCache",
+    "get_default_cache",
+]
 
 
 class ModelCache:
     """
     Configurable cache for SentenceTransformer models.
-    
+
     Thread-safe LRU cache with memory-based eviction and optional TTL.
     """
-    
+
     def __init__(
         self,
         max_memory_gb: float = 4.0,
@@ -21,7 +27,7 @@ class ModelCache:
     ):
         """
         Initialize the model cache.
-        
+
         Args:
             max_memory_gb: Maximum memory to use for cached models (in GB).
             ttl_seconds: Optional time-to-live for cache entries in seconds.
@@ -33,21 +39,21 @@ class ModelCache:
         self._lock = threading.RLock()
         self._hits = 0
         self._misses = 0
-    
+
     def get_or_load(self, model_name: str, factory: Callable[[], Any]) -> Any:
         """
         Get a model from cache or load it using the factory function.
-        
+
         Args:
             model_name: Unique identifier for the model
             factory: Callable that returns the model instance
-            
+
         Returns:
             The cached or newly created model
         """
         with self._lock:
             current_time = time.time()
-            
+
             # Check if model is in cache and not expired
             if model_name in self._cache:
                 if self._ttl_seconds is not None:
@@ -64,18 +70,18 @@ class ModelCache:
                     self._hits += 1
                     self._access_times[model_name] = current_time
                     return self._cache[model_name]
-            
+
             self._misses += 1
-            
+
             # Load the model
             model = factory()
-            
+
             # Add to cache
             self._cache[model_name] = model
             self._access_times[model_name] = current_time
-            
+
             return model
-    
+
     def clear(self) -> None:
         """Clear all cached models."""
         with self._lock:
@@ -83,11 +89,11 @@ class ModelCache:
             self._access_times.clear()
             self._hits = 0
             self._misses = 0
-    
+
     def stats(self) -> Dict[str, Any]:
         """
         Get cache statistics.
-        
+
         Returns:
             Dictionary with hits, misses, size, hit_rate
         """
@@ -117,8 +123,7 @@ def get_default_cache() -> ModelCache:
 
 
 def compute_embeddings(
-    texts: List[str],
-    model_name: str = "sentence-transformers/paraphrase-mpnet-base-v2"
+    texts: List[str], model_name: str = "sentence-transformers/paraphrase-mpnet-base-v2"
 ) -> np.ndarray:
     """Compute embeddings for a list of texts."""
     model = SentenceTransformer(model_name)
@@ -140,10 +145,10 @@ def cosine_sim(a: np.ndarray, b: np.ndarray) -> float:
 def batch_encode(
     texts: List[str],
     model_name: str = "sentence-transformers/paraphrase-mpnet-base-v2",
-    batch_size: int = 32
+    batch_size: int = 32,
 ) -> Iterator[np.ndarray]:
     """Encode texts in batches."""
     model = SentenceTransformer(model_name)
     for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
+        batch = texts[i : i + batch_size]
         yield model.encode(batch)

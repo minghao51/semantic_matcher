@@ -24,8 +24,7 @@ class TestSetFitClassifier:
 
     def test_classifier_init_with_model(self, labels):
         clf = SetFitClassifier(
-            labels=labels,
-            model_name="sentence-transformers/paraphrase-mpnet-base-v2"
+            labels=labels, model_name="sentence-transformers/paraphrase-mpnet-base-v2"
         )
         assert clf.model_name == "sentence-transformers/paraphrase-mpnet-base-v2"
 
@@ -35,11 +34,7 @@ class TestSetFitClassifier:
         assert clf.batch_size == 16
 
     def test_classifier_custom_params(self, labels):
-        clf = SetFitClassifier(
-            labels=labels,
-            num_epochs=2,
-            batch_size=8
-        )
+        clf = SetFitClassifier(labels=labels, num_epochs=2, batch_size=8)
         assert clf.num_epochs == 2
         assert clf.batch_size == 8
 
@@ -83,7 +78,7 @@ class TestSetFitClassifier:
         clf.train(training_data, num_epochs=1)
         model_path = tmp_path / "model"
         clf.save(str(model_path))
-        
+
         loaded_clf = SetFitClassifier.load(str(model_path))
         assert loaded_clf.is_trained
         result = loaded_clf.predict("Deutschland")

@@ -14,4 +14,6 @@ def test_backend_exports_use_canonical_module():
 
 def test_misspelled_backend_module_is_removed():
     with pytest.raises(ModuleNotFoundError):
-        __import__("semanticmatcher.backends.sentencetranformer", fromlist=["HFEmbedding"])
+        __import__(
+            "semanticmatcher.backends.sentencetranformer", fromlist=["HFEmbedding"]
+        )
