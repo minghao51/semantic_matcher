@@ -65,7 +65,7 @@ def main(argv=None):
         for name, func in INGESTORS.items():
             if name == "all":
                 continue
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"Ingesting {name}...")
             print("=" * 50)
             try:
