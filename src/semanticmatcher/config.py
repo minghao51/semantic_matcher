@@ -4,7 +4,6 @@ from typing import Any, Dict, Mapping, Optional, Union
 
 import yaml
 
-
 PathLike = Union[str, Path]
 
 
@@ -103,7 +102,9 @@ class Config:
         try:
             from importlib import resources
 
-            return resources.files("semanticmatcher").joinpath("data/default_config.json")
+            return resources.files("semanticmatcher").joinpath(
+                "data/default_config.json"
+            )
         except (ImportError, FileNotFoundError, ModuleNotFoundError, TypeError):
             return None
 

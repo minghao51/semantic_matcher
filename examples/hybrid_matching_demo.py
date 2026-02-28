@@ -98,7 +98,9 @@ def main():
             if entity:
                 print(f"  {i}. {entity['name']}")
                 print(f"     Bi-Encoder Score: {result.get('score', 'N/A'):.3f}")
-                print(f"     Cross-Encoder Score: {result.get('cross_encoder_score', 'N/A'):.3f}")
+                print(
+                    f"     Cross-Encoder Score: {result.get('cross_encoder_score', 'N/A'):.3f}"
+                )
         print()
 
     # Demonstrate stage-by-stage

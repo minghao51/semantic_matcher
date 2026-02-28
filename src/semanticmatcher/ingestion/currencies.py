@@ -54,12 +54,14 @@ class CurrenciesFetcher(BaseFetcher):
             if numeric:
                 aliases.append(numeric)
 
-            entities.append({
-                "id": code,
-                "name": name,
-                "aliases": "|".join(aliases),
-                "type": "currency"
-            })
+            entities.append(
+                {
+                    "id": code,
+                    "name": name,
+                    "aliases": "|".join(aliases),
+                    "type": "currency",
+                }
+            )
 
         return entities
 

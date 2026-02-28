@@ -29,10 +29,7 @@ class RerankerBackend(ABC):
         Default implementation using score(). Subclasses can override for optimization.
         """
         # Extract texts from candidates
-        texts = [
-            cand.get(text_field, cand.get("name", ""))
-            for cand in candidates
-        ]
+        texts = [cand.get(text_field, cand.get("name", "")) for cand in candidates]
 
         # Score all pairs
         scores = self.score(query, texts)
@@ -45,10 +42,8 @@ class RerankerBackend(ABC):
             scored.append(item)
 
         # Return top_k
-        reranked = sorted(
-            scored,
-            key=lambda x: x["cross_encoder_score"],
-            reverse=True
-        )[:top_k]
+        reranked = sorted(scored, key=lambda x: x["cross_encoder_score"], reverse=True)[
+            :top_k
+        ]
 
         return reranked

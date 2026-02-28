@@ -56,12 +56,14 @@ def compare_models(
         total_time = avg_time
         qps = len(queries) / avg_time if avg_time > 0 else 0
 
-        results.append({
-            "model": model,
-            "avg_time": avg_time,
-            "total_time": total_time,
-            "queries_per_second": qps,
-        })
+        results.append(
+            {
+                "model": model,
+                "avg_time": avg_time,
+                "total_time": total_time,
+                "queries_per_second": qps,
+            }
+        )
 
     return pd.DataFrame(results)
 
@@ -166,9 +168,11 @@ def print_benchmark_report(results: pd.DataFrame):
     print("=" * 80)
 
     # Find winner (highest queries per second)
-    winner_idx = results['queries_per_second'].idxmax()
-    print(f"\nWinner: {results.loc[winner_idx, 'model']} "
-          f"({results.loc[winner_idx, 'queries_per_second']:.2f} qps)")
+    winner_idx = results["queries_per_second"].idxmax()
+    print(
+        f"\nWinner: {results.loc[winner_idx, 'model']} "
+        f"({results.loc[winner_idx, 'queries_per_second']:.2f} qps)"
+    )
 
 
 if __name__ == "__main__":
@@ -179,7 +183,9 @@ if __name__ == "__main__":
         print("Usage: python -m semanticmatcher.utils.benchmarks <command>")
         print("Commands:")
         print("  compare <num_entities> <num_queries>  - Compare model performance")
-        print("  latency <model> <num_queries>         - Benchmark single model latency")
+        print(
+            "  latency <model> <num_queries>         - Benchmark single model latency"
+        )
         sys.exit(1)
 
     command = sys.argv[1]
@@ -190,7 +196,11 @@ if __name__ == "__main__":
 
         # Generate sample data
         entities = [
-            {"id": f"entity_{i}", "name": f"Entity {i}", "text": f"Description for entity {i}"}
+            {
+                "id": f"entity_{i}",
+                "name": f"Entity {i}",
+                "text": f"Description for entity {i}",
+            }
             for i in range(num_entities)
         ]
         queries = [f"Entity {i}" for i in range(min(num_queries, num_entities))]
@@ -205,12 +215,18 @@ if __name__ == "__main__":
         num_queries = int(sys.argv[3]) if len(sys.argv) > 3 else 100
 
         entities = [
-            {"id": f"entity_{i}", "name": f"Entity {i}", "text": f"Description for entity {i}"}
+            {
+                "id": f"entity_{i}",
+                "name": f"Entity {i}",
+                "text": f"Description for entity {i}",
+            }
             for i in range(1000)
         ]
         queries = [f"Entity {i % 100}" for i in range(num_queries)]
 
-        matcher = EmbeddingMatcher(entities, model_name=MODEL_REGISTRY.get(model, model))
+        matcher = EmbeddingMatcher(
+            entities, model_name=MODEL_REGISTRY.get(model, model)
+        )
         matcher.build_index()
 
         stats = benchmark_latency(matcher, queries)

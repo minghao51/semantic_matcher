@@ -4,6 +4,7 @@ from datasets import Dataset
 
 try:
     from setfit import SetFitModel, Trainer, TrainingArguments
+
     SETFIT_AVAILABLE = True
 except ImportError:
     SETFIT_AVAILABLE = False
@@ -38,10 +39,7 @@ class SetFitClassifier:
         epochs = num_epochs or self.num_epochs
         batch = batch_size or self.batch_size
 
-        self.model = SetFitModel.from_pretrained(
-            self.model_name,
-            labels=self.labels
-        )
+        self.model = SetFitModel.from_pretrained(self.model_name, labels=self.labels)
 
         dataset = Dataset.from_list(training_data)
 

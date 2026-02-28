@@ -56,9 +56,9 @@ class STReranker(RerankerBackend):
         )
 
         # Convert to list of floats
-        if hasattr(scores, 'cpu'):
+        if hasattr(scores, "cpu"):
             scores = scores.cpu().tolist()
-        elif hasattr(scores, 'tolist'):
+        elif hasattr(scores, "tolist"):
             scores = scores.tolist()
         elif not isinstance(scores, list):
             scores = list(scores)

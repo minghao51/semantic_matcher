@@ -93,9 +93,7 @@ class HybridMatcher:
         """
         # Stage 1: Blocking - Fast lexical filtering
         candidates = self.blocker.block(
-            query,
-            self.retriever.entities,
-            top_k=blocking_top_k
+            query, self.retriever.entities, top_k=blocking_top_k
         )
 
         # Early exit if no candidates from blocking
@@ -151,12 +149,7 @@ class HybridMatcher:
         """
         if n_jobs == 1 or len(queries) == 0:
             return [
-                self.match(
-                    q,
-                    blocking_top_k,
-                    retrieval_top_k,
-                    final_top_k
-                )
+                self.match(q, blocking_top_k, retrieval_top_k, final_top_k)
                 for q in queries
             ]
 
@@ -174,11 +167,7 @@ class HybridMatcher:
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             futures = [
                 executor.submit(
-                    self.match,
-                    q,
-                    blocking_top_k,
-                    retrieval_top_k,
-                    final_top_k
+                    self.match, q, blocking_top_k, retrieval_top_k, final_top_k
                 )
                 for q in queries
             ]

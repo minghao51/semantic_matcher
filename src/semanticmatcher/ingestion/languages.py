@@ -59,12 +59,14 @@ class LanguagesFetcher(BaseFetcher):
             if french and french.lower() != english.lower():
                 aliases.append(french)
 
-            entities.append({
-                "id": lang_id,
-                "name": english,
-                "aliases": "|".join(aliases) if aliases else "",
-                "type": "language"
-            })
+            entities.append(
+                {
+                    "id": lang_id,
+                    "name": english,
+                    "aliases": "|".join(aliases) if aliases else "",
+                    "type": "language",
+                }
+            )
 
         return entities
 

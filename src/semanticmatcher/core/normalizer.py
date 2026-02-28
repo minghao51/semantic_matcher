@@ -23,10 +23,7 @@ class TextNormalizer:
         text = unicodedata.normalize("NFKD", text)
 
         if self.remove_accents:
-            text = "".join(
-                c for c in text
-                if not unicodedata.combining(c)
-            )
+            text = "".join(c for c in text if not unicodedata.combining(c))
 
         if self.lowercase:
             text = text.lower()

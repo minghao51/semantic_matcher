@@ -13,7 +13,6 @@ from semanticmatcher.ingestion import (
     run_universities,
 )
 
-
 INGESTORS = {
     "languages": run_languages,
     "currencies": run_currencies,

@@ -11,56 +11,220 @@ class UniversitiesFetcher(BaseFetcher):
     """Fetch university/institution data from multiple sources."""
 
     FALLBACK_UNIVERSITIES = [
-        {"name": "Harvard University", "aliases": "Harvard,Harvard Univ", "country": "US"},
-        {"name": "Stanford University", "aliases": "Stanford,Stanford Univ", "country": "US"},
-        {"name": "Massachusetts Institute of Technology", "aliases": "MIT,Massachusetts Institute of Technology", "country": "US"},
-        {"name": "University of Cambridge", "aliases": "Cambridge University,Univ of Cambridge", "country": "GB"},
-        {"name": "University of Oxford", "aliases": "Oxford University,Univ of Oxford", "country": "GB"},
+        {
+            "name": "Harvard University",
+            "aliases": "Harvard,Harvard Univ",
+            "country": "US",
+        },
+        {
+            "name": "Stanford University",
+            "aliases": "Stanford,Stanford Univ",
+            "country": "US",
+        },
+        {
+            "name": "Massachusetts Institute of Technology",
+            "aliases": "MIT,Massachusetts Institute of Technology",
+            "country": "US",
+        },
+        {
+            "name": "University of Cambridge",
+            "aliases": "Cambridge University,Univ of Cambridge",
+            "country": "GB",
+        },
+        {
+            "name": "University of Oxford",
+            "aliases": "Oxford University,Univ of Oxford",
+            "country": "GB",
+        },
         {"name": "Yale University", "aliases": "Yale,Yale Univ", "country": "US"},
-        {"name": "Princeton University", "aliases": "Princeton,Princeton Univ", "country": "US"},
-        {"name": "Columbia University", "aliases": "Columbia,Columbia Univ", "country": "US"},
-        {"name": "University of Chicago", "aliases": "UChicago,Chicago University", "country": "US"},
-        {"name": "University of Pennsylvania", "aliases": "UPenn,Penn", "country": "US"},
-        {"name": "California Institute of Technology", "aliases": "Caltech,California Tech", "country": "US"},
-        {"name": "Johns Hopkins University", "aliases": "JHU,Johns Hopkins", "country": "US"},
-        {"name": "Cornell University", "aliases": "Cornell,Cornell Univ", "country": "US"},
-        {"name": "University of Michigan", "aliases": "UMich,Michigan", "country": "US"},
+        {
+            "name": "Princeton University",
+            "aliases": "Princeton,Princeton Univ",
+            "country": "US",
+        },
+        {
+            "name": "Columbia University",
+            "aliases": "Columbia,Columbia Univ",
+            "country": "US",
+        },
+        {
+            "name": "University of Chicago",
+            "aliases": "UChicago,Chicago University",
+            "country": "US",
+        },
+        {
+            "name": "University of Pennsylvania",
+            "aliases": "UPenn,Penn",
+            "country": "US",
+        },
+        {
+            "name": "California Institute of Technology",
+            "aliases": "Caltech,California Tech",
+            "country": "US",
+        },
+        {
+            "name": "Johns Hopkins University",
+            "aliases": "JHU,Johns Hopkins",
+            "country": "US",
+        },
+        {
+            "name": "Cornell University",
+            "aliases": "Cornell,Cornell Univ",
+            "country": "US",
+        },
+        {
+            "name": "University of Michigan",
+            "aliases": "UMich,Michigan",
+            "country": "US",
+        },
         {"name": "University of Toronto", "aliases": "UofT,Toronto", "country": "CA"},
         {"name": "Duke University", "aliases": "Duke,Duke Univ", "country": "US"},
-        {"name": "Northwestern University", "aliases": "Northwestern,Northwestern Univ", "country": "US"},
-        {"name": "New York University", "aliases": "NYU,New York Univ", "country": "US"},
-        {"name": "University of California, Berkeley", "aliases": "UC Berkeley,Berkeley", "country": "US"},
-        {"name": "University of Tokyo", "aliases": "UTokyo,Tokyo Univ", "country": "JP"},
+        {
+            "name": "Northwestern University",
+            "aliases": "Northwestern,Northwestern Univ",
+            "country": "US",
+        },
+        {
+            "name": "New York University",
+            "aliases": "NYU,New York Univ",
+            "country": "US",
+        },
+        {
+            "name": "University of California, Berkeley",
+            "aliases": "UC Berkeley,Berkeley",
+            "country": "US",
+        },
+        {
+            "name": "University of Tokyo",
+            "aliases": "UTokyo,Tokyo Univ",
+            "country": "JP",
+        },
         {"name": "Kyoto University", "aliases": "Kyoto Univ,KGU", "country": "JP"},
-        {"name": "University of Melbourne", "aliases": "UniMelb,Melbourne", "country": "AU"},
-        {"name": "Australian National University", "aliases": "ANU,Australian National Univ", "country": "AU"},
-        {"name": "ETH Zurich", "aliases": "Swiss Federal Institute of Technology Zurich", "country": "CH"},
-        {"name": "University of Edinburgh", "aliases": "Edinburgh Univ,Edinburgh", "country": "GB"},
-        {"name": "University of Manchester", "aliases": "Manchester Univ,UMIST", "country": "GB"},
-        {"name": "University of Sydney", "aliases": "Sydney Univ,USYD", "country": "AU"},
-        {"name": "University of Queensland", "aliases": "UQ,Queensland", "country": "AU"},
+        {
+            "name": "University of Melbourne",
+            "aliases": "UniMelb,Melbourne",
+            "country": "AU",
+        },
+        {
+            "name": "Australian National University",
+            "aliases": "ANU,Australian National Univ",
+            "country": "AU",
+        },
+        {
+            "name": "ETH Zurich",
+            "aliases": "Swiss Federal Institute of Technology Zurich",
+            "country": "CH",
+        },
+        {
+            "name": "University of Edinburgh",
+            "aliases": "Edinburgh Univ,Edinburgh",
+            "country": "GB",
+        },
+        {
+            "name": "University of Manchester",
+            "aliases": "Manchester Univ,UMIST",
+            "country": "GB",
+        },
+        {
+            "name": "University of Sydney",
+            "aliases": "Sydney Univ,USYD",
+            "country": "AU",
+        },
+        {
+            "name": "University of Queensland",
+            "aliases": "UQ,Queensland",
+            "country": "AU",
+        },
         {"name": "McGill University", "aliases": "McGill,McGill Univ", "country": "CA"},
-        {"name": "University of British Columbia", "aliases": "UBC,Vancouver", "country": "CA"},
-        {"name": "National University of Singapore", "aliases": "NUS,National Univ of Singapore", "country": "SG"},
-        {"name": "Nanyang Technological University", "aliases": "NTU,Nanyang", "country": "SG"},
-        {"name": "Technical University of Munich", "aliases": "TUM,Munich Tech", "country": "DE"},
-        {"name": "Heidelberg University", "aliases": "Heidelberg Univ,Ruprecht Karls University", "country": "DE"},
-        {"name": "University of Paris", "aliases": "Sorbonne,Paris University", "country": "FR"},
-        {"name": "Sorbonne University", "aliases": "Universite Sorbonne", "country": "FR"},
+        {
+            "name": "University of British Columbia",
+            "aliases": "UBC,Vancouver",
+            "country": "CA",
+        },
+        {
+            "name": "National University of Singapore",
+            "aliases": "NUS,National Univ of Singapore",
+            "country": "SG",
+        },
+        {
+            "name": "Nanyang Technological University",
+            "aliases": "NTU,Nanyang",
+            "country": "SG",
+        },
+        {
+            "name": "Technical University of Munich",
+            "aliases": "TUM,Munich Tech",
+            "country": "DE",
+        },
+        {
+            "name": "Heidelberg University",
+            "aliases": "Heidelberg Univ,Ruprecht Karls University",
+            "country": "DE",
+        },
+        {
+            "name": "University of Paris",
+            "aliases": "Sorbonne,Paris University",
+            "country": "FR",
+        },
+        {
+            "name": "Sorbonne University",
+            "aliases": "Universite Sorbonne",
+            "country": "FR",
+        },
         {"name": "Ecole Polytechnique", "aliases": "X,Polytechnique", "country": "FR"},
-        {"name": "University of Hong Kong", "aliases": "HKU,Hong Kong Univ", "country": "HK"},
-        {"name": "Chinese University of Hong Kong", "aliases": "CUHK,Chinese Univ HK", "country": "HK"},
-        {"name": "Seoul National University", "aliases": "SNU,Seoul Natl Univ", "country": "KR"},
+        {
+            "name": "University of Hong Kong",
+            "aliases": "HKU,Hong Kong Univ",
+            "country": "HK",
+        },
+        {
+            "name": "Chinese University of Hong Kong",
+            "aliases": "CUHK,Chinese Univ HK",
+            "country": "HK",
+        },
+        {
+            "name": "Seoul National University",
+            "aliases": "SNU,Seoul Natl Univ",
+            "country": "KR",
+        },
         {"name": "Korea University", "aliases": "KU,Korea Univ", "country": "KR"},
-        {"name": "KAIST", "aliases": "Korea Advanced Institute of Science and Technology", "country": "KR"},
+        {
+            "name": "KAIST",
+            "aliases": "Korea Advanced Institute of Science and Technology",
+            "country": "KR",
+        },
         {"name": "Tsinghua University", "aliases": "Tsinghua,THU", "country": "CN"},
-        {"name": "Peking University", "aliases": "Beijing University,PKU", "country": "CN"},
+        {
+            "name": "Peking University",
+            "aliases": "Beijing University,PKU",
+            "country": "CN",
+        },
         {"name": "Fudan University", "aliases": "Fudan,Fudan Univ", "country": "CN"},
-        {"name": "Shanghai Jiao Tong University", "aliases": "SJTU,Shanghai Jiao Tong", "country": "CN"},
-        {"name": "Zhejiang University", "aliases": "ZJU,Zhejiang Univ", "country": "CN"},
-        {"name": "Indian Institute of Technology Bombay", "aliases": "IIT Bombay,IITB", "country": "IN"},
-        {"name": "Indian Institute of Technology Delhi", "aliases": "IIT Delhi,IITD", "country": "IN"},
-        {"name": "Indian Institute of Science", "aliases": "IISc,Indian Institute of Science", "country": "IN"},
+        {
+            "name": "Shanghai Jiao Tong University",
+            "aliases": "SJTU,Shanghai Jiao Tong",
+            "country": "CN",
+        },
+        {
+            "name": "Zhejiang University",
+            "aliases": "ZJU,Zhejiang Univ",
+            "country": "CN",
+        },
+        {
+            "name": "Indian Institute of Technology Bombay",
+            "aliases": "IIT Bombay,IITB",
+            "country": "IN",
+        },
+        {
+            "name": "Indian Institute of Technology Delhi",
+            "aliases": "IIT Delhi,IITD",
+            "country": "IN",
+        },
+        {
+            "name": "Indian Institute of Science",
+            "aliases": "IISc,Indian Institute of Science",
+            "country": "IN",
+        },
     ]
 
     def fetch(self) -> list[dict[str, Any]]:
@@ -79,16 +243,13 @@ class UniversitiesFetcher(BaseFetcher):
 
         headers = {
             "Accept": "application/sparql-results+json",
-            "User-Agent": "SemanticMatcher/1.0"
+            "User-Agent": "SemanticMatcher/1.0",
         }
 
         if not output_path.exists():
             try:
                 response = requests.get(
-                    wikidata_url,
-                    params={"query": query},
-                    headers=headers,
-                    timeout=120
+                    wikidata_url, params={"query": query}, headers=headers, timeout=120
                 )
                 if response.status_code == 200:
                     results = response.json()
@@ -123,8 +284,16 @@ class UniversitiesFetcher(BaseFetcher):
                     aliases = item.get("aliases", "").strip()
                     country = item.get("country", "").strip()
                 else:
-                    name = item.get("name", {}).get("value", "").strip() if isinstance(item.get("name"), dict) else str(item.get("name", ""))
-                    country_raw = item.get("country", {}).get("value", "") if isinstance(item.get("country"), dict) else str(item.get("country", ""))
+                    name = (
+                        item.get("name", {}).get("value", "").strip()
+                        if isinstance(item.get("name"), dict)
+                        else str(item.get("name", ""))
+                    )
+                    country_raw = (
+                        item.get("country", {}).get("value", "")
+                        if isinstance(item.get("country"), dict)
+                        else str(item.get("country", ""))
+                    )
                     country = country_raw.split("/")[-1] if country_raw else ""
                     aliases = ""
             else:
@@ -140,13 +309,15 @@ class UniversitiesFetcher(BaseFetcher):
                     if a.strip().lower() != name.lower():
                         aliases_list.append(a.strip())
 
-            entities.append({
-                "id": name.lower().replace(" ", "_").replace(",", ""),
-                "name": name,
-                "aliases": "|".join(aliases_list),
-                "type": "university",
-                "country": country
-            })
+            entities.append(
+                {
+                    "id": name.lower().replace(" ", "_").replace(",", ""),
+                    "name": name,
+                    "aliases": "|".join(aliases_list),
+                    "type": "university",
+                    "country": country,
+                }
+            )
 
         return entities
 
@@ -176,12 +347,14 @@ class TopUniversitiesFetcher(BaseFetcher):
             if not name:
                 continue
 
-            entities.append({
-                "id": item.get("id", name.lower().replace(" ", "_")),
-                "name": name,
-                "aliases": item.get("aliases", ""),
-                "type": "university"
-            })
+            entities.append(
+                {
+                    "id": item.get("id", name.lower().replace(" ", "_")),
+                    "name": name,
+                    "aliases": item.get("aliases", ""),
+                    "type": "university",
+                }
+            )
 
         return entities
 

@@ -12,7 +12,6 @@ from ..utils.validation import (
 )
 from ..utils.embeddings import ModelCache, get_default_cache
 
-
 TextInput = Union[str, List[str]]
 
 
@@ -51,7 +50,9 @@ def _normalize_training_data(
     ]
 
 
-def _flatten_entity_texts(entities: List[Dict[str, Any]]) -> Tuple[List[str], List[str]]:
+def _flatten_entity_texts(
+    entities: List[Dict[str, Any]],
+) -> Tuple[List[str], List[str]]:
     entity_texts: List[str] = []
     entity_ids: List[str] = []
     for entity in entities:
@@ -103,13 +104,12 @@ class EntityMatcher:
             num_epochs=num_epochs,
             batch_size=batch_size,
         )
-        self.classifier.train(normalized_data, num_epochs=num_epochs, batch_size=batch_size)
+        self.classifier.train(
+            normalized_data, num_epochs=num_epochs, batch_size=batch_size
+        )
         self.is_trained = True
 
-    def predict(
-        self,
-        texts: TextInput
-    ) -> Union[Optional[str], List[Optional[str]]]:
+    def predict(self, texts: TextInput) -> Union[Optional[str], List[Optional[str]]]:
         if not self.is_trained or self.classifier is None:
             raise RuntimeError("Model not trained. Call train() first.")
 
@@ -145,7 +145,7 @@ class EmbeddingMatcher:
     ):
         """
         Initialize the embedding matcher.
-        
+
         Args:
             entities: List of entity dictionaries with 'id' and 'name' keys
             model_name: Name of the sentence-transformer model
@@ -179,8 +179,7 @@ class EmbeddingMatcher:
         """
         # Use cache to get or load the model
         self.model = self.cache.get_or_load(
-            self.model_name,
-            lambda: SentenceTransformer(self.model_name)
+            self.model_name, lambda: SentenceTransformer(self.model_name)
         )
 
         # Validate embedding_dim if provided
@@ -207,13 +206,18 @@ class EmbeddingMatcher:
         )
 
         if batch_size is not None:
-            self.embeddings = self.model.encode(self.entity_texts, batch_size=batch_size)
+            self.embeddings = self.model.encode(
+                self.entity_texts, batch_size=batch_size
+            )
         else:
             self.embeddings = self.model.encode(self.entity_texts)
 
         # Matryoshka embedding support: truncate to specified dimension
-        if self.embedding_dim is not None and self.embeddings.shape[1] > self.embedding_dim:
-            self.embeddings = self.embeddings[:, :self.embedding_dim]
+        if (
+            self.embedding_dim is not None
+            and self.embeddings.shape[1] > self.embedding_dim
+        ):
+            self.embeddings = self.embeddings[:, : self.embedding_dim]
 
     def match(
         self,
@@ -246,7 +250,9 @@ class EmbeddingMatcher:
         # Use provided candidates or all entities
         if candidates is not None:
             candidate_ids = {c["id"] for c in candidates}
-            candidate_indices = [i for i, eid in enumerate(self.entity_ids) if eid in candidate_ids]
+            candidate_indices = [
+                i for i, eid in enumerate(self.entity_ids) if eid in candidate_ids
+            ]
         else:
             candidate_indices = list(range(len(self.entity_ids)))
 
@@ -264,7 +270,11 @@ class EmbeddingMatcher:
 
         # Ensure both query and candidate embeddings use same dimension
         # Use the smaller of: model's output dim or configured embedding_dim
-        effective_dim = self.embedding_dim if self.embedding_dim is not None else query_embeddings.shape[1]
+        effective_dim = (
+            self.embedding_dim
+            if self.embedding_dim is not None
+            else query_embeddings.shape[1]
+        )
 
         # Truncate query embeddings if needed
         if query_embeddings.shape[1] > effective_dim:
@@ -290,11 +300,15 @@ class EmbeddingMatcher:
                     continue
                 seen_ids.add(entity_id)
                 entity = entity_lookup.get(entity_id, {})
-                matches.append({
-                    "id": entity_id,
-                    "score": float(score),
-                    "text": entity.get("text", self.entity_texts[candidate_indices[idx]]),
-                })
+                matches.append(
+                    {
+                        "id": entity_id,
+                        "score": float(score),
+                        "text": entity.get(
+                            "text", self.entity_texts[candidate_indices[idx]]
+                        ),
+                    }
+                )
                 if len(matches) >= top_k:
                     break
 

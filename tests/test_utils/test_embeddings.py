@@ -1,6 +1,10 @@
 import pytest
 import numpy as np
-from semanticmatcher.utils.embeddings import compute_embeddings, cosine_sim, batch_encode
+from semanticmatcher.utils.embeddings import (
+    compute_embeddings,
+    cosine_sim,
+    batch_encode,
+)
 
 
 class TestEmbeddings:
