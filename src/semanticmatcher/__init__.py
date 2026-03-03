@@ -1,4 +1,5 @@
 from importlib import import_module
+import warnings
 
 try:
     from importlib.metadata import version as _pkg_version
@@ -8,12 +9,14 @@ except Exception:  # pragma: no cover - fallback for local source usage
     __version__ = "0.1.0"
 
 __all__ = [
-    "EntityMatcher",
-    "EmbeddingMatcher",
+    "Matcher",  # New unified API
+    "EntityMatcher",  # Deprecated - use Matcher
+    "EmbeddingMatcher",  # Deprecated - use Matcher
     "SetFitClassifier",
     "TextNormalizer",
     "CrossEncoderReranker",
-    "HybridMatcher",
+    "HybridMatcher",  # Deprecated - use Matcher with mode='hybrid'
+    "HierarchicalMatcher",  # Hierarchical entity matching
     "BlockingStrategy",
     "BM25Blocking",
     "TFIDFBlocking",
@@ -22,12 +25,14 @@ __all__ = [
 ]
 
 _EXPORTS = {
+    "Matcher": (".core.matcher", "Matcher"),
     "EntityMatcher": (".core.matcher", "EntityMatcher"),
     "EmbeddingMatcher": (".core.matcher", "EmbeddingMatcher"),
     "SetFitClassifier": (".core.classifier", "SetFitClassifier"),
     "TextNormalizer": (".core.normalizer", "TextNormalizer"),
     "CrossEncoderReranker": (".core.reranker", "CrossEncoderReranker"),
     "HybridMatcher": (".core.hybrid", "HybridMatcher"),
+    "HierarchicalMatcher": (".core.hierarchy", "HierarchicalMatcher"),
     "BlockingStrategy": (".core.blocking", "BlockingStrategy"),
     "BM25Blocking": (".core.blocking", "BM25Blocking"),
     "TFIDFBlocking": (".core.blocking", "TFIDFBlocking"),
@@ -35,10 +40,28 @@ _EXPORTS = {
     "NoOpBlocking": (".core.blocking", "NoOpBlocking"),
 }
 
+# Classes that should show deprecation warnings
+_DEPRECATED_CLASSES = {
+    "EntityMatcher": "Matcher",
+    "EmbeddingMatcher": "Matcher",
+    "HybridMatcher": "Matcher",
+}
+
 
 def __getattr__(name):
     if name not in _EXPORTS:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    # Show deprecation warning for old matcher classes
+    if name in _DEPRECATED_CLASSES:
+        replacement = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{name} is deprecated and will be removed in a future version. "
+            f"Use the unified {replacement} class instead. "
+            f"See documentation for migration guide.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     module_name, attr_name = _EXPORTS[name]
     value = getattr(import_module(module_name, __name__), attr_name)
