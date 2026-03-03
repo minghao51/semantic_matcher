@@ -3,6 +3,7 @@ Tests for hierarchical entity matching.
 """
 
 import pytest
+import numpy as np
 from semanticmatcher.core.hierarchy import (
     HierarchyIndex,
     HierarchicalScoring,
@@ -209,7 +210,92 @@ class TestHierarchicalScoring:
 
     def test_init(self):
         """Test HierarchicalScoring initialization"""
-        assert True  # Placeholder
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+        scorer = HierarchicalScoring(index)
+
+        assert scorer.hierarchy == index
+        assert scorer.alpha == 0.7  # Default
+        assert scorer.beta == 0.3   # Default
+
+    def test_init_custom_params(self):
+        """Test initialization with custom alpha and beta"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+        scorer = HierarchicalScoring(index, alpha=0.8, beta=0.2)
+
+        assert scorer.alpha == 0.8
+        assert scorer.beta == 0.2
+
+    def test_compute_score_self_match(self):
+        """Test score calculation for self-match (no relationship)"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+        scorer = HierarchicalScoring(index)
+
+        # Mock embeddings
+        query_emb = np.array([1.0, 0.0, 0.0])
+        entity_emb = np.array([1.0, 0.0, 0.0])
+
+        score = scorer.compute_score(
+            query_emb,
+            entity_emb,
+            "DE",
+            relationship_type="self",
+            depth=0
+        )
+
+        # High score for perfect semantic match at depth 0
+        # Formula: (1.0 * 0.7 + 0.5 * 0.3) * 1.0 = 0.85
+        assert score > 0.8
+        assert score <= 1.0
+
+    def test_compute_score_depth_penalty(self):
+        """Test that deeper relationships get lower scores"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+        scorer = HierarchicalScoring(index)
+
+        query_emb = np.array([1.0, 0.0, 0.0])
+        entity_emb = np.array([1.0, 0.0, 0.0])
+
+        # Direct parent (depth 1)
+        score_depth_1 = scorer.compute_score(
+            query_emb, entity_emb, "DE",
+            relationship_type="parent", depth=1
+        )
+
+        # Grandparent (depth 2)
+        score_depth_2 = scorer.compute_score(
+            query_emb, entity_emb, "EU",
+            relationship_type="ancestor", depth=2
+        )
+
+        # Depth 2 should have lower score than depth 1
+        assert score_depth_2 < score_depth_1
+
+    def test_hierarchical_boost_by_relationship_type(self):
+        """Test that different relationship types get different boosts"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+        scorer = HierarchicalScoring(index)
+
+        query_emb = np.array([1.0, 0.0, 0.0])
+        entity_emb = np.array([1.0, 0.0, 0.0])
+
+        score_self = scorer.compute_score(
+            query_emb, entity_emb, "DE",
+            relationship_type="self", depth=0
+        )
+        score_parent = scorer.compute_score(
+            query_emb, entity_emb, "DE",
+            relationship_type="parent", depth=1
+        )
+        score_ancestor = scorer.compute_score(
+            query_emb, entity_emb, "EU",
+            relationship_type="ancestor", depth=2
+        )
+
+        # Self match should score highest
+        assert score_self > score_parent
+        # Parent should score higher than distant ancestor
+        assert score_parent > score_ancestor
+
 
 
 class TestHierarchicalMatcher:

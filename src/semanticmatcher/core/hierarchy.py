@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Tuple, Any
 import networkx as nx
 import numpy as np
 from functools import lru_cache
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 __all__ = [
@@ -227,8 +228,114 @@ class HierarchyIndex:
 
 # Placeholder classes to be implemented in subsequent tasks
 class HierarchicalScoring:
-    """Placeholder for HierarchicalScoring class"""
-    pass
+    """
+    Calculate hierarchy-aware confidence scores.
+
+    Combines:
+    - Semantic similarity (cosine similarity of embeddings)
+    - Hierarchical proximity boost (based on relationship type)
+    - Depth penalty (deeper relationships = lower scores)
+    """
+
+    # Depth penalties: how much to reduce score based on relationship depth
+    DEPTH_PENALTIES = {
+        0: 1.0,    # Self-match
+        1: 0.9,    # Direct parent/child
+        2: 0.75,   # Grandparent/grandchild
+        3: 0.6,    # Great-grandparent
+        4: 0.5     # Even deeper
+    }
+
+    # Hierarchical boost: how much to boost score based on relationship type
+    HIERARCHICAL_BOOSTS = {
+        "self": 0.5,
+        "parent": 0.4,
+        "child": 0.4,
+        "ancestor": 0.3,
+        "descendant": 0.3
+    }
+
+    def __init__(
+        self,
+        hierarchy_index: HierarchyIndex,
+        alpha: float = 0.7,
+        beta: float = 0.3
+    ):
+        """
+        Initialize hierarchical scorer.
+
+        Args:
+            hierarchy_index: HierarchyIndex for graph operations
+            alpha: Weight for semantic similarity (0-1)
+            beta: Weight for hierarchical boost (0-1)
+        """
+        self.hierarchy = hierarchy_index
+        self.alpha = alpha
+        self.beta = beta
+
+    def compute_score(
+        self,
+        query_embedding: np.ndarray,
+        entity_embedding: np.ndarray,
+        entity_id: str,
+        relationship_type: str = "self",
+        depth: int = 0
+    ) -> float:
+        """
+        Compute hierarchical score combining semantic and hierarchical features.
+
+        Formula:
+            final_score = (
+                semantic_similarity * alpha +
+                hierarchical_boost * beta
+            ) * depth_penalty
+
+        Args:
+            query_embedding: Query text embedding
+            entity_embedding: Entity text embedding
+            entity_id: Entity identifier
+            relationship_type: "self", "parent", "child", "ancestor", "descendant"
+            depth: Relationship depth (0=self, 1=direct, etc.)
+
+        Returns:
+            Final hierarchical score (0-1)
+        """
+        # Compute semantic similarity
+        semantic_score = self._compute_semantic_similarity(
+            query_embedding,
+            entity_embedding
+        )
+
+        # Get hierarchical boost for this relationship type
+        hierarchical_boost = self._get_hierarchical_boost(relationship_type)
+
+        # Get depth penalty
+        depth_penalty = self.DEPTH_PENALTIES.get(depth, 0.4)
+
+        # Combine scores
+        final_score = (
+            semantic_score * self.alpha +
+            hierarchical_boost * self.beta
+        ) * depth_penalty
+
+        return float(final_score)
+
+    def _compute_semantic_similarity(
+        self,
+        emb1: np.ndarray,
+        emb2: np.ndarray
+    ) -> float:
+        """Compute cosine similarity between two embeddings."""
+        similarity = cosine_similarity(
+            emb1.reshape(1, -1),
+            emb2.reshape(1, -1)
+        )[0][0]
+        return float(similarity)
+
+    def _get_hierarchical_boost(self, relationship_type: str) -> float:
+        """Get hierarchical boost value for relationship type."""
+        return self.HIERARCHICAL_BOOSTS.get(relationship_type, 0.2)
+
 
 
 class HierarchicalMatcher:
