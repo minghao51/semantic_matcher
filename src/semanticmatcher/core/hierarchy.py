@@ -18,3 +18,219 @@ __all__ = [
     "HierarchicalScoring",
     "HierarchicalMatcher",
 ]
+
+
+class HierarchyIndex:
+    """
+    Graph-based index for hierarchical entity relationships.
+
+    Supports:
+    - Multi-parent hierarchies (DAG structure)
+    - Weighted edges for relationship strength
+    - Fast ancestor/descendant queries
+    - Path finding and depth calculation
+    """
+
+    def __init__(self, entities: List[Dict[str, Any]]):
+        """
+        Build hierarchy index from entity definitions.
+
+        Args:
+            entities: List of entity dicts with optional 'hierarchy' key
+                     hierarchy format: {
+                         'parents': ['parent_id1', 'parent_id2'],
+                         'children': ['child_id1', 'child_id2'],
+                         'level': int,
+                         'weights': {'parent_id': float}
+                     }
+        """
+        self.entities = {e["id"]: e for e in entities}
+        self.graph = nx.DiGraph()
+        self._build_graph()
+        self._cache = {}
+
+    def _build_graph(self) -> None:
+        """Build directed acyclic graph from entity definitions."""
+        # Add all nodes first
+        for entity_id, entity in self.entities.items():
+            hierarchy = entity.get("hierarchy", {})
+            level = hierarchy.get("level", 0)
+            self.graph.add_node(entity_id, level=level)
+
+        # Add edges (both parent->child and child->parent for bidirectional traversal)
+        for entity_id, entity in self.entities.items():
+            hierarchy = entity.get("hierarchy", {})
+
+            # Add parent edges (parent -> child)
+            for parent in hierarchy.get("parents", []):
+                if parent in self.entities:
+                    weight = hierarchy.get("weights", {}).get(parent, 1.0)
+                    self.graph.add_edge(parent, entity_id, weight=weight)
+
+            # Add child edges (child -> parent)
+            for child in hierarchy.get("children", []):
+                if child in self.entities:
+                    child_weights = self.entities[child].get("hierarchy", {}).get("weights", {})
+                    weight = child_weights.get(entity_id, 1.0)
+                    self.graph.add_edge(entity_id, child, weight=weight)
+
+    def get_ancestors(
+        self,
+        entity_id: str,
+        max_depth: Optional[int] = None
+    ) -> List[str]:
+        """
+        Get all ancestor entities for a given entity.
+
+        Args:
+            entity_id: Entity to find ancestors for
+            max_depth: Maximum depth to traverse (None = unlimited)
+
+        Returns:
+            List of ancestor entity IDs
+        """
+        if entity_id not in self.graph:
+            return []
+
+        cache_key = f"ancestors_{entity_id}_{max_depth}"
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        ancestors = []
+        visited = set()
+        to_visit = [(entity_id, 0)]  # (node, depth)
+
+        while to_visit:
+            current, depth = to_visit.pop(0)
+
+            if current in visited:
+                continue
+            visited.add(current)
+
+            # Get predecessors (parents in our graph)
+            for parent in self.graph.predecessors(current):
+                if parent not in visited:
+                    if max_depth is None or depth < max_depth:
+                        ancestors.append(parent)
+                        to_visit.append((parent, depth + 1))
+
+        self._cache[cache_key] = ancestors
+        return ancestors
+
+    def get_descendants(
+        self,
+        entity_id: str,
+        max_depth: Optional[int] = None
+    ) -> List[str]:
+        """
+        Get all descendant entities for a given entity.
+
+        Args:
+            entity_id: Entity to find descendants for
+            max_depth: Maximum depth to traverse (None = unlimited)
+
+        Returns:
+            List of descendant entity IDs
+        """
+        if entity_id not in self.graph:
+            return []
+
+        cache_key = f"descendants_{entity_id}_{max_depth}"
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        descendants = []
+        visited = set()
+        to_visit = [(entity_id, 0)]  # (node, depth)
+
+        while to_visit:
+            current, depth = to_visit.pop(0)
+
+            if current in visited:
+                continue
+            visited.add(current)
+
+            # Get successors (children in our graph)
+            for child in self.graph.successors(current):
+                if child not in visited:
+                    if max_depth is None or depth < max_depth:
+                        descendants.append(child)
+                        to_visit.append((child, depth + 1))
+
+        self._cache[cache_key] = descendants
+        return descendants
+
+    def get_relationship_depth(self, entity_a: str, entity_b: str) -> int:
+        """
+        Calculate the depth of relationship between two entities.
+
+        Args:
+            entity_a: First entity ID
+            entity_b: Second entity ID
+
+        Returns:
+            Depth (0 = same entity, 1 = direct parent/child, 2 = grandparent, etc.)
+            Returns -1 if no relationship found
+        """
+        if entity_a == entity_b:
+            return 0
+
+        if entity_a not in self.graph or entity_b not in self.graph:
+            return -1
+
+        try:
+            # Try to find shortest path in the directed graph
+            path = nx.shortest_path(self.graph, entity_a, entity_b)
+            return len(path) - 1
+        except nx.NetworkXNoPath:
+            # Try reverse direction (child to parent)
+            try:
+                path = nx.shortest_path(self.graph, entity_b, entity_a)
+                return len(path) - 1
+            except nx.NetworkXNoPath:
+                return -1
+
+    def get_path(self, from_entity: str, to_entity: str) -> List[str]:
+        """
+        Get shortest path between two entities in the hierarchy.
+
+        Args:
+            from_entity: Starting entity ID
+            to_entity: Ending entity ID
+
+        Returns:
+            List of entity IDs representing the path (inclusive)
+            Returns empty list if no path exists
+        """
+        try:
+            return nx.shortest_path(self.graph, from_entity, to_entity)
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            return []
+
+    def is_ancestor(self, ancestor_id: str, descendant_id: str) -> bool:
+        """
+        Check if ancestor_id is an ancestor of descendant_id.
+
+        Args:
+            ancestor_id: Potential ancestor
+            descendant_id: Potential descendant
+
+        Returns:
+            True if ancestor_id is an ancestor of descendant_id
+        """
+        if ancestor_id == descendant_id:
+            return False
+
+        ancestors = self.get_ancestors(descendant_id)
+        return ancestor_id in ancestors
+
+
+# Placeholder classes to be implemented in subsequent tasks
+class HierarchicalScoring:
+    """Placeholder for HierarchicalScoring class"""
+    pass
+
+
+class HierarchicalMatcher:
+    """Placeholder for HierarchicalMatcher class"""
+    pass

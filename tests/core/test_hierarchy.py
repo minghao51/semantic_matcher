@@ -10,12 +10,198 @@ from semanticmatcher.core.hierarchy import (
 )
 
 
+# Test fixtures
+SAMPLE_HIERARCHICAL_ENTITIES = [
+    {
+        "id": "EU",
+        "name": "European Union",
+        "aliases": ["EU"],
+        "hierarchy": {
+            "parents": [],
+            "children": ["DE", "FR"],
+            "level": 1
+        }
+    },
+    {
+        "id": "DE",
+        "name": "Germany",
+        "aliases": ["Deutschland"],
+        "hierarchy": {
+            "parents": ["EU"],
+            "children": ["DE-BY", "DE-BW"],
+            "level": 2
+        }
+    },
+    {
+        "id": "FR",
+        "name": "France",
+        "aliases": [],
+        "hierarchy": {
+            "parents": ["EU"],
+            "children": [],
+            "level": 2
+        }
+    },
+    {
+        "id": "DE-BY",
+        "name": "Bavaria",
+        "aliases": ["Bayern"],
+        "hierarchy": {
+            "parents": ["DE"],
+            "children": [],
+            "level": 3
+        }
+    },
+    {
+        "id": "DE-BW",
+        "name": "Baden-Württemberg",
+        "aliases": [],
+        "hierarchy": {
+            "parents": ["DE"],
+            "children": [],
+            "level": 3
+        }
+    }
+]
+
+MULTI_PARENT_ENTITIES = [
+    {
+        "id": "laptop-gaming",
+        "name": "Gaming Laptop",
+        "aliases": [],
+        "hierarchy": {
+            "parents": ["laptops", "gaming-hardware"],
+            "weights": {"laptops": 1.0, "gaming-hardware": 0.8},
+            "level": 2
+        }
+    },
+    {
+        "id": "laptops",
+        "name": "Laptops",
+        "aliases": [],
+        "hierarchy": {
+            "parents": ["computers"],
+            "children": ["laptop-gaming"],
+            "level": 1
+        }
+    },
+    {
+        "id": "gaming-hardware",
+        "name": "Gaming Hardware",
+        "aliases": [],
+        "hierarchy": {
+            "parents": ["electronics"],
+            "children": ["laptop-gaming"],
+            "level": 1
+        }
+    }
+]
+
+
 class TestHierarchyIndex:
     """Tests for HierarchyIndex class"""
 
-    def test_init(self):
-        """Test HierarchyIndex initialization"""
-        assert True  # Placeholder
+    def test_init_builds_graph(self):
+        """Test that HierarchyIndex builds graph from entities"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # Check graph exists
+        assert index.graph is not None
+        assert hasattr(index.graph, 'nodes')
+
+        # Check nodes
+        assert "EU" in index.graph.nodes
+        assert "DE" in index.graph.nodes
+        assert "DE-BY" in index.graph.nodes
+
+        # Check edges (parent -> child)
+        assert index.graph.has_edge("EU", "DE")
+        assert index.graph.has_edge("DE", "DE-BY")
+
+    def test_get_ancestors(self):
+        """Test getting ancestors of an entity"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # DE should have EU as ancestor
+        ancestors = index.get_ancestors("DE")
+        assert "EU" in ancestors
+
+        # DE-BY should have DE and EU as ancestors
+        ancestors = index.get_ancestors("DE-BY")
+        assert "DE" in ancestors
+        assert "EU" in ancestors
+
+        # EU should have no ancestors
+        ancestors = index.get_ancestors("EU")
+        assert len(ancestors) == 0
+
+    def test_get_ancestors_max_depth(self):
+        """Test getting ancestors with depth limit"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # DE-BY with max_depth=1 should only return DE
+        ancestors = index.get_ancestors("DE-BY", max_depth=1)
+        assert "DE" in ancestors
+        assert "EU" not in ancestors
+
+        # DE-BY with max_depth=2 should return DE and EU
+        ancestors = index.get_ancestors("DE-BY", max_depth=2)
+        assert "DE" in ancestors
+        assert "EU" in ancestors
+
+    def test_get_descendants(self):
+        """Test getting descendants of an entity"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # DE should have DE-BY and DE-BW as descendants
+        descendants = index.get_descendants("DE")
+        assert "DE-BY" in descendants
+        assert "DE-BW" in descendants
+
+        # EU should have DE, FR, DE-BY, DE-BW as descendants
+        descendants = index.get_descendants("EU")
+        assert "DE" in descendants
+        assert "FR" in descendants
+        assert "DE-BY" in descendants
+
+    def test_get_relationship_depth(self):
+        """Test calculating relationship depth between entities"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # Self
+        assert index.get_relationship_depth("DE", "DE") == 0
+
+        # Direct parent-child
+        assert index.get_relationship_depth("EU", "DE") == 1
+        assert index.get_relationship_depth("DE", "EU") == 1
+
+        # Grandparent
+        assert index.get_relationship_depth("EU", "DE-BY") == 2
+        assert index.get_relationship_depth("DE-BY", "EU") == 2
+
+    def test_is_ancestor(self):
+        """Test checking if entity is ancestor of another"""
+        index = HierarchyIndex(SAMPLE_HIERARCHICAL_ENTITIES)
+
+        # Direct relationships
+        assert index.is_ancestor("EU", "DE") is True
+        assert index.is_ancestor("DE", "EU") is False
+
+        # Indirect relationships
+        assert index.is_ancestor("EU", "DE-BY") is True
+        assert index.is_ancestor("DE-BY", "EU") is False
+
+        # Self is not ancestor
+        assert index.is_ancestor("DE", "DE") is False
+
+    def test_multi_parent_hierarchy(self):
+        """Test handling entities with multiple parents"""
+        index = HierarchyIndex(MULTI_PARENT_ENTITIES)
+
+        # laptop-gaming should have both parents
+        ancestors = index.get_ancestors("laptop-gaming")
+        assert "laptops" in ancestors
+        assert "gaming-hardware" in ancestors
 
 
 class TestHierarchicalScoring:
