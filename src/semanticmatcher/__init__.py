@@ -15,13 +15,19 @@ __all__ = [
     "SetFitClassifier",
     "TextNormalizer",
     "CrossEncoderReranker",
-    "HybridMatcher",  # Deprecated - use Matcher with mode='hybrid'
+    "HybridMatcher",  # Deprecated - use Matcher(mode='hybrid')
     "HierarchicalMatcher",  # Hierarchical entity matching
     "BlockingStrategy",
     "BM25Blocking",
     "TFIDFBlocking",
     "FuzzyBlocking",
     "NoOpBlocking",
+    # Exceptions
+    "SemanticMatcherError",
+    "ValidationError",
+    "TrainingError",
+    "MatchingError",
+    "ModeError",
 ]
 
 _EXPORTS = {
@@ -38,6 +44,12 @@ _EXPORTS = {
     "TFIDFBlocking": (".core.blocking", "TFIDFBlocking"),
     "FuzzyBlocking": (".core.blocking", "FuzzyBlocking"),
     "NoOpBlocking": (".core.blocking", "NoOpBlocking"),
+    # Exceptions
+    "SemanticMatcherError": (".exceptions", "SemanticMatcherError"),
+    "ValidationError": (".exceptions", "ValidationError"),
+    "TrainingError": (".exceptions", "TrainingError"),
+    "MatchingError": (".exceptions", "MatchingError"),
+    "ModeError": (".exceptions", "ModeError"),
 }
 
 # Classes that should show deprecation warnings

@@ -2,115 +2,241 @@
 
 ## External APIs & Services
 
-### Hugging Face (Primary)
+### HuggingFace (Primary Integration)
 
-**Purpose**: Model hosting and downloading
+**Purpose**: Model hub for pre-trained embeddings and rerankers
 
-**Models Used:**
-- Sentence transformer models (bi-encoders)
-- Cross-encoder rerankers
-- SetFit classification models
+**Models Used**:
 
-**Access Pattern:**
-- Automatic download on first use via `sentence-transformers` library
-- Models cached locally in `~/.cache/huggingface/` or `~/.cache/torch/sentence_transformers/`
-- No API keys required (open-source models)
+**Sentence Transformers (Embeddings)**:
+- `BAAI/bge-m3` - Multilingual embeddings (8192 dimensions)
+- `BAAI/bge-base-en-v1.5` - English embeddings (768 dimensions)
+- `nomic-ai/nomic-embed-text-v1` - Long-context embeddings (768 dimensions)
 
-**Files:**
-- `src/semanticmatcher/backends/sentencetransformer.py`
-- `src/semanticmatcher/backends/reranker_st.py`
-- `src/semanticmatcher/utils/embeddings.py` (ModelCache)
+**Cross-Encoders (Rerankers)**:
+- `BAAI/bge-reranker-v2-m3` - Multilingual reranking
+- `ms-marco-MiniLM-L-6-v2` - English reranking
 
-### External Data Sources (Ingestion)
+**Integration Details**:
+- Models downloaded and cached locally on first use
+- Thread-safe model loading with `ModelCache` class
+- No API keys required (models are public)
+- Fallback to alternative models on download failure
 
-**Currencies:**
-- Source: `https://datahub.io/core/currency-codes/r/codes-all.csv`
-- File: `src/semanticmatcher/ingestion/currencies.py`
+**Configuration**:
+```yaml
+embeddings:
+  default: BAAI/bge-m3
+  models:
+    - name: BAAI/bge-m3
+      dimensions: 8192
+```
 
-**Industries:**
-- Sources:
-  - `https://raw.githubusercontent.com/erickogore/country-code-json/refs/heads/master/industry-codes.json`
-  - `https://raw.githubusercontent.com/datasets/industry-codes/master/data/industry-codes.csv`
-  - `https://www.bls.gov/cew/classifications/industry/sic-industry-titles.csv` (SIC codes)
-- File: `src/semanticmatcher/ingestion/industries.py`
+---
 
-**Languages:**
-- Source: `https://datahub.io/core/language-codes/r/language-codes-full.csv`
-- File: `src/semanticmatcher/ingestion/languages.py`
+### LiteLLM (Optional Integration)
 
-**Occupations:**
-- Sources:
-  - `https://www.onetcenter.org/dl/30_2/occupation_data.zip` (O*NET)
-  - `https://www.bls.gov/soc/2018/home.htm` (SOC codes)
-- File: `src/semanticmatcher/ingestion/occupations.py`
+**Purpose**: Multi-provider LLM API integration for embeddings and reranking
 
-**Products (UNSPSC):**
-- Sources:
-  - `https://unstats.un.org/unsd/services/v2/` (UN SPSC API)
-  - `https://raw.githubusercontent.com/papermax/UNSPSC/master/UNSPSC_en.json`
-- File: `src/semanticmatcher/ingestion/products.py`
+**Providers Supported** (via LiteLLM):
+- OpenAI (`openai/`)
+- Anthropic (`anthropic/`)
+- Cohere (`cohere/`)
+- Azure OpenAI (`azure/`)
+- 100+ other providers
 
-**Timezones:**
-- Source: IANA timezone database (via Python `zoneinfo`)
-- File: `src/semanticmatcher/ingestion/timezones.py`
+**Usage**:
+```python
+from semanticmatcher.backends import LiteLLMEmbeddingBackend
 
-**Universities:**
-- Source: Hardcoded fallback data (no external API)
-- File: `src/semanticmatcher/ingestion/universities.py`
+backend = LiteLLMEmbeddingBackend(
+    model="openai/text-embedding-3-small",
+    api_key="sk-..."
+)
+```
 
-## Authentication
+**API Key Handling**:
+- **Current Implementation**: Sets `LITELLM_API_KEY` in `os.environ`
+- **Security Concern**: Affects entire process (see CONCERNS.md)
+- **Configuration**: Via environment variable or parameter
 
-**Current Implementation:**
-- No authentication required for Hugging Face models (public models)
-- No API keys for data ingestion sources (all public CSV/JSON)
+**Installation**:
+```bash
+uv pip install semanticmatcher[litellm]
+```
 
-**Future:**
-- LiteLLM backend stub exists (`src/semanticmatcher/backends/litellm.py`)
-- Would support OpenAI/Anthropic APIs with API keys
-- Currently not in active use
+---
 
-## Databases
+## Public Data Sources (Ingestion Pipeline)
 
-**Not Used:**
-- No database dependencies
-- All entity data stored in-memory (Python lists/dicts)
-- Processed data saved to `data/processed/` as JSON/CSV
+The project includes a data ingestion pipeline (`src/semanticmatcher/ingest/`) that downloads reference data from public sources.
 
-## Caching
+### Data Sources
 
-**Model Cache:**
-- Implementation: `src/semanticmatcher/utils/embeddings.py`
-- Thread-safe model caching with TTL and memory limits
-- Prevents redundant model loading
+| Source | URL | Data | Purpose |
+|--------|-----|------|---------|
+| **GitHub Raw** | github.com | Industry codes, UNSPSC products, MCC codes | Entity classification |
+| **BLS.gov** | bls.gov | SIC industry titles, SOC occupations | Occupation matching |
+| **WorldTimeAPI** | worldtimeapi.org | Timezone offsets | Location data |
+| **Datahub.io** | datahub.io | Language codes, currency codes | Validation data |
+| **O*NET Center** | onetcenter.org | Occupation descriptions | Job matching |
+| **UN Statistics** | unstats.un.org | Product/service codes (CPC) | Classification |
+| **Wikidata SPARQL** | wikidata.org | University data | Institution matching |
+| **Wikipedia** | wikipedia.org | Oldest universities list | Historical data |
 
-**Data Cache:**
-- Ingested datasets cached in `data/processed/`
-- Avoids re-downloading from external sources
+### Ingestion Details
 
-## Webhooks
+**Storage**: Data saved as CSV/JSON files in `data/` directory
 
-**Not Used:**
-- No webhook implementations
-- All matching is synchronous
+**CLI Command**:
+```bash
+semanticmatcher-ingest
+```
 
-## File System
+**Rate Limiting**:
+- Respectful scraping with delays
+- Error handling for network failures
+- Retry logic for transient failures
 
-**Data Directories:**
-- `data/raw/` - Downloaded source files
-- `data/processed/` - Processed entity datasets
-- `~/.cache/huggingface/` - Hugging Face model cache
-- `~/.cache/torch/` - PyTorch model cache
+**No Authentication Required**:
+- All sources are publicly accessible
+- No API keys needed
+- No rate limits imposed
+
+---
+
+## Database Integrations
+
+**Status**: None
+
+**Details**:
+- No SQL/NoSQL databases detected
+- No ORM or database drivers
+- Data stored as CSV/JSON files
+- In-memory processing with pandas
+
+**Future Considerations**:
+- For large-scale deployments, consider:
+  - PostgreSQL with pgvector for vector similarity
+  - Qdrant/Milvus for vector databases
+  - Redis for caching
+
+---
+
+## Authentication & Authorization
+
+**Status**: Not Applicable
+
+**Details**:
+- No OAuth, JWT, or auth libraries
+- No user management system
+- No authentication required for HuggingFace models
+- API keys only for optional LiteLLM integration
+
+**Security**: N/A (library/tool, not a service)
+
+---
+
+## Webhooks & Real-time
+
+**Status**: None
+
+**Details**:
+- No webhook handlers
+- No WebSocket connections
+- No message queue systems (RabbitMQ, Kafka, etc.)
+- Batch processing only
+
+---
+
+## Payment & Billing
+
+**Status**: None
+
+**Details**:
+- No payment processing (Stripe, PayPal, etc.)
+- No billing integration
+- Free HuggingFace models
+- LiteLLM costs paid by user to their provider
+
+---
+
+## Third-Party Services Summary
+
+| Service | Type | Auth Required | Purpose |
+|---------|------|---------------|---------|
+| HuggingFace Model Hub | Model Registry | No | Download models |
+| LiteLLM | API Aggregator | Yes (optional) | Embedding/reranking APIs |
+| Public Data Sources | Static Data | No | Reference datasets |
+
+---
+
+## Integration Patterns
+
+### Model Loading Pattern
+```python
+# Thread-safe model cache
+from semanticmatcher.backends.huggingface import ModelCache
+
+cache = ModelCache()
+model = cache.get_model("BAAI/bge-m3")
+```
+
+### Backend Selection Pattern
+```python
+# Auto-select backend based on configuration
+from semanticmatcher import Matcher
+
+matcher = Matcher()  # Automatically picks best backend
+```
+
+### Error Handling Pattern
+```python
+# Graceful fallback on model failures
+try:
+    model = load_model(primary_model)
+except Exception:
+    model = load_model(fallback_model)
+```
+
+---
 
 ## Security Considerations
 
-**HTTP vs HTTPS:**
-- All external URLs use HTTPS (secure)
-- No hardcoded credentials in source code
+### API Key Management
+- **Current**: Environment variables (see CONCERNS.md for issues)
+- **Recommendation**: Use secrets manager (AWS Secrets Manager, HashiCorp Vault)
+- **Never Commit**: API keys in code or config files
 
-**Input Validation:**
-- Validation utilities in `src/semanticmatcher/utils/validation.py`
-- Prevents injection attacks from user input
+### Model Downloads
+- Verify model checksums (not currently implemented)
+- Download from official HuggingFace hub only
+- Cache models to avoid repeated downloads
 
-**Rate Limiting:**
-- No built-in rate limiting for HTTP requests
-- Assumes reasonable usage patterns for ingestion
+### Data Ingestion
+- Validate all downloaded data
+- Sanitize inputs to prevent injection attacks
+- Use HTTPS for all network requests
+
+---
+
+## Monitoring & Observability
+
+**Current**: None
+
+**Recommendations**:
+- Add structured logging (replace print statements)
+- Metrics for model loading times
+- Track embedding cache hit rates
+- Monitor API usage for LiteLLM backend
+
+---
+
+## Future Integration Opportunities
+
+1. **Vector Databases**: Qdrant, Milvus, pgvector for large-scale similarity search
+2. **Message Queues**: Celery/RQ for async processing
+3. **Object Storage**: S3/GCS for model and data storage
+4. **Secrets Management**: HashiCorp Vault, AWS Secrets Manager
+5. **Observability**: OpenTelemetry, Prometheus, Grafana
+6. **Feature Flags**: LaunchDarkly, Unleash for A/B testing models

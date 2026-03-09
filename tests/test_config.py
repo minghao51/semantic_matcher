@@ -1,4 +1,4 @@
-from semanticmatcher.config import Config
+from semanticmatcher.config import Config, resolve_matcher_mode
 
 
 def test_config_loads_default_and_nested_access(tmp_path, monkeypatch):
@@ -74,3 +74,14 @@ def test_config_can_load_packaged_default_when_local_sources_absent(monkeypatch)
     cfg = Config()
 
     assert isinstance(cfg.to_dict(), dict)
+
+
+def test_resolve_matcher_mode_supported_values():
+    assert resolve_matcher_mode("zero-shot") == "EmbeddingMatcher"
+    assert resolve_matcher_mode("full") == "EntityMatcher"
+    assert resolve_matcher_mode("hybrid") == "HybridMatcher"
+    assert resolve_matcher_mode("auto") == "SmartSelection"
+
+
+def test_resolve_matcher_mode_unsupported_value_passthrough():
+    assert resolve_matcher_mode("custom-mode") == "custom-mode"

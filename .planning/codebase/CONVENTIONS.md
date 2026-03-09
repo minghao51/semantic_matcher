@@ -1,392 +1,351 @@
-# Conventions
+# Code Conventions
+
+## Project Overview
+Semantic Matcher is a text-to-entity matching library using SetFit few-shot learning and sentence transformers. The codebase follows Python best practices with emphasis on type safety, validation, and clear error messages.
 
 ## Code Style
 
-### Formatting
+### Formatting & Linting
+- **Formatter**: Black (code style enforcement)
+- **Linter**: Ruff (fast Python linter)
+- **Python Version**: 3.9+ (supports 3.9, 3.10, 3.11, 3.12)
+- **Line Length**: Black default (88 characters)
+- **Import Style**: Absolute imports preferred
 
-**Tool**: Black (via `ruff format` or standalone)
+### Naming Conventions
+- **Classes**: `PascalCase` (e.g., `EntityMatcher`, `SetFitClassifier`)
+- **Functions/Methods**: `snake_case` (e.g., `validate_entity`, `compute_embeddings`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MODEL_REGISTRY`, `SETFIT_AVAILABLE`)
+- **Private/Internal**: Leading underscore (e.g., `_cache`, `_build_graph`)
+- **Type Aliases**: `PascalCase` with "Type" suffix (e.g., `TextInput`, `PathLike`)
 
-**Configuration**:
-```toml
-[tool.ruff]
-line-length = 88  # Black default
+### Module Organization
+```
+src/semanticmatcher/
+├── __init__.py          # Public API exports with lazy loading
+├── exceptions.py        # Custom exception hierarchy
+├── config.py            # Configuration management & model registries
+├── core/                # Core matching logic
+│   ├── matcher.py       # Main Matcher classes
+│   ├── classifier.py    # SetFit wrapper
+│   ├── normalizer.py    # Text normalization
+│   └── hierarchy.py     # Hierarchical matching
+├── backends/            # Backend abstractions
+│   ├── base.py          # Abstract base classes
+│   └── sentencetransformer.py  # HuggingFace integration
+├── utils/               # Utilities
+│   ├── validation.py    # Input validation
+│   ├── embeddings.py    # Embedding computation & caching
+│   └── preprocessing.py # Text preprocessing
+└── ingestion/           # Data ingestion modules
 ```
 
-**Usage**:
-```bash
-# Format code
-ruff format src/ tests/
+## Type System
 
-# Check formatting
-ruff format --check src/ tests/
-```
+### Type Annotations
+- **Mandatory**: All public functions/methods must have type hints
+- **Style**: Use from `typing` module for compatibility
+- **Common Types**:
+  - `List[str]`, `Dict[str, Any]`, `Optional[str]`
+  - `Union[str, List[str]]` for flexible inputs
+  - Custom type aliases for complex types
 
-### Linting
-
-**Tool**: Ruff (fast Python linter)
-
-**Configuration** in `pyproject.toml`:
-- Uses Ruff defaults
-- Line length: 88 characters
-- Python 3.9+ compatibility
-
-**Usage**:
-```bash
-# Lint code
-ruff check src/ tests/
-
-# Fix auto-fixable issues
-ruff check --fix src/ tests/
-```
-
-## Type Hints
-
-### Standard Practices
-
-**Extensive Type Annotations**:
-- All public APIs have type hints
-- Use `Optional` for nullable returns
-- Use `List`, `Dict`, `Any` from `typing` module
-
-**Examples**:
 ```python
-from typing import List, Dict, Any, Optional, Union
-
-def match(
-    self,
-    query: str,
-    top_k: int = 10,
-    threshold: Optional[float] = None,
-) -> Optional[List[Dict[str, Any]]]:
-    """Match query against entities."""
-    pass
+def validate_entity(entity: Dict[str, Any]) -> bool:
+    """Validate a single entity dictionary."""
+    if "id" not in entity:
+        raise ValidationError(
+            "Entity must have 'id' field",
+            entity=entity,
+            field="id",
+        )
+    return True
 ```
 
-**Return Types**:
-- Explicit return types on all functions
-- `-> None` for void functions
-- `-> List[Dict[str, Any]]` for structured results
-
-## Naming Patterns
-
-### Classes
-
-**Pattern**: `CamelCase`
-
-**Suffixes indicate type**:
-- `*Matcher` - Matching classes (EntityMatcher, EmbeddingMatcher)
-- `*Blocking` - Blocking strategies (BM25Blocking, TFIDFBlocking)
-- `*Reranker` - Reranking classes (CrossEncoderReranker)
-- `*Normalizer` - Text normalization (TextNormalizer)
-- `*Classifier` - Classification (SetFitClassifier)
-
-### Functions/Methods
-
-**Pattern**: `snake_case`
-
-**Common prefixes**:
-- `get_*` - Retrieve cached values (get_default_cache)
-- `resolve_*` - Resolve aliases (resolve_model_alias)
-- `recommend_*` - Recommendations (recommend_model)
-- `build_*` - Construct/initialize (build_index)
-- `train` - Model training
-- `predict` / `match` - Inference methods
-
-### Constants
-
-**Pattern**: `UPPER_CASE`
-
-**Examples**:
+### Type Aliases
 ```python
-MODEL_REGISTRY = {...}
-RERANKER_REGISTRY = {...}
-SOURCE_URL = "https://..."
-DEFAULT_THRESHOLD = 0.7
+TextInput = Union[str, List[str]]
+PathLike = Union[str, Path]
 ```
-
-### Private Members
-
-**Pattern**: `_leading_underscore`
-
-**Levels of privacy**:
-- `_protected` - Internal but not strict (single underscore)
-- `__private__` - Dunder methods (Python protocol)
-- `__mangled` - Name mangling (rarely used)
 
 ## Error Handling
 
-### Validation Strategy
+### Exception Hierarchy
+All custom exceptions inherit from `SemanticMatcherError`:
 
-**Input Validation**:
-- Located in `src/semanticmatcher/utils/validation.py`
-- Validates entities, queries, training data
-- Type checking with defensive programming
-
-**Example Pattern**:
 ```python
-def validate_entities(entities: List[Dict[str, Any]]) -> None:
-    if not isinstance(entities, list):
-        raise TypeError("entities must be a list")
+SemanticMatcherError (Exception)
+├── ValidationError (ValueError, SemanticMatcherError)
+├── TrainingError (RuntimeError, SemanticMatcherError)
+├── MatchingError (RuntimeError, SemanticMatcherError)
+└── ModeError (ValueError, SemanticMatcherError)
+```
+
+### Error Design Patterns
+
+1. **Context-Rich Exceptions**: Include helpful diagnostic information
+```python
+raise ValidationError(
+    "Entity must have 'id' field",
+    entity=entity,
+    field="id",
+    suggestion="Add 'id' field: {'id': 'unique_id', 'name': 'Entity Name'}",
+)
+```
+
+2. **Attribute-based Context**: Store context as instance attributes
+```python
+class ValidationError(ValueError, SemanticMatcherError):
+    def __init__(self, message, *, entity=None, field=None, suggestion=None):
+        self.raw_message = message
+        self.entity = entity
+        self.field = field
+        self.suggestion = suggestion
+```
+
+3. **Formatted Messages**: Use `_format_message()` for consistent error display
+```python
+def _format_message(self) -> str:
+    msg = self.raw_message
+    if self.field:
+        msg += f"\n  Problem field: {self.field}"
+    if self.suggestion:
+        msg += f"\n  💡 Suggestion: {self.suggestion}"
+    return msg
+```
+
+### Error Handling Patterns
+
+- **Validation Errors**: Use `ValidationError` for input validation failures
+- **Training Errors**: Use `TrainingError` for model training failures
+- **Import Errors**: Use `ImportError` with helpful install instructions
+```python
+if not SETFIT_AVAILABLE:
+    raise ImportError("setfit is required. Install with: pip install setfit")
+```
+
+## Validation
+
+### Validation Functions
+Centralized in `utils/validation.py`:
+
+- `validate_entity()` - Single entity validation
+- `validate_entities()` - Batch validation with duplicate detection
+- `validate_threshold()` - Threshold range checking (0-1)
+- `validate_model_name()` - Model name validation
+
+### Validation Pattern
+```python
+def validate_entities(entities: List[Dict[str, Any]]) -> bool:
+    """Validate a list of entities."""
+    if not entities:
+        raise ValidationError(
+            "entities list cannot be empty",
+            suggestion="Provide at least one entity",
+        )
+
     for entity in entities:
-        if "id" not in entity:
-            raise ValueError("entity missing 'id' field")
+        validate_entity(entity)
+
+    # Check for duplicate IDs
+    ids = [e["id"] for e in entities]
+    if len(ids) != len(set(ids)):
+        duplicates = [eid for eid in ids if ids.count(eid) > 1]
+        raise ValidationError(
+            f"Entity IDs must be unique. Found duplicates: {duplicates}",
+        )
+
+    return True
 ```
 
-### Exception Propagation
+## Configuration & Constants
 
-**No Custom Exception Hierarchy**:
-- Let ML framework exceptions bubble up
-- Users handle `sentence-transformers` and `SetFit` errors
-- No wrapping in custom exceptions
+### Model Registries
+Centralized in `config.py` for easy model selection:
 
-**Common Exceptions**:
-- `ValueError` - Invalid input parameters
-- `TypeError` - Wrong type passed
-- `RuntimeError` - Model loading failures
-
-### Error Messages
-
-**Descriptive Messages**:
 ```python
-raise ValueError(f"entities must have 'text' or 'name' field, got: {entity}")
-```
+MODEL_REGISTRY = {
+    "bge-base": "BAAI/bge-base-en-v1.5",
+    "bge-m3": "BAAI/bge-m3",
+    "mpnet": "sentence-transformers/all-mpnet-base-v2",
+    "default": "sentence-transformers/all-mpnet-base-v2",
+}
 
-## Documentation
-
-### Docstring Format
-
-**Google Style (preferred)**:
-```python
-def match(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
-    """
-    Match query against entities.
-
-    Args:
-        query: Query text to match
-        top_k: Number of results to return
-
-    Returns:
-        List of matched entities with scores
-
-    Raises:
-        ValueError: If query is empty
-    """
-    pass
-```
-
-### Module Docstrings
-
-**All modules have descriptive docstrings**:
-```python
-"""Hybrid matching pipeline with blocking, retrieval, and reranking."""
-```
-
-### Example Code in Docstrings
-
-**Doctest-style examples**:
-```python
 def resolve_model_alias(model_name: str) -> str:
-    """
-    Resolve model alias to full model name.
-
-    Example:
-        >>> resolve_model_alias("bge-base")
-        'BAAI/bge-base-en-v1.5'
-    """
+    """Resolve model alias to full model name."""
     return MODEL_REGISTRY.get(model_name, model_name)
 ```
 
-## Import Conventions
+### Configuration Loading
+- **File Formats**: YAML (`.yaml`) or JSON (`.json`)
+- **Search Order**: repo root → package default → current directory
+- **Merging**: Deep merge for custom overrides
+- **Access**: Dot-notation access (`config.get("model.name")`)
 
-### Import Order
+## Caching Patterns
 
-**Standard layout**:
-1. Standard library imports
-2. Third-party imports
-3. Local imports
+### Model Cache
+Thread-safe LRU cache in `utils/embeddings.py`:
 
 ```python
-# 1. Standard library
-from pathlib import Path
-from typing import List, Dict, Any
+class ModelCache:
+    def __init__(self, max_memory_gb: float = 4.0, ttl_seconds: Optional[float] = None):
+        self._cache: Dict[str, Any] = {}
+        self._lock = threading.RLock()
 
-# 2. Third-party
-import numpy as np
-from sentence_transformers import SentenceTransformer
-
-# 3. Local
-from .classifier import SetFitClassifier
-from ..utils.validation import validate_entities
+    def get_or_load(self, model_name: str, factory: Callable[[], Any]) -> Any:
+        with self._lock:
+            if model_name in self._cache:
+                return self._cache[model_name]
+            model = factory()
+            self._cache[model_name] = model
+            return model
 ```
 
-### Import Style
-
-**Prefer explicit imports**:
+### Cache Clearing
+Use `autouse` fixture in tests:
 ```python
-from typing import List, Dict, Any, Optional
-
-# Avoid:
-from typing import *
+@pytest.fixture(autouse=True)
+def clear_model_cache():
+    cache = get_default_cache()
+    cache.clear()
+    yield
+    cache.clear()
 ```
 
-**Relative imports in package**:
+## Public API Design
+
+### Lazy Loading
+Use `__getattr__` for lazy imports in `__init__.py`:
+
 ```python
-from .classifier import SetFitClassifier  # sibling
-from ..utils import validation  # parent/child
+_EXPORTS = {
+    "Matcher": (".core.matcher", "Matcher"),
+    "SetFitClassifier": (".core.classifier", "SetFitClassifier"),
+}
+
+def __getattr__(name):
+    if name not in _EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module_name, attr_name = _EXPORTS[name]
+    value = getattr(import_module(module_name, __name__), attr_name)
+    globals()[name] = value
+    return value
 ```
 
-## Code Organization
+### Deprecation Warnings
+Use `warnings.warn()` for deprecated APIs:
 
-### File Length Guidelines
-
-**Preferred**: < 200 lines per file
-**Acceptable**: 200-300 lines
-**Review needed**: > 300 lines
-
-**Current largest files**:
-- `ingestion/universities.py` (371 lines) - Contains hardcoded data
-- `ingestion/products.py` (356 lines) - Contains hardcoded data
-- `core/matcher.py` (320 lines) - Core logic, could be modularized
-
-### Class Organization
-
-**Standard structure**:
 ```python
-class MyClass:
-    """Docstring."""
+_DEPRECATED_CLASSES = {
+    "EntityMatcher": "Matcher",
+    "EmbeddingMatcher": "Matcher",
+}
 
-    def __init__(self, ...):
-        """Initialize."""
-
-    # Public methods
-    def public_method(self):
-        """Public API."""
-
-    # Private methods
-    def _private_method(self):
-        """Internal helper."""
-
-    # Properties
-    @property
-    def my_property(self):
-        """Property getter."""
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        replacement = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{name} is deprecated. Use {replacement} instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 ```
 
-## Logging
+## Class Design Patterns
 
-**Current Status**: Minimal logging
-- Progress bars via `tqdm` for long operations
-- No structured logging framework
-- Print statements for debugging (should be replaced with `logging`)
-
-**Recommended Enhancement**:
+### Initialization Pattern
 ```python
-import logging
-
-logger = logging.getLogger(__name__)
-
-logger.info("Loading model...")
-logger.debug(f"Candidates after blocking: {len(candidates)}")
+class Matcher:
+    def __init__(
+        self,
+        entities: List[Dict[str, Any]],
+        model_name: str = "sentence-transformers/paraphrase-mpnet-base-v2",
+        threshold: float = 0.7,
+        normalize: bool = True,
+    ):
+        self.entities = entities
+        self.model_name = model_name
+        self.threshold = threshold
+        self.normalize = normalize
 ```
+
+### Method Chaining
+Return `self` for fluent interface:
+
+```python
+def set_threshold(self, threshold: float) -> "Matcher":
+    """Update threshold and return self for chaining."""
+    self.threshold = validate_threshold(threshold)
+    return self
+```
+
+## Utility Functions
+
+### Helper Functions
+Keep helper functions private (underscore prefix):
+
+```python
+def _coerce_texts(texts: TextInput) -> Tuple[List[str], bool]:
+    """Coerce single string to list for uniform processing."""
+    if isinstance(texts, str):
+        return [texts], True
+    return texts, False
+
+def _unwrap_single(results: List[Any], single_input: bool) -> Any:
+    """Unwrap single result if input was a single string."""
+    if single_input:
+        return results[0]
+    return results
+```
+
+### Data Processing
+```python
+def _flatten_entity_texts(entities: List[Dict[str, Any]]) -> Tuple[List[str], List[str]]:
+    """Extract all entity texts and their IDs."""
+    entity_texts = []
+    entity_ids = []
+    for entity in entities:
+        entity_texts.append(entity["name"])
+        entity_ids.append(entity["id"])
+        for alias in entity.get("aliases", []):
+            entity_texts.append(alias)
+            entity_ids.append(entity["id"])
+    return entity_texts, entity_ids
+```
+
+## Documentation Standards
+
+### Docstrings
+- **Format**: Google-style docstrings
+- **Required**: All public classes/methods/functions
+- **Content**: Purpose, args, returns, raises, examples
+
+```python
+class Matcher:
+    """
+    Unified entity matcher with smart auto-selection.
+
+    Automatically chooses the best matching strategy:
+    - No training data → zero-shot (embedding similarity)
+    - < 3 examples/entity → head-only training (~30s)
+    - ≥ 3 examples/entity → full training (~3min)
+
+    Example:
+        matcher = Matcher(entities=[
+            {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
+        ])
+        matcher.fit()
+        result = matcher.match("America")  # {"id": "US", "score": 0.95}
+    """
+```
+
+### Comments
+- Use inline comments for complex logic
+- Explain "why", not "what"
+- Keep comments up-to-date with code changes
 
 ## Testing Patterns
 
-### Test Structure
-
-**Mirror Source Structure**:
-```
-tests/test_core/        → src/semanticmatcher/core/
-tests/test_backends/    → src/semanticmatcher/backends/
-tests/test_utils/       → src/semanticmatcher/utils/
-```
-
-### Test Naming
-
-**Pattern**: `test_<function>_<scenario>`
-
-```python
-def test_match_returns_top_k_results():
-    """Test that match returns exactly top_k results."""
-    pass
-
-def test_match_filters_below_threshold():
-    """Test that match filters results below threshold."""
-    pass
-```
-
-### AAA Pattern
-
-**Arrange-Act-Assert**:
-```python
-def test_match_with_valid_query():
-    # Arrange
-    matcher = EmbeddingMatcher(entities=TEST_ENTITIES)
-    matcher.build_index()
-    query = "test query"
-
-    # Act
-    results = matcher.match(query, top_k=3)
-
-    # Assert
-    assert len(results) == 3
-    assert "score" in results[0]
-```
-
-## Performance Patterns
-
-### Caching
-
-**ModelCache** (`utils/embeddings.py`):
-- Thread-safe singleton pattern
-- TTL-based expiration
-- Memory limits
-- Shared across instances
-
-### Lazy Loading
-
-**Package imports** (`__init__.py`):
-- Lazy import via `__getattr__`
-- Reduces initial import time
-- Optional dependencies not loaded until needed
-
-### Parallel Processing
-
-**ThreadPoolExecutor**:
-- Used in `HybridMatcher` for bulk operations
-- Concurrent blocking/retrieval/reranking
-- Configurable worker count
-
-## Configuration
-
-### YAML Configuration
-
-**Config Class** (`config.py`):
-- Loads YAML files
-- Model registries
-- Path resolution
-
-### Environment Variables
-
-**Currently**: Not used
-**Future consideration**: API keys for LiteLLM backend
-
-## Git Conventions
-
-**Commit Format**:
-- Conventional commits (feat:, fix:, docs:, refactor:)
-- Descriptive body for major changes
-
-**Branch Structure**:
-- `main` - Stable production code
-- Feature branches - `feature/` or `codex/` prefixes
-
-## Code Review Priorities
-
-When reviewing code, check:
-1. Type hints present and accurate
-2. Docstrings for public APIs
-3. Input validation
-4. Error handling
-5. No hardcoded secrets
-6. Test coverage
-7. Adherence to naming conventions
+See `TESTING.md` for comprehensive testing guidelines.

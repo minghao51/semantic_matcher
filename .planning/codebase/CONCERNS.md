@@ -1,352 +1,527 @@
 # Concerns
 
-## Tech Debt
+## Summary
 
-### Large Files (Code Smell)
+This document tracks technical debt, bugs, security issues, and performance concerns in the semantic_matcher codebase.
 
-**Files requiring refactoring**:
+**Last Updated**: 2026-03-09
+**Total Issues**: 7 categories, 15+ specific items
 
-| File | Lines | Issue |
-|------|-------|-------|
-| `ingestion/universities.py` | 371 | Hardcoded fallback data |
-| `ingestion/products.py` | 356 | Hardcoded fallback data |
-| `core/matcher.py` | 320 | Core logic, could be modularized |
-| `ingestion/industries.py` | 247 | Similar pattern to products/universities |
+---
 
-**Recommended Actions**:
-1. Extract hardcoded data to `data/raw/` JSON files
-2. Split `matcher.py` into separate files for `EntityMatcher` and `EmbeddingMatcher`
-3. Consider data-driven approach for ingestion modules
+## 1. Large/Complex Files
 
-### Hardcoded URLs
+### matcher.py (992 lines)
+**Location**: `src/semanticmatcher/core/matcher.py`
 
-**Files with hardcoded URLs** (8 files):
-- `ingestion/currencies.py` - Currency codes CSV
-- `ingestion/industries.py` - Industry codes JSON/CSV
-- `ingestion/languages.py` - Language codes CSV
-- `ingestion/occupations.py` - O*NET and SOC data
-- `ingestion/products.py` - UNSPSC API and JSON
-- `ingestion/timezones.py` - IANA timezone data
-- `ingestion/universities.py` - (no URL, uses hardcoded data)
-- `backends/__init__.py` - (minor, likely HuggingFace URLs)
+**Issues**:
+- Contains 3 classes: `Matcher`, `EntityMatcher`, `EmbeddingMatcher`
+- High complexity with multiple responsibilities
+- Difficult to test and maintain
+- God object anti-pattern
 
-**Concern**:
-- URLs may become stale
-- No fallback if external sources change
-- Difficult to update across multiple files
+**Impact**:
+- Hard to understand the full flow
+- Testing is challenging
+- Bug fixes may have unintended side effects
 
-**Recommended Actions**:
-1. Centralize URL configuration in `config.py`
-2. Add health checks for external sources
-3. Implement fallback mechanisms for all ingestion sources
+**Recommendation**:
+```python
+# Split into separate modules:
+src/semanticmatcher/core/
+  ├── matcher.py          # Unified Matcher (small orchestrator)
+  ├── entity_matcher.py   # EntityMatcher (SetFit-based)
+  ├── embedding_matcher.py # EmbeddingMatcher (zero-shot)
+  └── base_matcher.py     # Shared base class
+```
 
-### No TODO/FIXME Comments
+**Priority**: Medium
 
-**Status**: ✅ **Positive**
-- No TODO comments found in codebase
-- No FIXME markers
-- No HACK or XXX comments
+---
 
-**Implication**: Code is well-maintained or technical debt is not being tracked
+### hierarchy.py (656 lines)
+**Location**: `src/semanticmatcher/core/hierarchy.py`
 
-## Security
+**Issues**:
+- Hierarchical matching with NetworkX
+- Moderate complexity but growing
+- Mix of graph logic and matching logic
 
-### Hardcoded Secrets
+**Impact**:
+- Difficult to add new hierarchy features
+- Testing graph scenarios is complex
 
-**Status**: ✅ **No critical issues found**
+**Recommendation**:
+- Extract graph operations to separate module
+- Consider strategy pattern for different hierarchy traversal algorithms
 
-**Scan Results**:
-- No API keys detected in source code
-- No hardcoded credentials
-- No passwords in config files
+**Priority**: Low
 
-**Note**: LiteLLM backend exists (`backends/litellm.py`) but is not actively used. If activated, would require secure API key management (environment variables).
+---
 
-### HTTP vs HTTPS
+## 2. Security Issues
 
-**Status**: ✅ **All URLs use HTTPS**
+### API Key in Environment Variable
+**Location**: `src/semanticmatcher/backends/litellm.py:21, 34`
 
-**Verified Sources**:
-- All ingestion URLs use `https://`
-- No insecure HTTP endpoints
+**Issue**:
+```python
+os.environ["LITELLM_API_KEY"] = api_key  # Sets global env var
+```
 
-### Input Validation
+**Problems**:
+1. **Process-wide Exposure**: Affects entire process, not just the backend
+2. **No Input Validation**: Accepts None or empty string
+3. **Environment Variable Pollution**: Side effects on other code
+4. **Logging Risk**: May be logged by debugging tools
 
-**Status**: ⚠️ **Partial coverage**
+**Attack Vector**:
+- If an attacker can read environment variables, they get the API key
+- No cleanup after use (key remains in memory)
 
-**Existing Validation**:
-- `src/semanticmatcher/utils/validation.py` exists
-- Type hints provide some safety
+**Recommendation**:
+```python
+# Option 1: Pass directly to LiteLLM
+import litellm
+result = litellm.embedding(model=model, text=text, api_key=api_key)
 
-**Gaps**:
-- Need to verify SQL injection prevention (if databases added)
-- Check for XSS vulnerabilities in web UIs (if any)
-- Validate file paths in ingestion to prevent path traversal
+# Option 2: Use context manager
+from contextlib import contextmanager
 
-**Recommended Actions**:
-1. Audit validation.py completeness
-2. Add sanitization for user-supplied text inputs
-3. Implement path validation for file operations
+@contextmanager
+def temporary_env_var(key, value):
+    old_value = os.environ.get(key)
+    os.environ[key] = value
+    try:
+        yield
+    finally:
+        if old_value is None:
+            del os.environ[key]
+        else:
+            os.environ[key] = old_value
+```
 
-## Performance
+**Priority**: High
 
-### Model Loading
+---
 
-**Current Implementation**:
-- `ModelCache` in `utils/embeddings.py` provides caching
-- Thread-safe with locks
-- TTL and memory limits
+### No Input Validation
+**Location**: Multiple locations
 
-**Potential Issues**:
-- No preload strategy for common models
-- Cold start on first query
-- Large models (bge-m3, nomic) take time to load
+**Issues**:
+- No validation of user inputs (file paths, model names, parameters)
+- Could lead to path traversal, injection attacks
+- Silent failures on invalid inputs
 
-**Recommended Enhancements**:
-1. Implement model preloading on application startup
-2. Add warmup queries for JIT compilation
-3. Consider async model loading
+**Examples**:
+```python
+# matcher.py - No validation of model_name
+matcher = Matcher(model_name="../../../etc/passwd")  # Potential path traversal
 
-### Blocking Efficiency
+# No validation of dimensions
+EmbeddingMatcher(max_results=-1)  # Negative values accepted
+```
 
-**Current State**: ✅ **Good**
-- Multiple blocking strategies available
-- BM25Blocking is fast and efficient
-- TFIDFBlocking and FuzzyBlocking for specific use cases
+**Recommendation**:
+- Add validation for all public API inputs
+- Use `pydantic` or similar for validation
+- Whitelist model names, don't allow arbitrary strings
 
-**Concern**:
-- No benchmarking data for blocking vs. no-blocking performance
-- Unclear optimal `blocking_top_k` values for different dataset sizes
+**Priority**: High
 
-**Recommended Actions**:
-1. Add performance benchmarks for blocking strategies
-2. Document recommended `blocking_top_k` by dataset size
-3. Add auto-tuning for blocking parameters
+---
+
+## 3. Error Handling
+
+### Bare Exception Catching
+**Location**: `src/semanticmatcher/core/matcher.py:681`
+
+**Issue**:
+```python
+except Exception as e:  # Too broad!
+    logger.error(f"Error: {e}")
+```
+
+**Problems**:
+- Catches KeyboardInterrupt, SystemExit, etc.
+- Makes debugging difficult
+- May hide serious errors
+
+**Recommendation**:
+```python
+except (ValueError, KeyError, ModelLoadError) as e:
+    logger.error(f"Specific error: {e}")
+```
+
+**Priority**: Medium
+
+---
+
+### Silent Failures in Ingestion
+**Location**: `src/semanticmatcher/ingest/*.py`
+
+**Issue**:
+```python
+try:
+    download_data()
+except Exception as e:
+    print(f"Failed: {e}")
+    continue  # Silently continues
+```
+
+**Problems**:
+- No indication of partial failures
+- User thinks everything succeeded
+- Difficult to debug
+
+**Recommendation**:
+- Collect all failures and report at end
+- Add `--strict` flag to fail on any error
+- Return exit code based on success/failure
+
+**Priority**: Medium
+
+---
+
+### Broad Exception Handling
+**Location**: `src/semanticmatcher/__init__.py:8`
+
+**Issue**:
+```python
+except Exception:
+    # Fallback version
+```
+
+**Problems**:
+- Hides import errors
+- Makes troubleshooting difficult
+- May ship wrong version
+
+**Recommendation**:
+```python
+except ImportError as e:
+    logger.warning(f"Could not import version: {e}")
+    version = "unknown"
+```
+
+**Priority**: Low
+
+---
+
+## 4. Code Quality Issues
+
+### Print Statements (41 occurrences)
+**Location**: Throughout codebase
+
+**Issue**:
+```python
+print("Loading model...")  # Should use logging
+```
+
+**Problems**:
+- Cannot control log levels
+- No timestamps
+- Cannot redirect to file easily
+- Not suitable for production
+
+**Recommendation**:
+```python
+import logging
+logger = logging.getLogger(__name__)
+logger.info("Loading model...")
+```
+
+**Priority**: Medium
+
+**Status**: See tracking ticket in project backlog
+
+---
+
+### Global State
+**Location**: `src/semanticmatcher/backends/embeddings.py`
+
+**Issue**:
+```python
+# Global default cache
+_default_cache = None
+_lock = threading.Lock()
+```
+
+**Problems**:
+- Difficult to test (shared state between tests)
+- Thread safety issues
+- Cannot have multiple caches
+
+**Recommendation**:
+- Use dependency injection
+- Pass cache as parameter
+- Consider using `functools.cached_property`
+
+**Priority**: Low
+
+---
+
+### Type Ignore Comments
+**Location**: `src/semanticmatcher/backends/litellm.py:13`
+
+**Issue**:
+```python
+from litellm import embedding  # type: ignore
+```
+
+**Problems**:
+- Suppresses type checking
+- May hide real type errors
+- Makes code less type-safe
+
+**Recommendation**:
+- Use stub files for LiteLLM
+- Or add proper type annotations inline
+
+**Priority**: Low
+
+---
+
+## 5. Architectural Concerns
+
+### Tight Coupling
+**Location**: `src/semanticmatcher/core/matcher.py`
+
+**Issue**:
+```python
+from semanticmatcher.backends.huggingface import HuggingFaceEmbeddingBackend
+from semanticmatcher.backends.setfit import SetFitBackend
+# Imports and instantiates concrete classes
+```
+
+**Problems**:
+- Hard to swap implementations
+- Difficult to test (requires real backends)
+- Violates Dependency Inversion Principle
+
+**Recommendation**:
+- Use dependency injection
+- Define protocols/interfaces
+- Allow backends to be passed in
+
+```python
+from typing import Protocol
+
+class EmbeddingBackend(Protocol):
+    def embed(self, texts: list[str]) -> np.ndarray: ...
+
+def __init__(self, backend: EmbeddingBackend):
+    self._backend = backend
+```
+
+**Priority**: Medium
+
+---
+
+### Lazy Initialization Pattern
+**Location**: `src/semanticmatcher/core/matcher.py`
+
+**Issue**:
+```python
+@property
+def _setfit_backend(self):
+    if self._backend is None:
+        self._backend = SetFitBackend(...)
+    return self._backend
+```
+
+**Problems**:
+- May hide initialization errors until runtime
+- Difficult to test (no way to mock before first access)
+- Unclear when initialization happens
+
+**Recommendation**:
+- Initialize in `__init__` if cheap
+- Use explicit initialization method if expensive
+- Document lazy initialization clearly
+
+**Priority**: Low
+
+---
+
+## 6. Testing & Coverage
+
+### Low Test Coverage
+**Current State**:
+- 33 test files vs 33+ source files
+- Likely <50% coverage (estimate)
+
+**Missing Tests**:
+- Error handling paths
+- Edge cases (empty inputs, null values)
+- Integration tests (end-to-end workflows)
+- Performance tests
+
+**Recommendations**:
+1. Add coverage reporting: `pytest --cov=semanticmatcher`
+2. Set minimum coverage threshold: 80%+
+3. Add integration tests for:
+   - Model loading failures
+   - Network errors
+   - Invalid inputs
+4. Add property-based testing (Hypothesis)
+
+**Priority**: High
+
+---
+
+### No Pragma Comments
+**Current State**: Only 1 pragma comment found
+
+**Issue**:
+- No coverage hints for complex code
+- Unclear what's intentionally untested
+
+**Recommendation**:
+```python
+# pragma: no-cover - Complex error handling that's hard to test
+try:
+    recover_from_disaster()
+except Exception:
+    # pragma: no-cover
+    pass
+```
+
+**Priority**: Low
+
+---
+
+## 7. Performance Concerns
+
+### Model Loading Time
+**Issue**: Models (1-4 GB) downloaded on first use
+
+**Impact**:
+- Cold start takes 30-60 seconds
+- Poor user experience
+- May timeout in serverless environments
+
+**Recommendations**:
+- Show progress bar during download
+- Pre-download models in Docker image
+- Add async model loading
+- Cache models in warm container
+
+**Priority**: Medium
+
+---
 
 ### Memory Usage
+**Issue**: Multiple large models loaded simultaneously
 
-**Potential Issues**:
-- Large embeddings held in memory
-- No LRU eviction for model cache (only TTL)
-- FuzzyBlocking loads all entity texts into memory
+**Impact**:
+- High RAM usage (8-16 GB)
+- May OOM on small instances
+- Limits scalability
 
-**Recommended Actions**:
-1. Add memory profiling tests
-2. Implement LRU eviction in ModelCache
-3. Consider disk-based index for very large datasets (>1M entities)
+**Recommendations**:
+- Unload unused models
+- Use model quantization
+- Add memory limits
+- Document memory requirements
 
-## Bugs
+**Priority**: Medium
 
-### Known Issues
+---
 
-**Status**: No known bugs documented
+### No Caching for Embeddings
+**Issue**: Same text embedded multiple times
 
-**Recommended Actions**:
-1. Add issue tracking labels (bug, enhancement, docs)
-2. Document common edge cases that users encounter
-3. Add error logging for production debugging
+**Impact**:
+- Wasted compute
+- Slower matching
 
-### Error Handling Gaps
+**Recommendation**:
+- Add LRU cache for embeddings
+- `@lru_cache(maxsize=1000)`
+- Or use Redis for distributed cache
 
-**Potential Issues**:
-- No validation for `top_k=0` or negative values
-- No handling for Hugging Face network failures
-- No retry logic for model downloads
+**Priority**: Low
 
-**Recommended Actions**:
-1. Add parameter validation in public APIs
-2. Implement retry logic for network operations
-3. Add graceful degradation when models unavailable
+---
 
-## Compatibility
+## 8. Documentation Concerns
 
-### Python Version Support
+### Missing Docstrings
+**Issue**: Some public methods lack docstrings
 
-**Current**: 3.9, 3.10, 3.11, 3.12
+**Impact**:
+- Difficult to use library
+- Poor IDE autocomplete
+- Need to read source code
 
-**Concerns**:
-- No testing matrix documented for all Python versions
-- Type hints may not work correctly on all versions
+**Recommendation**:
+- Add Google-style docstrings
+- Use `pydocstyle` to enforce
+- Auto-generate API docs with Sphinx
 
-**Recommended Actions**:
-1. Add CI testing for all supported Python versions
-2. Document version-specific features/limitations
+**Priority**: Low
 
-### Dependency Pinning
+---
 
-**Current State**:
-- Minimum versions specified (e.g., `numpy>=2.0.0`)
-- No maximum version caps
+## 9. Dependency Concerns
 
-**Concerns**:
-- Breaking changes in dependencies could cause failures
-- No compatibility testing with latest dependency versions
+### Outdated Dependencies
+**Issue**: Some dependencies may be outdated
 
-**Recommended Actions**:
-1. Add dependency update testing in CI
-2. Consider `uv.lock` for reproducible dev environments
-3. Document tested dependency versions
+**Recommendation**:
+```bash
+uv pip list --outdated
+uv pip update --all
+```
 
-## Scalability
+**Priority**: Low
 
-### Current Limitations
+---
 
-**In-Memory Only**:
-- All entities stored in memory
-- No database backend
-- No sharding or distributed processing
+### No Dependency Pinning
+**Issue**: Using `>=` allows breaking changes
 
-**Implications**:
-- Limited to datasets that fit in RAM
-- Single-machine only
-- No horizontal scaling
+**Recommendation**:
+- Pin exact versions for release
+- Use `>=` only for development
+- Consider using `uv.lock` for reproducibility
 
-**Recommended Considerations**:
-1. Document maximum recommended dataset size
-2. Add optional database backend for large datasets
-3. Consider distributed embedding index (FAISS, Milvus)
+**Priority**: Low
 
-### Concurrent Processing
+---
 
-**Current**: `ThreadPoolExecutor` in `HybridMatcher`
-
-**Limitations**:
-- GIL limits CPU-bound parallelism
-- No async/await for I/O-bound operations
-- No multiprocessing for true parallelism
-
-**Recommended Actions**:
-1. Profile GIL impact on performance
-2. Consider multiprocessing for bulk operations
-3. Add async variants of I/O operations
-
-## Documentation
-
-### Gaps
-
-**Missing**:
-1. API reference documentation (no Sphinx/MkDocs autodocs)
-2. Performance benchmarks and baseline numbers
-3. Production deployment guide
-4. Error codes and troubleshooting guide
-
-**Recommended Actions**:
-1. Generate API docs from docstrings (Sphinx/MkDocs)
-2. Add performance section to README
-3. Create deployment guide (Docker, env vars, scaling)
-4. Expand troubleshooting.md with common errors
-
-## Monitoring & Observability
-
-### Current State
-
-**Basic Monitoring**:
-- `src/semanticmatcher/core/monitoring.py` exists
-- No integrated logging framework
-- No metrics collection
-
-**Gaps**:
-- No structured logging
-- No performance metrics
-- No error tracking (Sentry, etc.)
-
-**Recommended Actions**:
-1. Replace print statements with `logging` module
-2. Add Prometheus/StatsD metrics
-3. Implement distributed tracing for request flows
-4. Add health check endpoints for deployments
-
-## Testing Gaps
-
-### Coverage
-
-**Current**: No coverage reporting configured
-
-**Risks**:
-- Untested code paths may contain bugs
-- No visibility into test coverage trends
-- Difficult to enforce coverage standards
-
-**Recommended Actions**:
-1. Add `pytest-cov` to dev dependencies
-2. Set minimum coverage threshold (e.g., 80%)
-3. Add coverage reporting to CI
-4. Generate coverage badges for README
-
-### Test Data
-
-**Concerns**:
-- Limited test data fixtures
-- No synthetic data generators
-- No regression test datasets
-
-**Recommended Actions**:
-1. Expand test fixture library
-2. Add data generators for edge cases
-3. Create regression test suite with known good outputs
-
-## Dependencies
-
-### Heavy Dependencies
-
-**Large packages**:
-- `torch` (≥2.0.0) - Very large install
-- `sentence-transformers` (≥3.0.0) - Pulls in torch
-- `setfit` (≥1.0.0) - Also depends on torch
-
-**Implications**:
-- Slow installation
-- Large Docker images
-- Difficult for lightweight deployments
-
-**Considerations**:
-1. Document optional dependencies for CPU-only
-2. Provide lightweight alternatives (ONNX, TFLite)
-3. Create separate packages for CPU/GPU variants
-
-## License & Legal
-
-### Model Licenses
-
-**Concern**: Different models have different licenses
-- BAAI models (bge-base, bge-m3) - MIT
-- Nomic models - Apache 2.0
-- Microsoft models (ms-marco) - MIT
-
-**Action Required**:
-1. Document model licenses in README
-2. Add license compatibility matrix
-3. Warn users about commercial use restrictions
-
-## Prioritized Action Items
+## Summary by Priority
 
 ### High Priority
-
-1. **Extract hardcoded data** from ingestion files to JSON
-2. **Add input validation** for edge cases (top_k=0, negative values)
-3. **Implement retry logic** for Hugging Face downloads
-4. **Add pytest-cov** and coverage reporting
+1. API key security issues
+2. Input validation
+3. Test coverage
 
 ### Medium Priority
-
-5. **Centralize URL configuration** in config.py
-6. **Replace print statements** with logging framework
-7. **Add performance benchmarks** for blocking strategies
-8. **Document maximum dataset size** limitations
+4. Refactor matcher.py
+5. Error handling specificity
+6. Print statements → logging
+7. Model loading performance
+8. Memory usage
+9. Dependency injection
 
 ### Low Priority
+10. Refactor hierarchy.py
+11. Global state
+12. Type ignore comments
+13. Lazy initialization documentation
+14. No pragma comments
+15. Missing docstrings
+16. Dependency updates
 
-9. **Consider database backend** for large datasets
-10. **Add API reference documentation** (Sphinx/MkDocs)
-11. **Implement LRU eviction** in ModelCache
-12. **Create deployment guide** for production
+---
 
-## Metrics to Track
+## Tracking
 
-1. **Test coverage percentage** (target: 80%+)
-2. **Model loading time** (cold start)
-3. **Query latency** (p50, p95, p99)
-4. **Memory usage** per entity count
-5. **External source uptime** (ingestion URLs)
-6. **Bug report frequency**
-7. **Time to first match** (TTFM)
+This document should be updated:
+- When new concerns are identified
+- When concerns are addressed
+- Quarterly review for stale items
+
+**Next Review**: 2026-06-09

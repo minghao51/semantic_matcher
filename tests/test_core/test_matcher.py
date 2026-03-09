@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import warnings
 from semanticmatcher.core.matcher import EntityMatcher, EmbeddingMatcher, Matcher
+from semanticmatcher.exceptions import ModeError, TrainingError
 
 
 class TestEntityMatcher:
@@ -293,6 +294,11 @@ class TestUnifiedMatcher:
         matcher = Matcher(entities=sample_entities, mode="full")
         assert matcher._training_mode == "full"
 
+    def test_matcher_hybrid_mode(self, sample_entities):
+        """Test hybrid mode is accepted."""
+        matcher = Matcher(entities=sample_entities, mode="hybrid")
+        assert matcher._training_mode == "hybrid"
+
     def test_matcher_auto_detect_zero_shot(self, sample_entities):
         """Test auto-detection selects zero-shot without training data."""
         matcher = Matcher(entities=sample_entities)
@@ -353,6 +359,47 @@ class TestUnifiedMatcher:
         matcher = Matcher(entities=sample_entities, mode="full")
         with pytest.raises(ValueError, match="training_data is required"):
             matcher.fit()
+
+    def test_matcher_fit_hybrid_initializes_pipeline(
+        self, sample_entities, monkeypatch
+    ):
+        class FakeHybridMatcher:
+            def __init__(
+                self,
+                entities,
+                blocking_strategy,
+                retriever_model,
+                reranker_model,
+                normalize,
+            ):
+                self.entities = entities
+                self.blocking_strategy = blocking_strategy
+                self.retriever_model = retriever_model
+                self.reranker_model = reranker_model
+                self.normalize = normalize
+
+        monkeypatch.setattr(
+            "semanticmatcher.core.hybrid.HybridMatcher", FakeHybridMatcher
+        )
+
+        matcher = Matcher(
+            entities=sample_entities,
+            mode="hybrid",
+            model="mpnet",
+            reranker_model="bge-m3",
+        )
+        matcher.fit(training_data=[{"text": "ignored", "label": "DE"}])
+
+        assert isinstance(matcher._active_matcher, FakeHybridMatcher)
+        assert matcher._active_matcher.retriever_model == (
+            "sentence-transformers/all-mpnet-base-v2"
+        )
+        assert matcher._active_matcher.reranker_model == "bge-m3"
+
+    def test_matcher_invalid_mode_uses_mode_error(self, sample_entities):
+        """Test invalid mode raises the custom compatibility error type."""
+        with pytest.raises(ModeError):
+            Matcher(entities=sample_entities, mode="invalid_mode")
 
     def test_matcher_match_zero_shot(self, sample_entities):
         """Test match() in zero-shot mode."""
@@ -431,6 +478,191 @@ class TestUnifiedMatcher:
         matcher.fit()
         results = matcher.predict(["Deutschland", "America"])
         assert results == ["DE", "US"]
+
+    def test_matcher_match_hybrid_single(self, sample_entities):
+        class FakeHybridMatcher:
+            def match(
+                self,
+                query,
+                blocking_top_k=1000,
+                retrieval_top_k=50,
+                final_top_k=5,
+            ):
+                assert query == "Deutschland"
+                assert blocking_top_k == 20
+                assert retrieval_top_k == 10
+                assert final_top_k == 2
+                return [
+                    {"id": "DE", "score": 0.91, "cross_encoder_score": 0.4},
+                    {"id": "FR", "score": 0.32, "cross_encoder_score": 0.9},
+                ]
+
+        matcher = Matcher(entities=sample_entities, mode="hybrid", threshold=0.5)
+        matcher._hybrid_matcher = FakeHybridMatcher()
+        matcher._active_matcher = matcher._hybrid_matcher
+        matcher._training_mode = "hybrid"
+
+        results = matcher.match(
+            "Deutschland",
+            top_k=2,
+            blocking_top_k=20,
+            retrieval_top_k=10,
+        )
+
+        assert results == [{"id": "DE", "score": 0.91, "cross_encoder_score": 0.4}]
+
+    def test_matcher_match_hybrid_multiple(self, sample_entities):
+        class FakeHybridMatcher:
+            def match_bulk(
+                self,
+                queries,
+                blocking_top_k=1000,
+                retrieval_top_k=50,
+                final_top_k=5,
+                n_jobs=-1,
+                chunk_size=None,
+            ):
+                assert queries == ["Deutschland", "America"]
+                assert blocking_top_k == 30
+                assert retrieval_top_k == 8
+                assert final_top_k == 1
+                assert n_jobs == 2
+                assert chunk_size == 4
+                return [
+                    [{"id": "DE", "score": 0.87}],
+                    [{"id": "US", "score": 0.22}],
+                ]
+
+        matcher = Matcher(entities=sample_entities, mode="hybrid", threshold=0.5)
+        matcher._hybrid_matcher = FakeHybridMatcher()
+        matcher._active_matcher = matcher._hybrid_matcher
+        matcher._training_mode = "hybrid"
+
+        results = matcher.match(
+            ["Deutschland", "America"],
+            blocking_top_k=30,
+            retrieval_top_k=8,
+            n_jobs=2,
+            chunk_size=4,
+        )
+
+        assert results == [{"id": "DE", "score": 0.87}, None]
+
+    def test_matcher_set_threshold_updates_underlying_matchers(self, sample_entities):
+        matcher = Matcher(entities=sample_entities, mode="zero-shot")
+        matcher._embedding_matcher = type(
+            "FakeEmbeddingMatcher", (), {"threshold": 0.7}
+        )()
+        matcher._entity_matcher = type("FakeEntityMatcher", (), {"threshold": 0.7})()
+
+        returned = matcher.set_threshold(0.42)
+
+        assert returned is matcher
+        assert matcher.threshold == 0.42
+        assert matcher._embedding_matcher.threshold == 0.42
+        assert matcher._entity_matcher.threshold == 0.42
+
+    def test_matcher_get_training_info(self, sample_entities):
+        matcher = self._build_trained_matcher(sample_entities, threshold=0.55)
+        matcher._detected_mode = "full"
+        matcher._has_training_data = True
+
+        info = matcher.get_training_info()
+
+        assert info == {
+            "mode": "full",
+            "detected_mode": "full",
+            "is_trained": True,
+            "active_matcher": "EntityMatcher",
+            "has_training_data": True,
+            "threshold": 0.55,
+        }
+
+    def test_matcher_get_statistics(self, sample_entities):
+        matcher = self._build_trained_matcher(sample_entities, threshold=0.55)
+        matcher._embedding_matcher = type(
+            "FakeEmbeddingMatcher", (), {"embeddings": np.ones((2, 2))}
+        )()
+
+        stats = matcher.get_statistics()
+
+        assert stats["num_entities"] == 3
+        assert stats["threshold"] == 0.55
+        assert stats["training_mode"] == "full"
+        assert stats["is_trained"] is True
+        assert stats["has_embeddings"] is True
+        assert stats["classifier_trained"] is True
+
+    def test_matcher_explain_match_temporarily_lowers_threshold(self, sample_entities):
+        class ThresholdAwareMatcher:
+            def __init__(self, threshold):
+                self.threshold = threshold
+
+            def match(self, _query, top_k=5):
+                candidates = [
+                    {"id": "FR", "score": 0.65, "text": "France"},
+                    {"id": "US", "score": 0.25, "text": "United States"},
+                ]
+                results = [
+                    candidate
+                    for candidate in candidates
+                    if candidate["score"] >= self.threshold
+                ]
+                return results[:top_k]
+
+        matcher = Matcher(entities=sample_entities, mode="zero-shot", threshold=0.8)
+        fake = ThresholdAwareMatcher(threshold=0.8)
+        matcher._active_matcher = fake
+        matcher._embedding_matcher = fake
+        matcher._training_mode = "zero-shot"
+
+        explanation = matcher.explain_match("France", top_k=2)
+
+        assert explanation["best_match"]["id"] == "FR"
+        assert [result["id"] for result in explanation["top_k"]] == ["FR", "US"]
+        assert explanation["matched"] is False
+        assert matcher.threshold == 0.8
+        assert fake.threshold == 0.8
+
+    def test_matcher_explain_match_hybrid_uses_wrapper_threshold(self, sample_entities):
+        class FakeHybridMatcher:
+            def match(
+                self,
+                _query,
+                blocking_top_k=1000,
+                retrieval_top_k=50,
+                final_top_k=5,
+            ):
+                return [
+                    {"id": "FR", "score": 0.62, "cross_encoder_score": 0.95},
+                    {"id": "US", "score": 0.24, "cross_encoder_score": 0.8},
+                ][:final_top_k]
+
+        matcher = Matcher(entities=sample_entities, mode="hybrid", threshold=0.8)
+        matcher._hybrid_matcher = FakeHybridMatcher()
+        matcher._active_matcher = matcher._hybrid_matcher
+        matcher._training_mode = "hybrid"
+
+        explanation = matcher.explain_match("France", top_k=2)
+
+        assert [result["id"] for result in explanation["top_k"]] == ["FR", "US"]
+        assert explanation["matched"] is False
+        assert matcher.threshold == 0.8
+
+    def test_matcher_diagnose_uses_explanation_results(self, sample_entities):
+        matcher = self._build_trained_matcher(sample_entities, threshold=0.9)
+
+        diagnosis = matcher.diagnose("Deutschland")
+
+        assert diagnosis["matcher_ready"] is True
+        assert diagnosis["issue"] == "Score 0.82 below threshold 0.9"
+        assert "matcher.set_threshold(0.8)" in diagnosis["suggestion"]
+
+    def test_matcher_explain_match_requires_fit(self, sample_entities):
+        matcher = Matcher(entities=sample_entities)
+
+        with pytest.raises(TrainingError, match="Matcher not ready"):
+            matcher.explain_match("Germany")
 
     def test_matcher_model_alias_resolution(self, sample_entities):
         """Test that model aliases are resolved correctly."""

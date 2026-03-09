@@ -13,6 +13,7 @@ from ..utils.validation import (
 )
 from ..utils.embeddings import ModelCache, get_default_cache
 from ..config import resolve_model_alias
+from ..exceptions import ModeError, TrainingError, ValidationError
 
 TextInput = Union[str, List[str]]
 
@@ -103,6 +104,9 @@ class Matcher:
         threshold: float = 0.7,
         normalize: bool = True,
         mode: Optional[str] = None,
+        blocking_strategy: Optional[Any] = None,
+        reranker_model: str = "default",
+        verbose: bool = False,
     ):
         """
         Initialize the unified Matcher.
@@ -120,6 +124,10 @@ class Matcher:
                 - 'zero-shot': No training, embedding similarity only
                 - 'head-only': Train classifier head only (fast, ~30s)
                 - 'full': Full SetFit training (accurate, ~3min)
+                - 'hybrid': Blocking + retrieval + reranking pipeline
+            blocking_strategy: Optional blocking strategy used by hybrid mode.
+            reranker_model: Reranker model alias or name used by hybrid mode.
+            verbose: Whether to print detailed logging information.
         """
         validate_entities(entities)
         validate_threshold(threshold)
@@ -129,6 +137,9 @@ class Matcher:
         self.threshold = threshold
         self.normalize = normalize
         self.mode = mode
+        self.blocking_strategy = blocking_strategy
+        self.reranker_model = reranker_model
+        self._verbose = verbose
 
         # Auto-detect mode if not explicitly set
         if mode is None or mode == "auto":
@@ -136,17 +147,19 @@ class Matcher:
         elif mode in ("zero-shot", "head-only", "full", "hybrid"):
             self._training_mode = mode
         else:
-            raise ValueError(
-                f"Invalid mode: {mode}. Must be one of: "
-                "'auto', 'zero-shot', 'head-only', 'full', 'hybrid'"
+            raise ModeError(
+                f"Invalid mode: {mode}",
+                invalid_mode=mode,
             )
 
         # Lazy initialization of underlying matchers
         # Using Any type to avoid forward reference issues since Matcher is defined before EntityMatcher/EmbeddingMatcher
         self._embedding_matcher: Optional[Any] = None
         self._entity_matcher: Optional[Any] = None
+        self._hybrid_matcher: Optional[Any] = None
         self._has_training_data = False
         self._active_matcher: Optional[Any] = None
+        self._detected_mode: Optional[str] = None  # Store auto-detected mode
 
     @property
     def embedding_matcher(self) -> Any:
@@ -174,6 +187,36 @@ class Matcher:
             )
         return self._entity_matcher
 
+    @property
+    def hybrid_matcher(self) -> Any:
+        """Lazy initialization of HybridMatcher."""
+        if self._hybrid_matcher is None:
+            from .hybrid import HybridMatcher
+
+            self._hybrid_matcher = HybridMatcher(
+                entities=self.entities,
+                blocking_strategy=self.blocking_strategy,
+                retriever_model=self.model_name,
+                reranker_model=self.reranker_model,
+                normalize=self.normalize,
+            )
+        return self._hybrid_matcher
+
+    def _log(self, message: str, level: str = "info") -> None:
+        """Log message if verbose mode is enabled.
+
+        Args:
+            message: The message to log
+            level: Log level ('info', 'warning', 'debug')
+        """
+        if self._verbose:
+            prefix = {
+                "info": "[INFO]",
+                "warning": "[WARN]",
+                "debug": "[DEBUG]",
+            }.get(level, "[LOG]")
+            print(f"{prefix} {message}")
+
     def _detect_training_mode(self, training_data: Optional[List[dict]]) -> str:
         """
         Auto-detect appropriate training mode based on data.
@@ -190,20 +233,21 @@ class Matcher:
             Detected mode: 'zero-shot', 'head-only', or 'full'.
         """
         if training_data is None:
-            return "zero-shot"
-
-        # Count examples per entity
-        entity_counts = defaultdict(int)
-        for item in training_data:
-            entity_counts[item["label"]] += 1
-
-        examples_per_entity = list(entity_counts.values())
-
-        # Check if we have enough examples for full training
-        if max(examples_per_entity) < 3:
-            return "head-only"
+            detected = "zero-shot"
         else:
-            return "full"
+            # Count examples per entity
+            entity_counts = defaultdict(int)
+            for item in training_data:
+                entity_counts[item["label"]] += 1
+
+            examples_per_entity = list(entity_counts.values())
+
+            # Check if we have enough examples for full training
+            detected = "head-only" if max(examples_per_entity) < 3 else "full"
+
+        # Store for transparency
+        self._detected_mode = detected
+        return detected
 
     def _select_matcher(self) -> Any:
         """Select the appropriate underlying matcher based on current mode."""
@@ -213,16 +257,19 @@ class Matcher:
             return self.embedding_matcher
         elif mode in ("head-only", "full"):
             return self.entity_matcher
+        elif mode == "hybrid":
+            return self.hybrid_matcher
         elif mode == "auto":
             # In auto mode, default to zero-shot until fit() is called
             return self.embedding_matcher
         else:
-            raise ValueError(f"Unknown mode: {mode}")
+            raise ModeError(f"Unknown mode: {mode}", invalid_mode=mode)
 
     def fit(
         self,
         training_data: Optional[List[dict]] = None,
         mode: Optional[str] = None,
+        show_progress: bool = True,
         **kwargs,
     ) -> "Matcher":
         """
@@ -237,6 +284,8 @@ class Matcher:
                 - 'zero-shot': Skip training, use embedding similarity
                 - 'head-only': Train classifier head only (fast)
                 - 'full': Full SetFit training (accurate)
+            show_progress: Whether to show progress bar during training.
+                Requires tqdm installed (pip install semantic-matcher[jupyter]).
             **kwargs: Additional arguments passed to training:
                 - num_epochs: Number of training epochs (default: 4)
                 - batch_size: Training batch size (default: 16)
@@ -254,43 +303,78 @@ class Matcher:
             # Explicit full training
             matcher.fit(training_data, mode="full")
         """
+        self._log(f"Starting fit with mode: {self._training_mode}")
+
         # Determine the mode to use
         if mode is not None:
-            if mode not in ("zero-shot", "head-only", "full"):
-                raise ValueError(
-                    f"Invalid mode: {mode}. Must be one of: "
-                    "'zero-shot', 'head-only', 'full'"
+            if mode not in ("zero-shot", "head-only", "full", "hybrid"):
+                raise ModeError(
+                    f"Invalid mode: {mode}",
+                    invalid_mode=mode,
                 )
             self._training_mode = mode
         elif training_data is not None and self._training_mode == "auto":
             # Auto-detect mode based on training data
             self._training_mode = self._detect_training_mode(training_data)
+            self._log(f"Auto-detected mode: {self._training_mode}", "debug")
         elif training_data is None and self._training_mode == "auto":
             # No training data, use zero-shot
             self._training_mode = "zero-shot"
 
+        # Try to import tqdm for progress messages
+        if show_progress:
+            try:
+                from tqdm.auto import tqdm
+
+                # Display mode if it was auto-detected
+                if self._detected_mode and self._training_mode != "zero-shot":
+                    tqdm.write(f"Auto-detected mode: {self._detected_mode}")
+            except ImportError:
+                # tqdm not available, silently disable
+                show_progress = False
+
+        if self._training_mode == "hybrid":
+            if training_data is not None:
+                self._log(
+                    "Ignoring training_data in hybrid mode; hybrid matching is inference-only",
+                    "warning",
+                )
+            self._log("Initializing hybrid pipeline")
+            self._active_matcher = self.hybrid_matcher
+            self._has_training_data = False
+            return self
+
         # Build index for zero-shot mode
         if self._training_mode == "zero-shot":
+            self._log("Building zero-shot index (no training required)")
             self.embedding_matcher.build_index()
             self._active_matcher = self.embedding_matcher
             return self
 
         # Train the entity matcher for head-only or full training
         if training_data is None:
-            raise ValueError(
-                "training_data is required for modes 'head-only' and 'full'"
+            raise ValidationError(
+                "training_data is required for modes 'head-only' and 'full'",
+                suggestion="Provide training_data or use mode='zero-shot' for matching without training",
             )
 
         # For now, both head-only and full use the same training
         # SetFit handles head-only vs full via different internal settings
         # In the future, we can add explicit head_only parameter to EntityMatcher.train()
         if self._training_mode in ("head-only", "full"):
-            self.entity_matcher.train(training_data, **kwargs)
+            self._log(f"Training in {self._training_mode} mode")
+            self.entity_matcher.train(
+                training_data, show_progress=show_progress, **kwargs
+            )
             self._active_matcher = self.entity_matcher
             self._has_training_data = True
+            self._log("Training complete")
             return self
 
-        raise ValueError(f"Unknown mode: {self._training_mode}")
+        raise ModeError(
+            f"Unknown mode: {self._training_mode}",
+            invalid_mode=self._training_mode,
+        )
 
     def match(
         self,
@@ -332,6 +416,8 @@ class Matcher:
             self.fit()
 
         # Route to appropriate matcher based on mode
+        if self._training_mode == "hybrid":
+            return self._match_hybrid(texts, top_k=top_k, **kwargs)
         if self._training_mode == "zero-shot":
             return self.embedding_matcher.match(texts, top_k=top_k, **kwargs)
         else:
@@ -367,6 +453,242 @@ class Matcher:
         else:
             return results["id"] if results else None
 
+    def set_threshold(self, threshold: float) -> "Matcher":
+        """Set the matching threshold.
+
+        Args:
+            threshold: New threshold value (0-1).
+
+        Returns:
+            self, for method chaining.
+        """
+        self.threshold = validate_threshold(threshold)
+
+        # Update threshold in underlying matchers if they exist
+        if self._embedding_matcher:
+            self._embedding_matcher.threshold = self.threshold
+        if self._entity_matcher:
+            self._entity_matcher.threshold = self.threshold
+
+        return self
+
+    def _match_hybrid(self, texts: TextInput, top_k: int = 1, **kwargs) -> Any:
+        """Run hybrid matching while preserving unified Matcher return semantics."""
+        blocking_top_k = kwargs.get("blocking_top_k", 1000)
+        retrieval_top_k = kwargs.get("retrieval_top_k", max(50, top_k))
+        final_top_k = kwargs.get("final_top_k", top_k)
+        n_jobs = kwargs.get("n_jobs", -1)
+        chunk_size = kwargs.get("chunk_size")
+
+        texts, single_input = _coerce_texts(texts)
+
+        if single_input:
+            raw_results = self.hybrid_matcher.match(
+                texts[0],
+                blocking_top_k=blocking_top_k,
+                retrieval_top_k=retrieval_top_k,
+                final_top_k=final_top_k,
+            )
+            return self._format_hybrid_results(raw_results, top_k=top_k)
+
+        raw_results = self.hybrid_matcher.match_bulk(
+            texts,
+            blocking_top_k=blocking_top_k,
+            retrieval_top_k=retrieval_top_k,
+            final_top_k=final_top_k,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
+        )
+        return [
+            self._format_hybrid_results(results, top_k=top_k) for results in raw_results
+        ]
+
+    def _format_hybrid_results(
+        self, results: Optional[List[Dict[str, Any]]], top_k: int
+    ) -> Any:
+        """Apply threshold filtering and shape normalization to hybrid results."""
+        filtered = []
+        for result in results or []:
+            if result.get("score", 0.0) < self.threshold:
+                continue
+            filtered.append(result)
+
+        if top_k == 1:
+            return filtered[0] if filtered else None
+        return filtered[:top_k]
+
+    def get_training_info(self) -> Dict[str, Any]:
+        """Get information about current training configuration.
+
+        Returns:
+            Dict with keys:
+                - mode: Current training mode
+                - detected_mode: Auto-detected mode (if applicable)
+                - is_trained: Whether the matcher is trained
+                - active_matcher: Name of the active matcher class
+                - has_training_data: Whether training data was provided
+                - threshold: Current threshold value
+        """
+        return {
+            "mode": self._training_mode,
+            "detected_mode": self._detected_mode,
+            "is_trained": self._active_matcher is not None,
+            "active_matcher": (
+                type(self._active_matcher).__name__ if self._active_matcher else None
+            ),
+            "has_training_data": self._has_training_data,
+            "threshold": self.threshold,
+        }
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get statistics about the matcher.
+
+        Returns:
+            Dict with matcher statistics including entity count,
+            configuration, and state information.
+        """
+        stats = {
+            "num_entities": len(self.entities),
+            "model_name": self.model_name,
+            "threshold": self.threshold,
+            "normalize": self.normalize,
+            "training_mode": self._training_mode,
+            "is_trained": self._active_matcher is not None,
+        }
+
+        # Add entity-specific stats if available
+        if hasattr(self, "_embedding_matcher") and self._embedding_matcher:
+            stats["has_embeddings"] = self._embedding_matcher.embeddings is not None
+
+        if hasattr(self, "_entity_matcher") and self._entity_matcher:
+            classifier = getattr(self._entity_matcher, "classifier", None)
+            stats["classifier_trained"] = (
+                getattr(classifier, "is_trained", self._entity_matcher.is_trained)
+                if classifier is not None
+                else False
+            )
+
+        return stats
+
+    def explain_match(
+        self,
+        query: str,
+        top_k: int = 5,
+    ) -> Dict[str, Any]:
+        """Explain matching results for debugging.
+
+        Args:
+            query: The input text to match
+            top_k: Number of top candidates to show
+
+        Returns:
+            Dict with:
+                - query: The original query
+                - query_normalized: Normalized query if enabled
+                - matched: Whether a match was found above threshold
+                - best_match: Top result (entity_id, score, etc.)
+                - top_k: List of top k candidates with scores
+                - threshold: Current threshold
+                - mode: Current training mode
+        """
+        if not self._active_matcher:
+            raise TrainingError(
+                "Matcher not ready. Call fit() first.",
+                details={"mode": self._training_mode},
+            )
+
+        # Get all candidates with scores by temporarily lowering matcher threshold.
+        original_threshold = self.threshold
+        self.set_threshold(0.0)
+        try:
+            results = self.match(query, top_k=top_k)
+        finally:
+            self.set_threshold(original_threshold)
+
+        if results is None:
+            result_list = []
+        elif isinstance(results, list):
+            result_list = results
+        else:
+            result_list = [results]
+
+        # Normalize query if applicable
+        query_normalized = None
+        if self.normalize:
+            normalizer = TextNormalizer()
+            query_normalized = normalizer.normalize(query)
+
+        # Get best match and check if it passes threshold
+        best = result_list[0] if result_list else None
+        matched = best and best.get("score", 0) >= self.threshold
+
+        return {
+            "query": query,
+            "query_normalized": query_normalized,
+            "matched": matched,
+            "best_match": best,
+            "top_k": result_list,
+            "threshold": self.threshold,
+            "mode": self._training_mode,
+        }
+
+    def diagnose(self, query: str) -> Dict[str, Any]:
+        """Run diagnostics on a query to help debug issues.
+
+        Args:
+            query: Input text to diagnose
+
+        Returns:
+            Dict with diagnostic information and suggestions.
+        """
+        diagnosis = {
+            "query": query,
+            "matcher_ready": self._active_matcher is not None,
+            "active_matcher": (
+                type(self._active_matcher).__name__ if self._active_matcher else None
+            ),
+        }
+
+        if not self._active_matcher:
+            diagnosis["issue"] = "Matcher not ready"
+            diagnosis["suggestion"] = "Call matcher.fit() to initialize the matcher"
+            return diagnosis
+
+        # Try the match
+        try:
+            explanation = self.explain_match(query, top_k=3)
+            diagnosis.update(explanation)
+
+            # Add suggestions based on results
+            if not explanation["matched"]:
+                if explanation["best_match"]:
+                    score = explanation["best_match"].get("score", 0)
+                    threshold = explanation["threshold"]
+                    diagnosis["issue"] = (
+                        f"Score {score:.2f} below threshold {threshold}"
+                    )
+                    suggested_threshold = max(0.1, threshold - 0.1)
+                    diagnosis["suggestion"] = (
+                        f"Lower threshold with matcher.set_threshold({suggested_threshold:.1f}) "
+                        f"or add more training examples"
+                    )
+                else:
+                    diagnosis["issue"] = "No candidates found"
+                    diagnosis["suggestion"] = (
+                        "Check entity data and text normalization. "
+                        "Ensure entities have relevant names/aliases."
+                    )
+        except Exception as e:
+            diagnosis["error"] = str(e)
+            diagnosis["suggestion"] = "Check input format and entity configuration"
+
+        return diagnosis
+
+    def __repr__(self) -> str:
+        """Simple string representation."""
+        status = "trained" if self._active_matcher else "untrained"
+        return f"Matcher(mode={self._training_mode}, status={status})"
+
 
 class EntityMatcher:
     """SetFit-based entity matching with optional text normalization."""
@@ -398,6 +720,7 @@ class EntityMatcher:
         training_data: List[dict],
         num_epochs: int = 4,
         batch_size: int = 16,
+        show_progress: bool = True,
     ):
         normalized_data = self._get_training_data(training_data)
         labels = list(dict.fromkeys(item["label"] for item in normalized_data))
@@ -409,7 +732,10 @@ class EntityMatcher:
             batch_size=batch_size,
         )
         self.classifier.train(
-            normalized_data, num_epochs=num_epochs, batch_size=batch_size
+            normalized_data,
+            num_epochs=num_epochs,
+            batch_size=batch_size,
+            show_progress=show_progress,
         )
         self.is_trained = True
 

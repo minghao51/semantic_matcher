@@ -1,4 +1,5 @@
 import pytest
+from semanticmatcher.exceptions import ValidationError
 from semanticmatcher.utils.validation import (
     validate_entity,
     validate_entities,
@@ -19,6 +20,10 @@ class TestValidation:
         with pytest.raises(ValueError, match="must have 'id'"):
             validate_entity(entity)
 
+    def test_validate_entity_missing_id_raises_validation_error(self):
+        with pytest.raises(ValidationError):
+            validate_entity({"name": "Germany"})
+
     def test_validate_entity_missing_name(self):
         entity = {"id": "DE"}
         with pytest.raises(ValueError, match="must have 'name'"):
@@ -34,6 +39,15 @@ class TestValidation:
     def test_validate_entities_empty(self):
         with pytest.raises(ValueError, match="entities list cannot be empty"):
             validate_entities([])
+
+    def test_validate_entities_duplicate_ids_raise_validation_error(self):
+        with pytest.raises(ValidationError, match="duplicates"):
+            validate_entities(
+                [
+                    {"id": "DE", "name": "Germany"},
+                    {"id": "DE", "name": "Deutschland"},
+                ]
+            )
 
     def test_validate_threshold_valid(self):
         assert validate_threshold(0.5) == 0.5

@@ -35,7 +35,6 @@ dependencies = [
     "requests>=2.31.0",
     "rank-bm25>=0.2.2",
     "rapidfuzz>=3.0.0",
-    "tqdm>=4.66.0",
     "pyyaml>=6.0.0",
 ]
 
@@ -43,14 +42,37 @@ dependencies = [
 semanticmatcher-ingest = "semanticmatcher.ingestion.cli:main"
 
 [project.optional-dependencies]
+# Progress bars for notebooks and terminals
+jupyter = [
+    "tqdm>=4.66.0",
+    "ipywidgets>=8.0.0",
+]
+
+# Development tools
 dev = [
     "beautifulsoup4>=4.14.3",
     "black>=23.0.0",
     "build>=1.2.2",
     "html-to-markdown>=1.8.0",
+    "ipywidgets>=8.0.0",
     "patchright>=1.58.0",
     "pytest>=8.4.2",
     "ruff>=0.1.0",
+    "tqdm>=4.66.0",
+    "twine>=5.1.1",
+]
+
+# Everything
+all = [
+    "beautifulsoup4>=4.14.3",
+    "black>=23.0.0",
+    "build>=1.2.2",
+    "html-to-markdown>=1.8.0",
+    "ipywidgets>=8.0.0",
+    "patchright>=1.58.0",
+    "pytest>=8.4.2",
+    "ruff>=0.1.0",
+    "tqdm>=4.66.0",
     "twine>=5.1.1",
 ]
 

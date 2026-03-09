@@ -65,6 +65,11 @@ matcher = Matcher(entities=entities, mode="zero-shot")
 # Force full training mode
 matcher = Matcher(entities=entities, mode="full")
 matcher.fit(training_data)
+
+# Force hybrid mode (blocking + retrieval + reranking)
+matcher = Matcher(entities=entities, mode="hybrid")
+matcher.fit()
+results = matcher.match("America", top_k=3)
 ```
 
 ## Feature Comparison
@@ -74,6 +79,7 @@ matcher.fit(training_data)
 | `zero-shot` | No | Fast (~50 q/s) | Prototyping, simple matching |
 | `head-only` | Yes (~30s) | Medium (~30 q/s) | Quick accuracy boost |
 | `full` | Yes (~3min) | Medium (~30 q/s) | Production, complex variations |
+| `hybrid` | No | Slower, highest precision | Large candidate sets, reranking |
 
 **The new `Matcher` class auto-selects the best mode** based on your training data.
 

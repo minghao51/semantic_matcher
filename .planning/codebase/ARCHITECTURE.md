@@ -1,249 +1,441 @@
-# Architecture
+# Semantic Matcher Architecture
 
-## Design Philosophy
+## Overview
 
-**Three-Stage Waterfall Pipeline**: Efficient semantic matching through progressive refinement
-1. **Blocking** - Fast lexical filtering to reduce candidate set
-2. **Retrieval** - Semantic similarity search with bi-encoders
-3. **Reranking** - Precise cross-encoder scoring for top candidates
+Semantic Matcher is a Python library for text-to-entity matching that uses semantic similarity and few-shot learning. The architecture follows a **layered design** with clear separation of concerns between core matching logic, backend abstractions, data ingestion, and utilities.
 
-This pattern balances accuracy (cross-encoder) with speed (blocking + bi-encoder).
+## Architectural Pattern
 
-## Core Patterns
+**Pattern**: Layered Architecture with Strategy Pattern
 
-### 1. Strategy Pattern
+The codebase follows a 4-layer architecture:
+1. **API Layer** - Public interfaces and unified entry points
+2. **Core Layer** - Business logic and matching algorithms
+3. **Backend Layer** - Abstraction over ML/DL models
+4. **Utility Layer** - Cross-cutting concerns (validation, preprocessing, embeddings)
 
-**Used in**: Blocking strategies
+## Core Architectural Layers
 
-**Implementation**:
-- Abstract base: `BlockingStrategy` in `src/semanticmatcher/core/blocking.py`
-- Concrete implementations: `BM25Blocking`, `TFIDFBlocking`, `FuzzyBlocking`, `NoOpBlocking`
+### 1. API Layer (`__init__.py`)
 
-**Benefits**:
-- Interchangeable blocking algorithms
-- Easy to add new strategies
-- Consistent interface via `block(query, entities, top_k)`
+**Purpose**: Lazy-loaded public API with deprecation warnings
 
-### 2. Pipeline Pattern
+**Key Components**:
+- Lazy import mechanism via `__getattr__`
+- Export registry mapping names to module locations
+- Deprecation warnings for legacy classes
+- Unified `Matcher` class as primary entry point
 
-**Used in**: `HybridMatcher`
+**Design Pattern**: Facade Pattern
+- Provides simplified interface to complex subsystem
+- Hides internal complexity from users
+- Manages backward compatibility
 
-**Implementation**: `src/semanticmatcher/core/hybrid.py`
-
-**Flow**:
+**Data Flow**:
 ```
-Input Query
-    ↓
-[Blocker] → filtered candidates (blocking_top_k)
-    ↓
-[Retriever] → semantic matches (retrieval_top_k)
-    ↓
-[Reranker] → final results (final_top_k)
-    ↓
-Output Results
+User imports → __getattr__ → Module lookup → Lazy import → Return class
 ```
 
-**Benefits**:
-- Each stage is independently testable
-- Configurable stage boundaries
-- Parallel processing support (ThreadPoolExecutor)
+### 2. Core Layer (`core/`)
 
-### 3. Backend Abstraction
+**Purpose**: Matching algorithms and business logic
 
-**Used in**: Model loading and inference
+**Components**:
 
-**Implementation**: `src/semanticmatcher/backends/`
+#### Matcher Classes (`matcher.py`)
+- **`Matcher`** (Unified API): Smart auto-selection of matching strategy
+  - Auto-detects training mode based on data
+  - Routes to appropriate specialized matcher
+  - Provides consistent interface across all modes
 
-**Base Class**: `BaseBackend` (abstract)
-- `SentenceTransformerBackend` - Standard sentence transformers
-- `STReranker` - Cross-encoder rerankers
-- `LiteLLMBackend` - OpenAI-compatible APIs (stub, not active)
+- **`EntityMatcher`**: SetFit-based few-shot classification
+  - Requires training data
+  - Uses SetFit for efficient fine-tuning
+  - Supports candidate filtering
 
-**Benefits**:
-- Swappable model backends
-- Consistent embedding API
-- Future-proof for new model providers
+- **`EmbeddingMatcher`**: Zero-shot semantic similarity
+  - No training required
+  - Uses sentence-transformers embeddings
+  - Cosine similarity matching
+  - Supports Matryoshka embeddings (dimensionality reduction)
 
-### 4. Lazy Import Pattern
+#### Specialized Matchers
 
-**Used in**: Package exports
+- **`HybridMatcher`** (`hybrid.py`): Three-stage pipeline
+  - Stage 1: Blocking (lexical filtering)
+  - Stage 2: Bi-encoder retrieval (semantic search)
+  - Stage 3: Cross-encoder reranking (precise scoring)
 
-**Implementation**: `src/semanticmatcher/__init__.py`
+- **`HierarchicalMatcher`** (`hierarchy.py`): Multi-parent hierarchy matching
+  - Graph-based hierarchy representation (NetworkX)
+  - Depth-aware confidence scoring
+  - Supports DAG structures with weighted edges
 
-**Mechanism**:
-```python
-_EXPORTS = {
-    "EntityMatcher": (".core.matcher", "EntityMatcher"),
-    # ...
-}
+#### Supporting Components
 
-def __getattr__(name):
-    # Import on first access
+- **`SetFitClassifier`** (`classifier.py`): Wrapper for SetFit training
+- **`CrossEncoderReranker`** (`reranker.py`): Cross-encoder reranking
+- **`TextNormalizer`** (`normalizer.py`): Text preprocessing
+- **`BlockingStrategy`** (`blocking.py`): Candidate filtering strategies
+  - `BM25Blocking`: Fast lexical blocking
+  - `TFIDFBlocking`: TF-IDF vectorization
+  - `FuzzyBlocking`: Approximate string matching
+  - `NoOpBlocking`: Pass-through for small datasets
+
+**Design Patterns**:
+- **Strategy Pattern**: Interchangeable matching strategies
+- **Template Method**: Base classes define algorithms, subclasses implement specifics
+- **Facade Pattern**: Unified Matcher hides complexity
+- **Lazy Initialization**: Matchers created only when needed
+
+### 3. Backend Layer (`backends/`)
+
+**Purpose**: Abstraction over ML/DL model providers
+
+**Components**:
+
+#### Base Abstractions (`base.py`)
+- **`EmbeddingBackend`**: Abstract interface for embedding models
+  - `encode(texts)`: Generate embeddings
+
+- **`RerankerBackend`**: Abstract interface for rerankers
+  - `score(query, docs)`: Score query-document pairs
+  - `rerank(query, candidates, top_k)`: Rerank candidates
+
+#### Concrete Implementations
+
+- **`HFEmbedding`**: HuggingFace sentence-transformers
+- **`HFReranker`**: HuggingFace cross-encoders
+- **`STReranker`**: SentenceTransformer rerankers
+
+**Design Patterns**:
+- **Abstract Factory**: Backend creation via factory functions
+- **Strategy Pattern**: Pluggable backends
+- **Adapter Pattern**: Adapts external libraries to internal interface
+
+**Data Flow**:
+```
+Core Layer → Backend Interface → Concrete Implementation → External Library
 ```
 
-**Benefits**:
-- Faster import times
-- Reduced memory footprint
-- Optional dependencies not loaded unless used
+### 4. Utility Layer (`utils/`)
 
-## Layered Architecture
+**Purpose**: Cross-cutting concerns and shared utilities
 
-```
-┌─────────────────────────────────────────┐
-│         User-Facing APIs                │
-│  (EntityMatcher, EmbeddingMatcher,     │
-│   HybridMatcher, CrossEncoderReranker)  │
-└─────────────────────────────────────────┘
-                  ↓
-┌─────────────────────────────────────────┐
-│         Core Matching Layer             │
-│  - TextNormalizer                       │
-│  - SetFitClassifier                     │
-│  - BlockingStrategy implementations     │
-└─────────────────────────────────────────┘
-                  ↓
-┌─────────────────────────────────────────┐
-│         Backend Abstraction             │
-│  - BaseBackend                          │
-│  - SentenceTransformerBackend           │
-│  - STReranker                           │
-└─────────────────────────────────────────┘
-                  ↓
-┌─────────────────────────────────────────┐
-│         ML Frameworks                   │
-│  - sentence-transformers                │
-│  - SetFit                               │
-│  - PyTorch                              │
-└─────────────────────────────────────────┘
-```
+**Components**:
 
-## Data Flow
+- **`validation.py`**: Input validation with helpful error messages
+  - Entity validation (ID, name, uniqueness)
+  - Threshold validation (0-1 range)
+  - Model name validation
 
-### Basic Matching (EmbeddingMatcher)
+- **`embeddings.py`**: Embedding utilities and caching
+  - `ModelCache`: Thread-safe LRU cache for models
+  - `compute_embeddings()`: Batch embedding computation
+  - `cosine_sim()`: Similarity calculations
+  - `batch_encode()`: Batch processing utilities
 
-```
-Entities List
-    ↓
-[Normalize Text]
-    ↓
-[Generate Embeddings] → Cached in ModelCache
-    ↓
-[Build Index] → Store embeddings
-    ↓
-Query Text → [Normalize] → [Generate Embedding]
-    ↓
-[Cosine Similarity] → Compare with index
-    ↓
-[Filter by Threshold] → Top matches
-    ↓
-Results List
-```
+- **`preprocessing.py`**: Text preprocessing utilities
+- **`benchmarks.py`**: Performance benchmarking tools
 
-### Training Flow (EntityMatcher)
+**Design Patterns**:
+- **Singleton**: Global default cache instance
+- **Utility Pattern**: Stateless helper functions
+
+### 5. Data Ingestion Layer (`ingestion/`)
+
+**Purpose**: External data source integration
+
+**Components**:
+
+- **`cli.py`**: Command-line interface for data ingestion
+- **`base.py`**: Base ingestion classes
+- **Domain-specific modules**: `languages`, `currencies`, `industries`, `timezones`, `occupations`, `products`, `universities`
+
+**Design Patterns**:
+- **Template Method**: Base classes define ingestion workflow
+- **Command Pattern**: CLI commands for ingestion operations
+
+## Data Flow & Execution Flow
+
+### Matching Flow (Unified Matcher)
 
 ```
-Training Data (text, label pairs)
+User Input
     ↓
-[SetFitClassifier.train()]
-    ├── Generate contrastive pairs
-    ├── Train sentence transformer
-    └── Save model weights
+Matcher.fit(training_data?, mode?)
     ↓
-[Train] → Fine-tune model
+Mode Detection (auto or explicit)
     ↓
-[Predict] → Use fine-tuned model for inference
+┌─────────────────┬─────────────────┬──────────────────┐
+│   zero-shot     │  head-only/full │     hybrid       │
+│   (no training) │  (SetFit)       │  (3-stage)       │
+├─────────────────┼─────────────────┼──────────────────┤
+│ build_index()   │ train()         │ initialize       │
+│ encode entities │ SetFit training │ pipeline         │
+└─────────────────┴─────────────────┴──────────────────┘
+    ↓
+Matcher.match(query, top_k)
+    ↓
+Route to active matcher
+    ↓
+Return results (consistent format)
 ```
 
-### Hybrid Flow (HybridMatcher)
+### Hybrid Matching Flow
 
 ```
-Query + Entities
+Query
     ↓
-[Blocking Stage]
-    ├── BM25Blocking (lexical)
-    ├── TFIDFBlocking (vector space)
-    ├── FuzzyBlocking (approximate match)
-    └── NoOpBlocking (pass-through)
-    ↓ (blocking_top_k candidates)
-[Retrieval Stage]
-    ├── Bi-encoder semantic search
-    └── Cosine similarity ranking
-    ↓ (retrieval_top_k candidates)
-[Reranking Stage]
-    ├── Cross-encoder scoring
-    └── Cross-attention re-ranking
-    ↓ (final_top_k results)
-Final Matches
+Stage 1: Blocking (BM25/TF-IDF/Fuzzy)
+    → Filter to top_k candidates (e.g., 1000)
+    ↓
+Stage 2: Bi-Encoder Retrieval
+    → Semantic similarity search
+    → Filter to top_k candidates (e.g., 50)
+    ↓
+Stage 3: Cross-Encoder Reranking
+    → Precise cross-attention scoring
+    → Return final top_k results (e.g., 5)
+```
+
+### Training Flow (SetFit)
+
+```
+Training Data
+    ↓
+Validation & Normalization
+    ↓
+SetFitClassifier.train()
+    ↓
+Initialize SetFitModel
+    ↓
+Trainer.train()
+    → Body learning rate: 2e-5
+    → Head learning rate: 1e-3
+    → Num epochs: 4 (default)
+    ↓
+Model saved in classifier
+    ↓
+Ready for prediction
 ```
 
 ## Key Abstractions
 
-### TextNormalizer
+### 1. Matcher Abstraction
 
-**Purpose**: Standardize text before matching
+**Interface**:
+```python
+matcher = Matcher(entities, model, threshold, mode, ...)
+matcher.fit(training_data?)  # Optional training
+results = matcher.match(query, top_k)  # Match queries
+```
+
+**Modes**:
+- `auto`: Smart selection based on data
+- `zero-shot`: Embedding similarity (no training)
+- `head-only`: Train classifier head only (fast)
+- `full`: Full SetFit training (accurate)
+- `hybrid`: Three-stage pipeline
+
+### 2. Backend Abstraction
+
+**Embedding Backend**:
+```python
+backend.encode(texts) → List[List[float]]
+```
+
+**Reranker Backend**:
+```python
+backend.score(query, docs) → List[float]
+backend.rerank(query, candidates, top_k) → List[Dict]
+```
+
+### 3. Blocking Strategy Abstraction
+
+```python
+strategy.block(query, entities, top_k) → List[entities]
+```
+
+## Configuration Management
+
+**Location**: `config.py`
+
+**Components**:
+- **Model Registries**: Aliases to full model names
+  - `MODEL_REGISTRY`: Embedding models
+  - `RERANKER_REGISTRY`: Reranker models
+  - `MATCHER_MODE_REGISTRY`: Mode to class mapping
+
+- **`Config` Class**: YAML/JSON configuration loader
+  - Search paths: repo root, package default, CWD
+  - Deep merge of custom configs
+  - Dot-notation access: `config.get("key.subkey")`
+
+**Model Aliases**:
+```python
+"default" → "sentence-transformers/all-mpnet-base-v2"
+"bge-base" → "BAAI/bge-base-en-v1.5"
+"bge-m3" → "BAAI/bge-m3"
+"nomic" → "nomic-ai/nomic-embed-text-v1"
+```
+
+## Exception Hierarchy
+
+**Base**: `SemanticMatcherError`
+
+**Specialized Exceptions**:
+- **`ValidationError`**: Input validation failures with context
+  - Attributes: `entity`, `field`, `suggestion`
+- **`TrainingError`**: Training failures with diagnostics
+  - Attributes: `training_mode`, `details`
+- **`MatchingError`**: Matching operation failures
+- **`ModeError`**: Invalid mode configuration
+  - Attributes: `invalid_mode`, `valid_modes`
+
+**Design Pattern**: Exception Chaining with Context
+- Rich error messages with suggestions
+- Structured diagnostic information
+- Helpful recovery hints
+
+## Caching Strategy
+
+**Model Cache** (`utils/embeddings.py`)
 
 **Features**:
-- Lowercase conversion
-- Accent removal (Unicode normalization)
-- Punctuation stripping
-- Whitespace normalization
+- Thread-safe LRU cache
+- Memory-based eviction (configurable GB limit)
+- Optional TTL (time-to-live)
+- Hit/miss statistics
 
-**Location**: `src/semanticmatcher/core/normalizer.py`
+**Implementation**:
+```python
+cache = ModelCache(max_memory_gb=4.0, ttl_seconds=None)
+model = cache.get_or_load("model_name", lambda: load_model())
+```
 
-### ModelCache
-
-**Purpose**: Cache loaded models to avoid redundant downloads
-
-**Features**:
-- Thread-safe (locks)
-- TTL-based expiration
-- Memory limits
-- Shared across instances
-
-**Location**: `src/semanticmatcher/utils/embeddings.py`
-
-### SetFitClassifier
-
-**Purpose**: Few-shot classification wrapper around SetFit
-
-**Features**:
-- Train/predict API
-- Model persistence (save/load)
-- Configurable number of epochs
-
-**Location**: `src/semanticmatcher/core/classifier.py`
-
-## Concurrency
-
-**Thread Safety**:
-- ModelCache uses `threading.Lock()` for concurrent access
-- HybridMatcher supports parallel bulk matching via `ThreadPoolExecutor`
-
-**Async**:
-- No async/await patterns (synchronous only)
-- Parallel processing via thread pools
-
-## Error Handling Strategy
-
-**Validation**:
-- Input validation in `src/semanticmatcher/utils/validation.py`
-- Type hints enforced with `Optional`, `List`, `Dict`
-
-**Exception Propagation**:
-- Exceptions bubble up from ML frameworks
-- No custom exception hierarchy
-- User handles sentence-transformers/SetFit errors
-
-## Performance Optimizations
-
-1. **Blocking** - Reduce search space before expensive operations
-2. **Model Caching** - Reuse loaded models across instances
-3. **Parallel Bulk Matching** - ThreadPoolExecutor for batch queries
-4. **Embedding Index** - Pre-compute embeddings for entities
+**Global Instance**:
+- Singleton pattern via `get_default_cache()`
+- Shared across all matchers by default
+- Reduces model loading overhead
 
 ## Extensibility Points
 
-1. **Custom Blocking Strategies** - Inherit from `BlockingStrategy`
-2. **Custom Backends** - Inherit from `BaseBackend`
-3. **Model Registry** - Add aliases to `config.py`
-4. **Ingestion Modules** - Follow pattern in `ingestion/base.py`
+### 1. Custom Backends
+
+**How**: Inherit from `EmbeddingBackend` or `RerankerBackend`
+
+```python
+class CustomBackend(EmbeddingBackend):
+    def encode(self, texts: list[str]) -> list[list[float]]:
+        # Custom implementation
+        pass
+```
+
+### 2. Custom Blocking Strategies
+
+**How**: Inherit from `BlockingStrategy`
+
+```python
+class CustomBlocking(BlockingStrategy):
+    def block(self, query, entities, top_k):
+        # Custom filtering logic
+        pass
+```
+
+### 3. Custom Matchers
+
+**How**: Implement match interface or extend existing classes
+
+```python
+class CustomMatcher:
+    def __init__(self, entities, ...): ...
+    def fit(self, training_data=None): ...
+    def match(self, texts, top_k=1): ...
+```
+
+## Technology Stack
+
+**Core Dependencies**:
+- `sentence-transformers`: Embedding models
+- `setfit`: Few-shot learning
+- `torch`: Deep learning backend
+- `scikit-learn`: ML utilities (cosine similarity, TF-IDF)
+- `networkx`: Graph algorithms (hierarchical matching)
+- `rank-bm25`: BM25 blocking
+- `rapidfuzz`: Fuzzy matching
+- `nltk`: Text preprocessing
+
+**Dev Tools**:
+- `pytest`: Testing
+- `ruff`: Linting
+- `black`: Formatting
+- `uv`: Package management
+
+## Performance Considerations
+
+### Optimization Strategies
+
+1. **Lazy Initialization**: Matchers created only when needed
+2. **Model Caching**: Reduces loading overhead
+3. **Batch Processing**: Efficient bulk operations
+4. **Candidate Filtering**: Blocking reduces search space
+5. **Dimensionality Reduction**: Matryoshka embeddings support
+6. **Parallel Processing**: Hybrid matcher supports parallel bulk matching
+
+### Complexity Analysis
+
+- **EmbeddingMatcher**: O(n) encoding, O(n*k) matching (n=entities, k=top_k)
+- **EntityMatcher**: O(1) prediction after training
+- **HybridMatcher**: O(n) blocking + O(k) retrieval + O(m) reranking
+  - n: total entities, k: blocking_top_k, m: retrieval_top_k
+
+## Testing Strategy
+
+**Test Organization** (`tests/`):
+- `test_core/`: Core matcher tests
+- `test_backends/`: Backend contract tests
+- `test_utils/`: Utility function tests
+- `test_ingestion/`: Data ingestion tests
+
+**Test Markers**:
+- `integration`: External service/network tests
+- `slow`: Expensive tests (not run by default)
+- `hf`: HuggingFace model-backed tests
+
+## Deployment & Packaging
+
+**Build System**: Hatchling
+
+**Package Structure**:
+```
+src/semanticmatcher/  # Source package
+pyproject.toml         # Build config
+README.md              # Documentation
+LICENSE                # MIT license
+```
+
+**Entry Points**:
+- CLI: `semanticmatcher-ingest` command
+- Library: `import semanticmatcher`
+
+**Python Versions**: 3.9, 3.10, 3.11, 3.12
+
+## Design Principles
+
+1. **Simplicity**: Clear, minimal interfaces
+2. **Flexibility**: Pluggable backends and strategies
+3. **Performance**: Lazy loading, caching, batching
+4. **User Experience**: Helpful errors, auto-detection, sensible defaults
+5. **Extensibility**: Abstract base classes, factory patterns
+6. **Backward Compatibility**: Deprecation warnings, migration guides
+
+## Future Architecture Considerations
+
+**Potential Enhancements**:
+1. **Async Support**: Async/await for I/O-bound operations
+2. **Distributed Matching**: Ray/Dask for large-scale matching
+3. **Model Versioning**: Track and compare model versions
+4. **Experiment Tracking**: Integration with MLflow/Weights & Biases
+5. **Streaming Support**: Process large datasets without loading all into memory
+6. **Multi-modal Support**: Match images, audio, etc.

@@ -4,10 +4,16 @@ import time
 from typing import Dict, List, Any
 
 import pandas as pd
-from tqdm import tqdm
 
 from ..core.matcher import EmbeddingMatcher
 from ..config import MODEL_REGISTRY
+
+try:
+    from tqdm.auto import tqdm
+except ImportError:  # pragma: no cover - optional dependency
+    def tqdm(iterable, **_kwargs):
+        """Fallback passthrough when tqdm is not installed."""
+        return iterable
 
 
 def compare_models(

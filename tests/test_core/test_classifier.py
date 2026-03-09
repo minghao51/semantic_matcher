@@ -1,5 +1,6 @@
 import pytest
 from semanticmatcher.core.classifier import SetFitClassifier
+from semanticmatcher.exceptions import TrainingError
 
 
 class TestSetFitClassifier:
@@ -71,6 +72,11 @@ class TestSetFitClassifier:
     def test_classifier_without_training_raises(self, labels):
         clf = SetFitClassifier(labels=labels)
         with pytest.raises(RuntimeError, match="not trained"):
+            clf.predict("test")
+
+    def test_classifier_without_training_raises_training_error(self, labels):
+        clf = SetFitClassifier(labels=labels)
+        with pytest.raises(TrainingError):
             clf.predict("test")
 
     def test_classifier_save_load(self, labels, training_data, tmp_path):

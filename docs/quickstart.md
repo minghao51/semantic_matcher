@@ -1,84 +1,79 @@
 # Quick Start Guide
 
-Related docs: [`index.md`](./index.md) | [`migration-guide.md`](./migration-guide.md) | [`examples.md`](./examples.md) | [`architecture.md`](./architecture.md)
+Related docs: [`index.md`](./index.md) | [`migration-guide.md`](./migration-guide.md) | [`examples.md`](./examples.md) | [`troubleshooting.md`](./troubleshooting.md)
 
-## Installation
+This guide covers the main `semanticmatcher.Matcher` workflow. Use it when you want to map messy input text to canonical entity IDs.
+
+## Install
+
+### From PyPI
 
 ```bash
 pip install semantic-matcher
 ```
 
-Use this page for the official package wrapper API. If you want exploratory scripts or Jupyter notebooks, see [`notebooks.md`](./notebooks.md). If you want lower-level raw `setfit` examples, see [`examples.md`](./examples.md).
+### For local development
 
-## Quick Start: The Unified Matcher API
+```bash
+uv sync --group dev
+```
 
-**New:** The unified `Matcher` class with smart auto-selection. No need to choose between different matchers!
+## Basic Zero-Shot Matching
+
+Use zero-shot mode when you do not have labeled training data yet.
 
 ```python
 from semanticmatcher import Matcher
 
 entities = [
-    {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
+    {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
     {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
     {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
 ]
 
 matcher = Matcher(entities=entities)
-matcher.fit()  # Auto zero-shot mode
-
-print(matcher.match("Deutschland"))  # {"id": "DE", "score": 0.95}
-```
-
-**How auto-selection works:**
-- No training data → **zero-shot** (embedding similarity, fast)
-- < 3 examples/entity → **head-only training** (~30s)
-- ≥ 3 examples/entity → **full training** (~3min, most accurate)
-
----
-
-## Path 1: Zero-Shot Matching (No Training)
-
-Use when you need results immediately with no training data.
-
-```python
-from semanticmatcher import Matcher
-
-entities = [
-    {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
-    {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
-    {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
-]
-
-matcher = Matcher(entities=entities)
-matcher.fit()  # No training data = zero-shot mode
-
-print(matcher.match("Deutschland"))  # {"id": "DE", "score": ...}
-print(matcher.match("UnknownPlace"))  # None (below threshold)
-```
-
-**Or explicitly specify mode:**
-```python
-matcher = Matcher(entities=entities, mode="zero-shot")
 matcher.fit()
+
+print(matcher.match("Deutschland"))
+# {'id': 'DE', 'score': 0.9..., 'text': 'Germany'}
+
+print(matcher.predict("America"))
+# 'US'
 ```
 
-**Parameters:**
-- `entities` (required): List of entity dicts with `id`, `name`, optional `aliases`
-- `model` (default: `"default"`): Model name or alias (e.g., `"bge-base"`, `"mpnet"`, `"minilm"`)
-- `threshold` (default: `0.7`): Minimum similarity score (0.0-1.0)
-- `normalize` (default: `True`): Apply text normalization
-- `mode` (optional): Explicit mode: `"zero-shot"`, `"head-only"`, `"full"`, or `"auto"`
+What happens here:
 
-**Methods:**
-- `fit(training_data=None, mode=None, **kwargs)`: Train the matcher or build zero-shot index
-- `match(texts, top_k=1, **kwargs)`: Match query/queries, returns best match(es)
-- `predict(texts, **kwargs)`: Convenience method returning just entity IDs
+- `Matcher(...)` validates and stores your entity catalog.
+- `fit()` builds the embedding index.
+- `match()` returns match objects with scores.
+- `predict()` returns only the entity ID.
 
----
+## Entity Format
 
-## Path 2: With Training Data (Auto-Detect)
+Each entity must include:
 
-When you have labeled examples, `Matcher` auto-detects the best training approach.
+- `id`: stable canonical ID
+- `name`: primary display name
+
+Optional fields:
+
+- `aliases`: alternate names, abbreviations, common misspellings
+
+Example:
+
+```python
+entities = [
+    {
+        "id": "GB",
+        "name": "United Kingdom",
+        "aliases": ["UK", "Great Britain", "Britain"],
+    }
+]
+```
+
+## Add Training Data
+
+If you have labeled examples, pass them to `fit(training_data=...)`.
 
 ```python
 from semanticmatcher import Matcher
@@ -88,318 +83,144 @@ entities = [
     {"id": "US", "name": "United States"},
 ]
 
-# Small training set → auto head-only (~30s)
-training_data = [
-    {"text": "Germany", "label": "DE"},
-    {"text": "USA", "label": "US"},
-]
-
-matcher = Matcher(entities=entities)
-matcher.fit(training_data)  # Auto-detects: head-only training
-
-print(matcher.match("Deutschland"))  # {"id": "DE", "score": 1.0}
-
-# Larger training set → auto full training (~3min)
-training_data_large = [
-    {"text": "Germany", "label": "DE"},
-    {"text": "Deutschland", "label": "DE"},
-    {"text": "Deutchland", "label": "DE"},
-    {"text": "USA", "label": "US"},
-    {"text": "America", "label": "US"},
-    {"text": "United States", "label": "US"},
-]
-
-matcher.fit(training_data_large, num_epochs=1)  # Auto-detects: full training
-print(matcher.match("Deutschland"))  # {"id": "DE", "score": 1.0}
-```
-
----
-
-## Path 3: Explicit Mode Selection
-
-Override auto-detection if you know what you need.
-
-```python
-# Force zero-shot even with training data available
-matcher = Matcher(entities=entities)
-matcher.fit(training_data, mode="zero-shot")
-
-# Force full training even with small dataset
-matcher = Matcher(entities=entities)
-matcher.fit(training_data_small, mode="full", num_epochs=1)
-```
-
----
-
-## Model Selection
-
-Use short aliases for common models:
-
-```python
-# Default (mpnet-base-v2)
-matcher = Matcher(entities=entities, model="default")
-
-# Fast (MiniLM)
-matcher = Matcher(entities=entities, model="minilm")
-
-# Accurate (BGE-base)
-matcher = Matcher(entities=entities, model="bge-base")
-
-# Multilingual (BGE-m3)
-matcher = Matcher(entities=entities, model="bge-m3")
-
-# Or use full model name
-matcher = Matcher(entities=entities, model="sentence-transformers/all-mpnet-base-v2")
-```
-
----
-
-## Legacy API (Deprecated)
-
-The old API is still functional but shows deprecation warnings:
-
-```python
-# Old API (deprecated - shows warning)
-from semanticmatcher import EmbeddingMatcher, EntityMatcher
-
-matcher = EmbeddingMatcher(entities=entities)
-matcher.build_index()
-result = matcher.match("query")
-
-# See migration-guide.md for migration instructions
-```
-
----
-
-## Choosing Your Approach
-
-| Situation | Recommended Mode | Training Time | Speed | Accuracy |
-|---|---|---|---|---|
-| **No training data** | `zero-shot` | None | Fast (~50 q/s) | Good |
-| **Few examples (<3/entity)** | `head-only` | ~30s | Medium (~30 q/s) | High |
-| **Many examples (≥3/entity)** | `full` | ~3min | Medium (~30 q/s) | Very High |
-
-**Or just use `Matcher` with auto-detection** - it will choose for you based on your data!
-    {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
-    {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
-]
-
 training_data = [
     {"text": "Germany", "label": "DE"},
     {"text": "Deutschland", "label": "DE"},
-    {"text": "Deutchland", "label": "DE"},
-    {"text": "France", "label": "FR"},
-    {"text": "Frankreich", "label": "FR"},
     {"text": "USA", "label": "US"},
     {"text": "America", "label": "US"},
 ]
 
-matcher = EntityMatcher(entities=entities)
-matcher.train(training_data, num_epochs=4)
+matcher = Matcher(entities=entities)
+matcher.fit(training_data=training_data, num_epochs=1)
 
-print(matcher.predict("Deutchland"))  # "DE"
-print(matcher.predict(["Deutchland", "America", "France"]))  # ["DE", "US", "FR"]
+print(matcher.match("United States"))
+print(matcher.predict(["Deutschland", "America"]))
 ```
 
-**Parameters**:
-- `entities` (required): List of entity dicts with `id`, `name`, optional `aliases`
-- `model_name` (default: `paraphrase-mpnet-base-v2`): Sentence transformer model
-- `threshold` (default: `0.7`): Minimum confidence for predictions (0.0-1.0)
-- `normalize` (default: `True`): Apply text normalization
+Auto-selection rules:
 
-**Methods**:
-- `train(training_data, num_epochs=4, batch_size=16)`: Train the model
-- `predict(texts)`: Predict entity for query/queries. Returns `None` if below threshold
-- Access `classifier.predict_proba(text)` to see confidence scores per entity
+- No training data: `zero-shot`
+- Fewer than 3 examples for the most represented entity: `head-only`
+- At least 3 examples for some entity: `full`
 
-See [`examples/entity_matcher_demo.py`](../examples/entity_matcher_demo.py) for a complete working example.
+## Choose a Mode Explicitly
 
----
+Override auto-selection when you want deterministic behavior.
 
-## Model Aliases
-
-Common models have short aliases for convenience:
-
-| Alias | Full Model Name | Language | Speed | Use Case |
-|---|---|---|---|---|
-| `mpnet` | `sentence-transformers/paraphrase-mpnet-base-v2` | English | Medium | Default choice, balanced |
-| `minilm` | `sentence-transformers/all-MiniLM-L6-v2` | English | Fast | Prototyping, speed-critical |
-| `bge-base` | `BAAI/bge-base-en-v1.5` | English | Medium | High accuracy English |
-| `bge-m3` | `BAAI/bge-m3` | Multilingual | Slow | Multilingual, high accuracy |
-
-**Usage**:
 ```python
-# Using alias
-matcher = EmbeddingMatcher(entities, model_name="minilm")
+matcher = Matcher(entities=entities, mode="zero-shot")
+matcher.fit()
 
-# Using full model name
-matcher = EntityMatcher(entities, model_name="sentence-transformers/LaBSE")
+matcher = Matcher(entities=entities, mode="full")
+matcher.fit(training_data=training_data, num_epochs=1)
+
+matcher = Matcher(entities=entities, mode="hybrid")
+matcher.fit()
 ```
 
----
+Supported modes:
 
-## Text Normalization
+- `zero-shot`: embedding similarity, no training
+- `head-only`: lightweight SetFit training path
+- `full`: full training path for higher accuracy
+- `hybrid`: blocking + retrieval + reranking
 
-Both matchers support normalization by default. Use `TextNormalizer` directly for preprocessing.
+## Return Shapes
+
+Single input with default `top_k=1`:
 
 ```python
-from semanticmatcher import TextNormalizer
-
-normalizer = TextNormalizer(
-    lowercase=True,         # Convert to lowercase
-    remove_accents=True,    # Remove accents (é → e)
-    remove_punctuation=True,  # Remove punctuation
-)
-
-print(normalizer.normalize("HELLO, World!"))  # "hello world"
+result = matcher.match("USA")
+# {'id': 'US', 'score': 0.9..., 'text': 'United States'}
 ```
 
-**When to enable/disable normalization**:
-- Enable (`normalize=True`, default): For user input, messy data, multilingual text
-- Disable (`normalize=False`): For clean, preprocessed data or case-sensitive matching
-
----
-
-## Path 3: Hybrid Matching Pipeline (For Large Datasets)
-
-For maximum accuracy with large datasets (>10,000 entities), use the three-stage pipeline:
+Single input with `top_k > 1`:
 
 ```python
-from semanticmatcher import HybridMatcher, BM25Blocking
+results = matcher.match("United", top_k=3)
+# [{'id': ...}, {'id': ...}, ...]
+```
 
-matcher = HybridMatcher(
-    entities=products,
-    blocking_strategy=BM25Blocking(),  # Fast lexical filtering
-    retriever_model="bge-base",        # Semantic search
-    reranker_model="bge-m3",            # Precise reranking
-)
+Batch input:
 
-results = matcher.match(
-    "iPhone 15 case",
-    blocking_top_k=1000,    # Candidates after blocking
-    retrieval_top_k=50,     # Candidates after retrieval
-    final_top_k=5           # Final results
+```python
+results = matcher.match(["USA", "Deutschland"])
+# [{'id': 'US', ...}, {'id': 'DE', ...}]
+```
+
+If nothing clears the threshold, the matcher returns `None` for `top_k=1` or `[]` for multi-result queries.
+
+## Useful Parameters
+
+```python
+matcher = Matcher(
+    entities=entities,
+    model="default",
+    threshold=0.7,
+    normalize=True,
+    verbose=False,
 )
 ```
 
-**Pipeline Stages**:
-1. **Blocking** (BM25/TF-IDF/Fuzzy): Fast lexical filtering to ~1000 candidates
-2. **Retrieval** (Bi-Encoder): Semantic similarity to ~50 candidates
-3. **Reranking** (Cross-Encoder): Precise cross-attention scoring to ~5 final results
+Common options:
 
-See [`examples/hybrid_matching_demo.py`](../examples/hybrid_matching_demo.py) for a complete working example.
+- `model`: model alias or full sentence-transformer model name
+- `threshold`: minimum score required for a match
+- `normalize`: normalize text before matching
+- `verbose`: print mode and fit diagnostics
 
----
+## Candidate Filtering
 
-## Blocking Strategies
-
-When using `HybridMatcher`, choose a blocking strategy:
-
-| Strategy | Best For | Speed | Notes |
-|---|---|---|---|---|
-| `BM25Blocking` | Keyword-heavy queries, proper nouns | Fast | Default choice |
-| `TFIDFBlocking` | Document-level similarity | Fast | Good for longer texts |
-| `FuzzyBlocking` | Typos and variations | Slow | Uses RapidFuzz |
-| `NoOpBlocking` | Small datasets (<1000 entities) | N/A | Pass-through, no filtering |
-
-**Example**:
-```python
-from semanticmatcher import HybridMatcher, FuzzyBlocking
-
-matcher = HybridMatcher(
-    entities=products,
-    blocking_strategy=FuzzyBlocking(score_cutoff=70),
-    # ...
-)
-```
-
----
-
-## Path 4: Cross-Encoder Reranking (For Higher Precision)
-
-Rerank top candidates for higher precision:
+Restrict matching to a subset of known candidates.
 
 ```python
-from semanticmatcher import EmbeddingMatcher, CrossEncoderReranker
+candidates = [
+    {"id": "DE", "name": "Germany"},
+    {"id": "US", "name": "United States"},
+]
 
-# Initial retrieval
-retriever = EmbeddingMatcher(entities)
-retriever.build_index()
-candidates = retriever.match(query, top_k=50)
-
-# Rerank with cross-encoder
-reranker = CrossEncoderReranker(model="bge-m3")
-final_results = reranker.rerank(query, candidates, top_k=5)
+print(matcher.match("America", candidates=candidates))
 ```
 
----
+This is useful when another upstream system has already narrowed the search space.
 
-## Model Persistence
-
-Save and load trained models for production:
+## Inspect Matcher State
 
 ```python
-from semanticmatcher import SetFitClassifier, EntityMatcher
+info = matcher.get_training_info()
+stats = matcher.get_statistics()
 
-# Train and save
-classifier = SetFitClassifier(labels=["DE", "FR", "US"])
-classifier.train(training_data)
-classifier.save("/path/to/model")
-
-# Load later
-loaded = SetFitClassifier.load("/path/to/model")
-
-# Use with EntityMatcher
-matcher = EntityMatcher(entities=entities)
-matcher.classifier = loaded
-matcher.is_trained = True
+print(info)
+print(stats)
 ```
 
-See [`examples/model_persistence.py`](../examples/model_persistence.py) for a complete guide.
+For debugging a specific query:
 
----
+```python
+print(matcher.explain_match("Deutchland"))
+print(matcher.diagnose("UnknownPlace"))
+```
 
-## Common First-Run Issues
+## Common First-Run Notes
 
-**EmbeddingMatcher**:
-- Call `build_index()` before `match()`
-- First run downloads model (~100-500MB, requires network)
+- First run may download model weights, so it can take longer than later runs.
+- `fit()` is required before calling `match()` if you want explicit setup, but `match()` will auto-call `fit()` in the default flow.
+- Lower `threshold` if likely matches are being filtered out.
+- Add aliases or training examples if close variants are missing.
 
-**EntityMatcher**:
-- Call `train()` before `predict()`
-- First run downloads model and trains (requires network + 1-3 minutes)
+## Run Examples
 
-**General**:
-- Low matches? Try lowering `threshold` (0.7 → 0.6)
-- Too many matches? Try raising `threshold` (0.7 → 0.8)
-- `predict()` returns `None`? Query confidence below threshold (see `predict_proba()`)
+Project examples live in [`examples/`](../examples/).
 
-See [`troubleshooting.md`](./troubleshooting.md) for more fixes.
+From the repository root:
 
----
+```bash
+uv run python examples/embedding_matcher_demo.py
+uv run python examples/entity_matcher_demo.py
+```
 
-## Performance Expectations
+## Next Steps
 
-Approximate performance on M1 MacBook Pro (8GB RAM):
-
-| Matcher | Setup Time | Query Speed | Memory |
-|---|---|---|---|---|
-| EmbeddingMatcher (minilm) | 3s | 50 q/s | 200MB |
-| EmbeddingMatcher (mpnet) | 4s | 40 q/s | 400MB |
-| EntityMatcher (after training) | 0s (load) | 30 q/s | 400MB |
-| HybridMatcher (3-stage) | 5s | 3 q/s | 600MB |
-
-**Tips for performance**:
-- Use `minilm` for prototyping, `mpnet` for production
-- Use `match_bulk()` for batch processing
-- Lower `threshold` reduces precision but increases recall
-- Enable `normalize=True` for better matching on messy input
-
----
-
-## Where to Go Next
-
-- **Working examples**: [`examples.md`](./examples.md) - Complete catalog with difficulty ratings
-- **Experiments**: [`notebooks.md`](./notebooks.md) - Interactive exploration
-- **Internals**: [`architecture.md`](./architecture.md) - Module layout and design
-- **Troubleshooting**: [`troubleshooting.md`](./troubleshooting.md) - Common issues and fixes
+- See [`examples.md`](./examples.md) for the example catalog.
+- See [`migration-guide.md`](./migration-guide.md) if you are moving off deprecated matcher classes.
+- See [`troubleshooting.md`](./troubleshooting.md) if model downloads or imports fail.

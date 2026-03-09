@@ -1,93 +1,133 @@
 # Tech Stack
 
-## Language & Runtime
+## Languages & Runtime
 
-- **Python**: 3.9, 3.10, 3.11, 3.12 (minimum 3.9)
-- **Package Manager**: `uv` (preferred for development), `pip` for production
-- **Build System**: Hatchling (via `pyproject.toml`)
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| **Python** | 3.9-3.12 | Primary language |
+| **Package Manager** | uv | Modern Python package manager |
+| **Build System** | Hatchling | PEP 517 build backend |
+| **CI/CD** | GitHub Actions | Lint, test, publish workflows |
 
-## Core Frameworks
+## Core Dependencies
 
-### Machine Learning
-- **sentence-transformers** (≥3.0.0): Primary embedding framework
-- **SetFit** (≥1.0.0): Few-shot learning framework
-- **PyTorch** (≥2.0.0): ML backend for sentence transformers
+### Machine Learning & NLP
 
-### NLP & Text Processing
-- **NLTK** (≥3.9.2): Text normalization and preprocessing
-- **RapidFuzz** (≥3.0.0): Fuzzy string matching for blocking
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `sentence-transformers` | >=3.0.0 | Text embeddings |
+| `setfit` | >=1.0.0 | Few-shot learning classification |
+| `torch` | >=2.0.0 | Deep learning framework |
+| `datasets` | >=2.14.0 | HuggingFace datasets |
+| `scikit-learn` | >=1.3.0 | ML utilities (cosine similarity, TF-IDF) |
+| `numpy` | >=2.0.0 | Numerical computing |
+| `nltk` | >=3.9.2 | Natural language processing |
 
-### Data & Math
-- **NumPy** (≥2.0.0): Numerical operations
-- **pandas** (≥2.0.0): Data manipulation
-- **scikit-learn** (≥1.3.0): Cosine similarity, TF-IDF, metrics
+### Data Processing
 
-### Search & Retrieval
-- **rank-bm25** (≥0.2.2): BM25 blocking algorithm
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `pandas` | >=2.0.0 | Data manipulation |
+| `networkx` | >=3.0,<4.0 | Graph operations (hierarchical matching) |
+| `rapidfuzz` | >=3.0.0 | Fast fuzzy string matching |
+| `rank-bm25` | >=0.2.2 | BM25 ranking algorithm |
 
-## Key Dependencies by Layer
+### Utilities
 
-**Blocking Layer:**
-- `rank-bm25` - BM25 lexical filtering
-- `scikit-learn` - TF-IDF vectorization
-- `rapidfuzz` - Fuzzy string matching
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `requests` | >=2.31.0 | HTTP client |
+| `pyyaml` | >=6.0.0 | YAML configuration |
 
-**Retrieval Layer:**
-- `sentence-transformers` - Bi-encoder embeddings
-- `setfit` - Few-shot classification
-- `torch` - Model backend
+### Development Tools
 
-**Reranking Layer:**
-- `sentence-transformers` - Cross-encoder models
-
-**Utilities:**
-- `PyYAML` - Configuration management
-- `requests` - HTTP for data ingestion
-- `tqdm` - Progress bars
-
-## Development Tools
-
-**Testing:**
-- `pytest` (≥8.4.2) - Test framework with markers
-- `patchright` (≥1.58.0) - Browser automation (optional)
-
-**Code Quality:**
-- `ruff` (≥0.1.0) - Fast linter
-- `black` (≥23.0.0) - Code formatter
-
-**Packaging:**
-- `build` (≥1.2.2) - Package building
-- `twine` (≥5.1.1) - PyPI uploads
-
-**Optional Dev Tools:**
-- `beautifulsoup4` (≥4.14.3) - HTML parsing for ingestion
-- `html-to-markdown` (≥1.8.0) - Content conversion
-
-## Entry Points
-
-**CLI:**
-- `semanticmatcher-ingest` → `semanticmatcher.ingestion.cli:main`
-
-**Python Package:**
-- Import path: `semanticmatcher`
-- Distribution name: `semantic-matcher`
-
-## Model Registry
-
-Built-in model aliases (configured in `src/semanticmatcher/config.py`):
-
-| Alias | Full Model Name |
-|-------|----------------|
-| `bge-base` | BAAI/bge-base-en-v1.5 |
-| `bge-m3` | BAAI/bge-m3 |
-| `nomic` | nomic-ai/nomic-embed-text-v1 |
-| `mpnet` | sentence-transformers/all-mpnet-base-v2 |
-| `minilm` | sentence-transformers/all-MiniLM-L6-v2 |
-| `default` | sentence-transformers/all-mpnet-base-v2 |
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `pytest` | >=8.4.2 | Testing framework |
+| `pytest-cov` | latest | Coverage reporting |
+| `ruff` | >=0.1.0 | Python linter |
+| `black` | >=23.0.0 | Code formatter |
+| `patchright` | >=1.58.0 | Browser automation (Playwright fork) |
+| `beautifulsoup4` | >=4.14.3 | HTML parsing |
+| `requests-mock` | latest | HTTP mocking in tests |
 
 ## Configuration
 
-- **Config File**: `pyproject.toml` (Hatchling build, pytest markers, dev dependencies)
-- **Linting**: Ruff (configured in pyproject.toml)
-- **Formatting**: Black (used via ruff or standalone)
-- **Testing**: pytest with 3 markers (integration, slow, hf)
+### Build Configuration
+- **File**: `pyproject.toml`
+- **Dependencies**: Managed via `dependencies` and `optional-dependencies`
+- **Python versions**: 3.9, 3.10, 3.11, 3.12
+
+### Linting & Formatting
+- **Formatter**: Black (line length 100)
+- **Linter**: Ruff (selects E, F, I, UP, B, C4, DTZ, TID, SIM, PT, RSE)
+- **Type checking**: Type hints mandatory (via ruff)
+
+### CI/CD Configuration
+- **Workflows**: `.github/workflows/`
+  - `lint.yml` - Code quality checks
+  - `test.yml` - Test suite execution
+  - `publish.yml` - PyPI publishing
+
+### Application Configuration
+- **File**: `config.yaml`
+- **Model Registries**: Embeddings and rerankers configuration
+- **CLI Tool**: `semanticmatcher-ingest`
+
+## Entry Points
+
+### Library Entry Point
+```python
+from semanticmatcher import Matcher
+```
+
+### CLI Entry Point
+```bash
+semanticmatcher-ingest
+```
+
+## Optional Dependencies
+
+### LiteLLM Integration
+- **Package**: `litellm` (optional)
+- **Purpose**: Multi-provider LLM API integration
+- **Usage**: Embedding and reranking via API
+- **Installation**: `uv pip install semanticmatcher[litellm]`
+
+## Development Tools
+
+### Package Management
+```bash
+uv sync              # Install/sync dependencies
+uv run <command>     # Execute within managed environment
+uv add <package>     # Add dependency to pyproject.toml
+```
+
+### Code Quality
+```bash
+uv run ruff check    # Lint code
+uv run black .       # Format code
+uv run pytest        # Run tests
+```
+
+## Technology Choices
+
+### Why uv?
+- 10-100x faster than pip
+- Modern Python package manager
+- Better dependency resolution
+
+### Why SetFit?
+- Few-shot learning without fine-tuning
+- Efficient for entity classification tasks
+- Good performance with minimal examples
+
+### Why NetworkX?
+- Robust graph algorithms
+- Well-maintained library
+- Ideal for hierarchical matching
+
+### Why Multiple Embedding Models?
+- Task-specific model selection
+- Performance vs accuracy tradeoffs
+- Multilingual support requirements
