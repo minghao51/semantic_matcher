@@ -83,6 +83,73 @@ results = matcher.match("America", top_k=3)
 
 **The new `Matcher` class auto-selects the best mode** based on your training data.
 
+## Embedding Models
+
+### Default: Static Embeddings
+
+Semantic Matcher uses **static embeddings by default for retrieval**:
+
+```python
+# Retrieval default
+matcher = Matcher(mode="zero-shot")  # Uses "potion-8m" by default
+```
+
+**Benefits:**
+- 10-100x faster than dynamic embeddings
+- Lower memory usage
+- Sufficient accuracy for most use cases
+
+### Available Models
+
+| Alias | Model | Type | Backend | Best For |
+|-------|-------|------|---------|----------|
+| `potion-8m` | minishlab/potion-base-8M | Static | model2vec | English general use (retrieval default) |
+| `potion-32m` | minishlab/potion-base-32M | Static | model2vec | Fast English with better quality |
+| `mrl-en` | RikkaBotan/stable-static-embedding-fast-retrieval-mrl-en | Static (MRL) | StaticEmbedding | English with MRL support* |
+| `mrl-multi` | sentence-transformers/static-similarity-mrl-multilingual-v1 | Static (MRL) | StaticEmbedding | Multilingual (NEW!) |
+| `bge-m3` | BAAI/bge-m3 | Dynamic | SentenceTransformer | Multilingual (opt-in dynamic) |
+| `bge-base` | BAAI/bge-base-en-v1.5 | Dynamic | SentenceTransformer | High accuracy (English) |
+
+*Note: The RikkaBotan MRL model may require MPS fallback on Apple Silicon (set `PYTORCH_ENABLE_MPS_FALLBACK=1`).
+
+### Static Embedding Backends
+
+Semantic Matcher supports two static embedding approaches:
+
+1. **StaticEmbedding** (sentence-transformers): For models like RikkaBotan MRL
+2. **model2vec**: For minishlab potion models and custom distillations
+
+Both are automatically detected and used based on the model name.
+
+### Training-Safe Default
+
+`Matcher.fit(...)` automatically switches to a training-compatible backbone for
+`head-only` and `full` modes. The current training default is `mpnet`, so
+`Matcher(model="default")` stays fast for zero-shot retrieval without breaking
+SetFit-based training.
+
+### Opting into Dynamic Embeddings
+
+For scenarios requiring contextual understanding:
+
+```python
+matcher = Matcher(mode="zero-shot", model="bge-base")
+```
+
+### Multilingual Support
+
+```python
+matcher = Matcher(mode="zero-shot", model="bge-m3")
+```
+
+### Benchmarking
+
+Run the comprehensive benchmark suite with:
+
+```bash
+uv run python scripts/benchmark_embeddings.py --track all --output benchmark-results.json
+```
+
 ## Documentation
 
 - [Migration Guide](docs/migration-guide.md) - Migrate from old API to unified Matcher

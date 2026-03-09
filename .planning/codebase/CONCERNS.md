@@ -59,49 +59,46 @@ src/semanticmatcher/core/
 
 ---
 
-## 2. Security Issues
+## 2. Code Quality Issues
 
-### API Key in Environment Variable
+### Process-Wide Environment Variable Pollution
 **Location**: `src/semanticmatcher/backends/litellm.py:21, 34`
 
 **Issue**:
 ```python
-os.environ["LITELLM_API_KEY"] = api_key  # Sets global env var
+if api_key:
+    os.environ["LITELLM_API_KEY"] = api_key  # Sets global env var
 ```
 
-**Problems**:
-1. **Process-wide Exposure**: Affects entire process, not just the backend
-2. **No Input Validation**: Accepts None or empty string
-3. **Environment Variable Pollution**: Side effects on other code
-4. **Logging Risk**: May be logged by debugging tools
+**Context**:
+- ✅ `.env` files are properly gitignored
+- ✅ API keys are never committed to git or GitHub
+- ✅ Standard practice: load from environment variables
 
-**Attack Vector**:
-- If an attacker can read environment variables, they get the API key
-- No cleanup after use (key remains in memory)
+**Actual Concerns**:
+1. **Process-wide Side Effect**: Setting `os.environ` affects the entire Python process, not just the backend instance
+2. **No Input Validation**: Accepts any string without validating format (could be None, empty string)
+3. **Unnecessary Mutation**: LiteLLM can accept the API key directly as a parameter
+4. **Testing Difficulty**: Harder to test in isolation when modifying global state
+
+**Not a Security Vulnerability**:
+- API keys are stored in `.env` files (gitignored)
+- Standard pattern used across most Python projects
+- No risk of accidental git commits
 
 **Recommendation**:
 ```python
-# Option 1: Pass directly to LiteLLM
-import litellm
-result = litellm.embedding(model=model, text=text, api_key=api_key)
-
-# Option 2: Use context manager
-from contextlib import contextmanager
-
-@contextmanager
-def temporary_env_var(key, value):
-    old_value = os.environ.get(key)
-    os.environ[key] = value
-    try:
-        yield
-    finally:
-        if old_value is None:
-            del os.environ[key]
-        else:
-            os.environ[key] = old_value
+# Better approach: Pass API key directly to LiteLLM
+def encode(self, texts):
+    response = embedding(
+        model=self.model,
+        input=texts,
+        api_key=self._api_key  # Pass directly, don't set env var
+    )
+    return [item["embedding"] for item in response["data"]]
 ```
 
-**Priority**: High
+**Priority**: Low (Code smell, not a bug)
 
 ---
 
@@ -494,21 +491,21 @@ uv pip update --all
 ## Summary by Priority
 
 ### High Priority
-1. API key security issues
-2. Input validation
-3. Test coverage
+1. Input validation
+2. Test coverage
 
 ### Medium Priority
-4. Refactor matcher.py
-5. Error handling specificity
-6. Print statements → logging
-7. Model loading performance
-8. Memory usage
-9. Dependency injection
+3. Refactor matcher.py
+4. Error handling specificity
+5. Print statements → logging
+6. Model loading performance
+7. Memory usage
+8. Dependency injection
 
 ### Low Priority
-10. Refactor hierarchy.py
-11. Global state
+9. Refactor hierarchy.py
+10. Global state
+11. Process-wide environment variable pollution (LiteLLM backend)
 12. Type ignore comments
 13. Lazy initialization documentation
 14. No pragma comments
