@@ -165,6 +165,9 @@ matcher = Matcher(
 Common options:
 
 - `model`: model alias or full sentence-transformer model name
+  - `default` uses static embeddings (fast, good for retrieval)
+  - `mpnet` or `bge-base` for better accuracy with training
+  - See [`models.md`](./models.md) for all options
 - `threshold`: minimum score required for a match
 - `normalize`: normalize text before matching
 - `verbose`: print mode and fit diagnostics
@@ -193,6 +196,72 @@ stats = matcher.get_statistics()
 print(info)
 print(stats)
 ```
+
+## Diagnostic Tools
+
+### explain_match()
+
+Get detailed information about why a query matched (or didn't match):
+
+```python
+explanation = matcher.explain_match("Deutchland", top_k=5)
+
+print(explanation["matched"])       # True/False
+print(explanation["best_match"])    # Top result
+print(explanation["top_k"])         # All candidates
+print(explanation["threshold"])     # Current threshold
+print(explanation["mode"])          # Active mode
+```
+
+**Example output:**
+```python
+{
+    "query": "Deutchland",
+    "query_normalized": "deutschland",
+    "matched": True,
+    "best_match": {"id": "DE", "score": 0.92, "text": "Germany"},
+    "top_k": [
+        {"id": "DE", "score": 0.92},
+        {"id": "US", "score": 0.75},
+        {"id": "FR", "score": 0.68}
+    ],
+    "threshold": 0.7,
+    "mode": "zero-shot"
+}
+```
+
+**Use cases:**
+- Debug low match rates
+- Understand score distribution
+- Verify threshold settings
+- Investigate edge cases
+
+### diagnose()
+
+Get actionable suggestions when matches fail:
+
+```python
+diagnosis = matcher.diagnose("UnknownPlace")
+
+print(diagnosis["issue"])       # What's wrong
+print(diagnosis["suggestion"])  # How to fix it
+```
+
+**Example output:**
+```python
+{
+    "query": "UnknownPlace",
+    "matcher_ready": True,
+    "active_matcher": "EmbeddingMatcher",
+    "issue": "Score 0.45 below threshold 0.7",
+    "suggestion": "Lower threshold with matcher.set_threshold(0.6) or add more training examples"
+}
+```
+
+**Common diagnoses:**
+- Score below threshold → Suggests lowering threshold
+- No candidates found → Suggests checking entity data
+- Matcher not ready → Suggests calling `fit()`
 
 For debugging a specific query:
 

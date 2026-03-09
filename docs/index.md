@@ -4,7 +4,7 @@ This folder is organized by audience and task.
 
 ## Start Here (New Users)
 
-- [`quickstart.md`](./quickstart.md): official package wrapper API (`EmbeddingMatcher`, `EntityMatcher`)
+- [`quickstart.md`](./quickstart.md): unified `Matcher` class with smart auto-selection
 - [`troubleshooting.md`](./troubleshooting.md): common install and first-run errors
 
 ## Experiments & Notebooks
@@ -15,6 +15,19 @@ This folder is organized by audience and task.
 ## Advanced / Raw Examples
 
 - [`examples.md`](./examples.md): guide to `examples/` (direct `setfit` / `sentence-transformers` workflows)
+
+## Models & Performance
+
+- [`models.md`](./models.md): model registry, aliases, and selection guidance
+- [`static-embeddings.md`](./static-embeddings.md): static embedding backend (model2vec, MRL)
+- [`matcher-modes.md`](./matcher-modes.md): matcher mode system (zero-shot, head-only, full, hybrid)
+- [`benchmarking.md`](./benchmarking.md): how to run and interpret benchmarks
+- [`benchmark.md`](./benchmark.md): latest benchmark results
+
+## Configuration & Internals
+
+- [`configuration.md`](./configuration.md): configuration system and model registries
+- [`migration-guide.md`](./migration-guide.md): migrating from deprecated classes
 
 ## Research & Planning
 
@@ -29,9 +42,10 @@ This folder is organized by audience and task.
 ### I want to use the library (recommended)
 
 1. Read [`quickstart.md`](./quickstart.md)
-2. Pick a matcher strategy (`EmbeddingMatcher` or `EntityMatcher`)
-3. Use [`troubleshooting.md`](./troubleshooting.md) if setup/runtime issues appear
-4. Explore [`notebooks.md`](./notebooks.md) for experiments after first success
+2. Choose a mode ([`matcher-modes.md`](./matcher-modes.md)) or use auto-selection
+3. Select a model ([`models.md`](./models.md))
+4. Use [`troubleshooting.md`](./troubleshooting.md) if setup/runtime issues appear
+5. Explore [`notebooks.md`](./notebooks.md) for experiments after first success
 
 ### I want to reproduce experiments
 
@@ -44,6 +58,13 @@ This folder is organized by audience and task.
 1. Read [`examples.md`](./examples.md)
 2. Use raw `setfit` / `sentence-transformers` examples as a base
 3. Refer to [`architecture.md`](./architecture.md) for project internals
+
+### I want to optimize performance
+
+1. Read [`static-embeddings.md`](./static-embeddings.md) for fast retrieval
+2. Read [`benchmarking.md`](./benchmarking.md) to run your own benchmarks
+3. Review [`benchmark.md`](./benchmark.md) for performance comparisons
+4. Configure with [`configuration.md`](./configuration.md)
 
 ## Notes
 

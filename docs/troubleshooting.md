@@ -165,6 +165,179 @@ Updated examples:
 - `experiments/country_classifier/country_classifier_quick.py`
 - `experiments/country_classifier/country_classifier_advanced.py`
 
+## Static Embedding Issues
+
+### model2vec Import Error
+
+**Symptom:**
+- `ModuleNotFoundError: No module named 'model2vec'`
+
+**Cause:**
+- Trying to use potion models without model2vec installed
+
+**Fix:**
+```bash
+# Install model2vec
+uv pip install model2vec
+
+# Or with extras
+uv pip install semantic-matcher[static]
+```
+
+### MRL Model Loading Error
+
+**Symptom:**
+- `Failed to load static embedding model`
+- `AttributeError: 'StaticEmbedding' module not found`
+
+**Cause:**
+- RikkaBotan MRL models require `trust_remote_code=True`
+
+**Fix:**
+```python
+from semanticmatcher.backends.static_embedding import StaticEmbeddingBackend
+
+# Automatically handled by Matcher
+from semanticmatcher import Matcher
+matcher = Matcher(model="mrl-en")  # Works correctly
+```
+
+### MPS Fallback Warning (Apple Silicon)
+
+**Symptom:**
+- Warning about MPS fallback on Apple Silicon
+
+**Cause:**
+- RikkaBotan MRL models use operations not supported by MPS
+
+**Fix:**
+- Already handled automatically - library sets `PYTORCH_ENABLE_MPS_FALLBACK=1`
+- Warning is informational, not an error
+
+### Static Model Auto-Fallback
+
+**Symptom:**
+- Training with `potion-8m` uses `mpnet` instead
+
+**Cause:**
+- Static models don't support SetFit training
+- Library auto-falls back to training-compatible model
+
+**Fix:**
+```python
+# Explicitly use training-compatible model
+matcher = Matcher(model="mpnet")  # Not potion-8m
+matcher.fit(training_data, mode="full")
+
+# Or accept the fallback
+matcher = Matcher(model="potion-8m")
+matcher.fit(training_data, mode="full")  # Will use mpnet for training
+```
+
+See [`static-embeddings.md`](./static-embeddings.md) for more details.
+
+## Matcher Mode Issues
+
+### Auto-Detection Not Working as Expected
+
+**Symptom:**
+- Wrong mode selected by auto-detection
+- Expected `head-only` but got `full`
+
+**Cause:**
+- Auto-detection counts examples per entity
+- ≥ 3 examples per entity triggers full training
+
+**Fix:**
+```python
+# Check detected mode
+matcher = Matcher(entities=entities, mode="auto")
+matcher.fit(training_data)
+print(matcher.get_training_info()["detected_mode"])
+
+# Override mode explicitly
+matcher = Matcher(entities=entities, mode="head-only")
+matcher.fit(training_data)
+```
+
+### Training Data Required Error
+
+**Symptom:**
+- `ValueError: training_data is required for modes 'head-only' and 'full'`
+
+**Cause:**
+- Requested training mode without providing training data
+
+**Fix:**
+```python
+# Wrong
+matcher = Matcher(mode="full")
+matcher.fit()  # Error!
+
+# Right
+matcher = Matcher(mode="full")
+matcher.fit(training_data)  # Provide training data
+
+# Or use zero-shot for no training
+matcher = Matcher(mode="zero-shot")
+matcher.fit()  # OK
+```
+
+### Hybrid Mode Not Working
+
+**Symptom:**
+- Hybrid mode returns no results
+- Very slow matching
+
+**Causes:**
+1. **Blocking too aggressive** - Filters out all candidates
+2. **Dataset too small** - Hybrid overkill for <10k entities
+
+**Fix:**
+```python
+# 1. Try different blocking strategy
+from semanticmatcher.core.blocking import NoOpBlocking
+
+matcher = Matcher(
+    entities=entities,
+    mode="hybrid",
+    blocking_strategy=NoOpBlocking()  # No filtering
+)
+
+# 2. Increase blocking_top_k
+result = matcher.match(
+    "query",
+    blocking_top_k=5000  # More candidates
+)
+
+# 3. Use simpler mode for small datasets
+matcher = Matcher(entities=entities, mode="zero-shot")
+```
+
+### Mode Not Supported Error
+
+**Symptom:**
+- `ModeError: Invalid mode: 'invalid_mode'`
+
+**Cause:**
+- Typos or invalid mode names
+
+**Valid modes:**
+- `zero-shot`
+- `head-only`
+- `full`
+- `hybrid`
+- `auto`
+
+**Fix:**
+```python
+# Check mode spelling
+matcher = Matcher(entities=entities, mode="zero-shot")  # Correct
+# Not "zeroshot" or "Zero-Shot"
+```
+
+See [`matcher-modes.md`](./matcher-modes.md) for complete mode guide.
+
 ## Performance Issues
 
 **Problem**: Matching is too slow
@@ -220,7 +393,31 @@ matcher = EmbeddingMatcher(entities, embedding_dim=256)
 
 If you're still stuck:
 
-1. Check the examples: [`docs/examples.md`](./examples.md)
-2. Review the quickstart: [`docs/quickstart.md`](./quickstart.md)
-3. Search issues: [GitHub Issues](https://github.com/your-repo/semantic-matcher/issues)
-4. Create an issue with your code, data sample, and error message
+1. **Check diagnostic tools**:
+   ```python
+   diagnosis = matcher.diagnose("problematic query")
+   print(diagnosis["suggestion"])
+   ```
+
+2. **Review documentation**:
+   - [`quickstart.md`](./quickstart.md) - Basic usage
+   - [`examples.md`](./examples.md) - Example catalog
+   - [`models.md`](./models.md) - Model selection guide
+   - [`matcher-modes.md`](./matcher-modes.md) - Mode system
+   - [`static-embeddings.md`](./static-embeddings.md) - Static embedding details
+   - [`configuration.md`](./configuration.md) - Configuration options
+
+3. **Check diagnostics**:
+   ```python
+   explanation = matcher.explain_match("query", top_k=5)
+   print(explanation)
+   ```
+
+4. **Search issues**: [GitHub Issues](https://github.com/anomalyco/semantic_matcher/issues)
+
+5. **Create an issue** with:
+   - Code snippet
+   - Data sample (sanitized)
+   - Error message
+   - `diagnose()` output
+   - `get_training_info()` output

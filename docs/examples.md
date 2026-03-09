@@ -4,6 +4,8 @@ Related docs: [`index.md`](./index.md) | [`quickstart.md`](./quickstart.md) | [`
 
 This page catalogs all examples in `examples/` and helps you choose where to start.
 
+> **⚠️ Deprecation Notice**: The wrapper API examples below use the deprecated `EmbeddingMatcher` and `EntityMatcher` classes. For the current unified `Matcher` API with smart auto-selection, see [`quickstart.md`](./quickstart.md) and [`migration-guide.md`](./migration-guide.md). These examples will be updated in a future release.
+
 ## Two Learning Paths
 
 ### Path 1: Wrapper API (Recommended)
@@ -20,13 +22,13 @@ Start with these examples to learn the official API:
 
 | Example | Difficulty | Runtime | API Features Demonstrated |
 |---|---|---|---|
-| [`embedding_matcher_demo.py`](../examples/embedding_matcher_demo.py) | Beginner | 30s | EmbeddingMatcher, build_index(), match(), threshold, top_k, TextNormalizer |
-| [`entity_matcher_demo.py`](../examples/entity_matcher_demo.py) | Beginner | 2-3 min | EntityMatcher, train(), predict(), predict_proba(), threshold, model selection |
-| [`model_persistence.py`](../examples/model_persistence.py) | Intermediate | 3-4 min | SetFitClassifier.save/load, model versioning, production deployment |
-| [`batch_processing.py`](../examples/batch_processing.py) | Intermediate | 1-2 min | match_bulk(), parallel processing, performance benchmarking |
-| [`matcher_comparison.py`](../examples/matcher_comparison.py) | Intermediate | 4-5 min | EntityMatcher vs EmbeddingMatcher comparison, decision matrix |
-| [`threshold_tuning.py`](../examples/threshold_tuning.py) | Intermediate | 2 min | Threshold parameter impact, validation, precision/recall tradeoffs |
-| [`hybrid_matching_demo.py`](../examples/hybrid_matching_demo.py) | Intermediate | 30s | HybridMatcher, three-stage pipeline, blocking strategies, BM25Blocking |
+| [`embedding_matcher_demo.py`](../examples/embedding_matcher_demo.py) | Beginner | 30s | ⚠️ Deprecated: EmbeddingMatcher, build_index(), match(), threshold, top_k, TextNormalizer |
+| [`entity_matcher_demo.py`](../examples/entity_matcher_demo.py) | Beginner | 2-3 min | ⚠️ Deprecated: EntityMatcher, train(), predict(), predict_proba(), threshold, model selection |
+| [`model_persistence.py`](../examples/model_persistence.py) | Intermediate | 3-4 min | ⚠️ Deprecated: SetFitClassifier.save/load, model versioning, production deployment |
+| [`batch_processing.py`](../examples/batch_processing.py) | Intermediate | 1-2 min | ⚠️ Deprecated: match_bulk(), parallel processing, performance benchmarking |
+| [`matcher_comparison.py`](../examples/matcher_comparison.py) | Intermediate | 4-5 min | ⚠️ Deprecated: EntityMatcher vs EmbeddingMatcher comparison, decision matrix |
+| [`threshold_tuning.py`](../examples/threshold_tuning.py) | Intermediate | 2 min | ⚠️ Deprecated: Threshold parameter impact, validation, precision/recall tradeoffs |
+| [`hybrid_matching_demo.py`](../examples/hybrid_matching_demo.py) | Intermediate | 30s | ⚠️ Deprecated: HybridMatcher, three-stage pipeline, blocking strategies, BM25Blocking |
 
 ### Learning Sequence
 
@@ -42,6 +44,19 @@ Start with these examples to learn the official API:
 
 **Large Scale / Advanced**:
 7. [`hybrid_matching_demo.py`](../examples/hybrid_matching_demo.py) - Three-stage pipeline for big datasets
+
+### ⚠️ Unified Matcher API
+
+The examples above use deprecated classes. The current recommended approach is the unified `Matcher` class which:
+
+- **Auto-selects** the best mode based on your training data
+- **Supports explicit modes**: zero-shot, head-only, full, hybrid
+- **Simpler API**: Single `fit()` method for all modes
+
+**See the current API in**:
+- [`quickstart.md`](./quickstart.md) - Getting started with the unified `Matcher`
+- [`matcher-modes.md`](./matcher-modes.md) - Detailed guide to matcher modes
+- [`migration-guide.md`](./migration-guide.md) - Migrating from deprecated classes
 
 ---
 

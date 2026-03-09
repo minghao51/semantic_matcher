@@ -23,6 +23,7 @@ src/semanticmatcher/
 │   └── monitoring.py        # Metrics/monitoring helpers
 ├── backends/                # Provider integrations (embeddings/reranking)
 │   ├── base.py              # Backend interfaces / shared abstractions
+│   ├── static_embedding.py  # Static embedding backend (model2vec, StaticEmbedding)
 │   ├── sentencetransformer.py
 │   ├── reranker_st.py
 │   ├── litellm.py           # Planned/in-progress cloud backend support
@@ -52,7 +53,30 @@ src/semanticmatcher/
 
 ## Core Components
 
-### EntityMatcher
+### Matcher (Unified API)
+
+The recommended `Matcher` class with smart auto-selection of the optimal matching strategy.
+
+**Modes:**
+- `zero-shot`: Embedding similarity without training
+- `head-only`: Lightweight SetFit training (~30s)
+- `full`: Full SetFit training (~3min)
+- `hybrid`: Multi-stage pipeline (blocking → retrieval → reranking)
+- `auto`: Auto-detects based on training data volume
+
+**Workflow:**
+```python
+matcher = Matcher(entities=[...], mode="auto")
+matcher.fit(training_data=None)  # Auto-selects mode
+result = matcher.match("query")   # Routes to appropriate strategy
+```
+
+**Auto-selection Rules:**
+- No training data → zero-shot mode
+- < 3 examples per entity → head-only mode
+- ≥ 3 examples per entity → full training mode
+
+### EntityMatcher (Deprecated)
 
 SetFit-based entity matching with optional text normalization.
 
@@ -111,6 +135,24 @@ Result (entity ID or score)
 
 ## Backends
 
+### Static Embeddings
+
+Fast retrieval-oriented embeddings using pre-computed lookups.
+
+**Supports two approaches:**
+- **model2vec** (`StaticModel`): minishlab potion models (potion-8m, potion-32m)
+- **StaticEmbedding** (sentence-transformers): RikkaBotan MRL models
+
+**Benefits:**
+- 10-100x faster than dynamic embeddings
+- Lower memory usage
+- Sufficient accuracy for retrieval scenarios
+
+**Usage:**
+```python
+matcher = Matcher(entities=[...], model="potion-8m")  # Static by default
+```
+
 ### HuggingFace (SentenceTransformers)
 
 - `HFEmbedding` - Generate embeddings
@@ -123,6 +165,44 @@ Result (entity ID or score)
 ### Ollama (future)
 
 - Local LLM embeddings (planned; may not be fully wired in current release)
+
+## Model Registries
+
+### MODEL_SPECS
+
+Central registry of model specifications with metadata:
+- **Static models**: potion-8m, potion-32m, mrl-en, mrl-multi
+- **Dynamic models**: bge-base, bge-m3, nomic, mpnet, minilm
+- **Training support**: Marks which models can be used for SetFit training
+
+### Resolution Logic
+
+- `resolve_model_alias()`: Maps short aliases to full model names
+- `is_static_embedding_model()`: Detects static embedding models
+- `resolve_training_model_alias()`: Falls back to training-safe models
+
+### Default Models
+
+- **Retrieval default**: `potion-8m` (fast static embeddings)
+- **Training default**: `mpnet` (SetFit-compatible)
+
+## Matcher Mode System
+
+### MATCHER_MODE_REGISTRY
+
+Maps mode names to implementation classes:
+- `zero-shot` → `EmbeddingMatcher`
+- `head-only` → `EntityMatcher` (lightweight training)
+- `full` → `EntityMatcher` (full training)
+- `hybrid` → `HybridMatcher` (multi-stage pipeline)
+- `auto` → `SmartSelection` (runtime detection)
+
+### Mode Selection Process
+
+1. User specifies mode (or uses `auto`)
+2. Matcher routes to appropriate implementation
+3. Training requests with static models auto-fallback to training-safe backbone
+4. Hybrid mode uses blocking → retrieval → reranking pipeline
 
 ## Design Decisions
 
