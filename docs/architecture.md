@@ -14,8 +14,9 @@ src/semanticmatcher/
 ├── __init__.py              # Public exports / lazy import surface
 ├── config.py                # Config loading and defaults
 ├── core/                    # Matching pipelines and domain logic
-│   ├── matcher.py           # EntityMatcher / EmbeddingMatcher
+│   ├── matcher.py           # EntityMatcher / EmbeddingMatcher / Matcher
 │   ├── classifier.py        # SetFitClassifier wrapper
+│   ├── bert_classifier.py   # BERTClassifier wrapper
 │   ├── normalizer.py        # Text normalization
 │   ├── blocking.py          # Candidate blocking strategies
 │   ├── reranker.py          # Cross-encoder reranking
@@ -61,6 +62,7 @@ The recommended `Matcher` class with smart auto-selection of the optimal matchin
 - `zero-shot`: Embedding similarity without training
 - `head-only`: Lightweight SetFit training (~30s)
 - `full`: Full SetFit training (~3min)
+- `bert`: BERT-based classifier (~5min, high accuracy)
 - `hybrid`: Multi-stage pipeline (blocking → retrieval → reranking)
 - `auto`: Auto-detects based on training data volume
 
@@ -74,7 +76,8 @@ result = matcher.match("query")   # Routes to appropriate strategy
 **Auto-selection Rules:**
 - No training data → zero-shot mode
 - < 3 examples per entity → head-only mode
-- ≥ 3 examples per entity → full training mode
+- ≥ 3 examples per entity, < 100 total → full training mode
+- ≥ 100 total, ≥ 8 examples per entity → bert mode
 
 ### EntityMatcher (Deprecated)
 
@@ -111,6 +114,10 @@ result = matcher.match("Deutschland")  # → {"id": "DE", "score": 0.92}
 ### SetFitClassifier
 
 Low-level wrapper around SetFit for training and prediction.
+
+### BERTClassifier
+
+Low-level wrapper around transformers library for BERT-based classification.
 
 ### TextNormalizer
 

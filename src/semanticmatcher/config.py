@@ -63,6 +63,57 @@ MODEL_SPECS = {
         "supports_training": True,
         "language": "en",
     },
+    # BERT-based classifier models
+    "distilbert": {
+        "name": "distilbert-base-uncased",
+        "backend": "bert",
+        "supports_training": True,
+        "language": "en",
+        "model_type": "bert",
+        "params": "66M",
+        "speed": "fast",
+        "accuracy": "high",
+    },
+    "tinybert": {
+        "name": "huawei-noah/TinyBERT_General_4L_312D",
+        "backend": "bert",
+        "supports_training": True,
+        "language": "en",
+        "model_type": "bert",
+        "params": "4.4M",
+        "speed": "very_fast",
+        "accuracy": "medium",
+    },
+    "roberta-base": {
+        "name": "roberta-base",
+        "backend": "bert",
+        "supports_training": True,
+        "language": "en",
+        "model_type": "bert",
+        "params": "125M",
+        "speed": "medium",
+        "accuracy": "very_high",
+    },
+    "deberta-v3": {
+        "name": "microsoft/deberta-v3-base",
+        "backend": "bert",
+        "supports_training": True,
+        "language": "en",
+        "model_type": "bert",
+        "params": "184M",
+        "speed": "slow",
+        "accuracy": "state_of_the_art",
+    },
+    "bert-multilingual": {
+        "name": "bert-base-multilingual-cased",
+        "backend": "bert",
+        "supports_training": True,
+        "language": "multilingual",
+        "model_type": "bert",
+        "params": "179M",
+        "speed": "slow",
+        "accuracy": "high",
+    },
 }
 
 STATIC_MODEL_REGISTRY = {
@@ -80,6 +131,7 @@ DYNAMIC_MODEL_REGISTRY = {
 MODEL_REGISTRY = {alias: spec["name"] for alias, spec in MODEL_SPECS.items()}
 RETRIEVAL_DEFAULT_MODEL = "potion-8m"
 TRAINING_DEFAULT_MODEL = "mpnet"
+BERT_DEFAULT_MODEL = "distilbert"
 MODEL_REGISTRY["default"] = MODEL_SPECS[RETRIEVAL_DEFAULT_MODEL]["name"]
 
 RERANKER_REGISTRY = {
@@ -95,6 +147,7 @@ MATCHER_MODE_REGISTRY = {
     "head-only": "EntityMatcher",
     "full": "EntityMatcher",
     "hybrid": "HybridMatcher",
+    "bert": "EntityMatcher",
     "auto": "SmartSelection",
 }
 
@@ -136,7 +189,7 @@ def supports_training_model(model_name: str) -> bool:
     """Return whether the model can be used as a SetFit/SentenceTransformer backbone."""
     spec = get_model_spec(model_name)
     if spec is not None:
-        return bool(spec["supports_training"])
+        return bool(spec["supports_training"]) and spec.get("backend") != "bert"
     return not is_static_embedding_model(model_name)
 
 
@@ -156,14 +209,62 @@ def resolve_training_model_alias(model_name: str) -> str:
     return resolve_model_alias(TRAINING_DEFAULT_MODEL)
 
 
+def resolve_bert_model_alias(model_name: str) -> str:
+    """
+    Resolve the effective BERT backbone.
+
+    BERT mode must always use a transformers classification model. When the
+    requested model is not BERT-compatible, fall back to the default BERT model.
+    """
+    if model_name == "default":
+        return resolve_model_alias(BERT_DEFAULT_MODEL)
+
+    if is_bert_model(model_name):
+        return resolve_model_alias(model_name)
+
+    return resolve_model_alias(BERT_DEFAULT_MODEL)
+
+
 def get_embedding_model_aliases() -> list[str]:
     """Return embedding aliases in a stable order for benchmarks."""
-    return list(MODEL_SPECS.keys())
+    return [
+        alias for alias, spec in MODEL_SPECS.items() if spec.get("backend") != "bert"
+    ]
 
 
 def get_training_model_aliases() -> list[str]:
     """Return aliases that support SetFit-based training."""
-    return [alias for alias, spec in MODEL_SPECS.items() if spec["supports_training"]]
+    return [
+        alias
+        for alias, spec in MODEL_SPECS.items()
+        if spec["supports_training"] and spec.get("backend") != "bert"
+    ]
+
+
+def is_bert_model(model_name: str) -> bool:
+    """Check if model is a BERT-based classifier.
+
+    Args:
+        model_name: Model alias or full model name
+
+    Returns:
+        True if the model is a BERT-based classifier, False otherwise.
+    """
+    spec = get_model_spec(model_name)
+    if spec is not None:
+        return spec.get("model_type") == "bert"
+    return False
+
+
+def get_bert_model_aliases() -> list[str]:
+    """Return BERT model aliases.
+
+    Returns:
+        List of model aliases that are BERT-based classifiers.
+    """
+    return [
+        alias for alias, spec in MODEL_SPECS.items() if spec.get("model_type") == "bert"
+    ]
 
 
 def resolve_reranker_alias(model_name: str) -> str:

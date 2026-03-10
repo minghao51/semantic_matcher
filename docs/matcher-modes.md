@@ -13,6 +13,7 @@ The unified `Matcher` class supports multiple matching strategies through **mode
 | `zero-shot` | Embedding similarity only | None | No training data available |
 | `head-only` | Train classifier head only | ~30s | Minimal training data (1-2 examples/entity) |
 | `full` | Full SetFit training | ~3min | Sufficient training data (3+ examples/entity) |
+| `bert` | BERT-based classifier | ~5min | High accuracy needed (100+ examples/entity) |
 | `hybrid` | Multi-stage pipeline | None | Large datasets (10k+ entities) |
 | `auto` | Smart auto-detection | Variable | Let the library choose |
 
@@ -107,6 +108,56 @@ result = matcher.match("query")
 
 ---
 
+### bert
+
+**What:** BERT-based classifier using transformers library.
+
+**When to use:**
+- High-stakes accuracy is critical (legal, medical, financial)
+- Complex pattern recognition needed (sarcasm, nuanced sentiment)
+- Data-rich scenarios (100+ examples per entity recommended)
+- GPU resources available
+- Inference speed is not critical
+
+**Pros:**
+- Superior accuracy for complex tasks (often 3-5% better than SetFit)
+- Works well with smaller datasets (8-16 examples per class)
+- State-of-the-art transformer architecture
+
+**Cons:**
+- Slower training (~5 minutes, GPU recommended)
+- Slower inference (full transformer pass required)
+- Higher computational cost
+- Larger model files on disk
+
+**Example:**
+```python
+matcher = Matcher(entities=entities, mode="bert", model="distilbert")
+matcher.fit(training_data, num_epochs=3)
+result = matcher.match("query")
+```
+
+**Implementation:** Routes to `EntityMatcher` with BERT classifier
+
+**BERT Models:**
+```python
+# Default: DistilBERT (recommended)
+matcher = Matcher(entities=entities, mode="bert")
+
+# For maximum accuracy
+matcher = Matcher(entities=entities, mode="bert", model="deberta-v3")
+
+# For resource-constrained environments
+matcher = Matcher(entities=entities, mode="bert", model="tinybert")
+
+# For multilingual text
+matcher = Matcher(entities=entities, mode="bert", model="bert-multilingual")
+```
+
+**See:** [`bert-classifier.md`](./bert-classifier.md) for detailed BERT guide.
+
+---
+
 ### hybrid
 
 **What:** Three-stage pipeline: blocking → retrieval → reranking.
@@ -160,7 +211,8 @@ result = matcher.match(
 ```
 No training data → zero-shot
 < 3 examples/entity → head-only
-≥ 3 examples/entity → full
+≥ 3 examples/entity, < 100 total → full
+≥ 100 total, ≥ 8 examples/entity → bert
 ```
 
 **When to use:**
@@ -182,7 +234,7 @@ matcher.fit(training_data)  # Auto-selects based on data
 **Check detected mode:**
 ```python
 info = matcher.get_training_info()
-print(info["detected_mode"])  # "zero-shot", "head-only", or "full"
+print(info["detected_mode"])  # "zero-shot", "head-only", "full", or "bert"
 ```
 
 ## Mode Selection Decision Tree
@@ -196,7 +248,9 @@ Do you have training data?
           │
           ├─ < 3 → head-only (fast, ~30s)
           │
-          └─ ≥ 3 → full (accurate, ~3min)
+          ├─ ≥ 3, < 100 total examples → full (accurate, ~3min)
+          │
+          └─ ≥ 100 total, ≥ 8 per entity → bert (very accurate, ~5min)
 ```
 
 **Special case:** Large datasets (10k+ entities)
@@ -233,6 +287,7 @@ Training time (100 entities, 50 examples):
 | zero-shot | None | Fast (static: ~1ms, dynamic: ~10ms) |
 | head-only | ~30s | Fast (~10ms) |
 | full | ~3min | Fast (~10ms) |
+| bert | ~5min | Medium (~50ms) |
 | hybrid | None | Medium (~50-100ms with reranking) |
 
 ### Accuracy Comparison
@@ -244,6 +299,7 @@ Accuracy on typical dataset (higher is better):
 | zero-shot | 70-80% | Good baseline |
 | head-only | 80-85% | Better with minimal data |
 | full | 85-95% | Best with sufficient data |
+| bert | 88-98% | Superior for complex patterns |
 | hybrid | 90-95% | Best for large datasets |
 
 *Actual results vary by dataset quality and size.*
@@ -301,7 +357,7 @@ matcher = Matcher(
 
 ## Candidate Filtering (Trained Modes)
 
-When using `head-only` or `full` modes, restrict matching to known candidates:
+When using `head-only`, `full`, or `bert` modes, restrict matching to known candidates:
 
 ```python
 matcher = Matcher(entities=entities, mode="full")
@@ -417,6 +473,8 @@ matcher.fit(training_data)
 
 **I have good training data (3+ examples/entity)** → `full`
 
+**I have rich training data (100+ examples, 8+ per entity)** → `bert`
+
 **I have 10k+ entities** → `hybrid`
 
 **I'm not sure** → `auto` (let the library choose)
@@ -441,6 +499,13 @@ matcher.fit(training_data)
 matcher = Matcher(entities=entities, mode="full")
 matcher.fit(training_data)
 # Best accuracy
+```
+
+**High-stakes application with rich training data:**
+```python
+matcher = Matcher(entities=entities, mode="bert", model="distilbert")
+matcher.fit(training_data)
+# Superior accuracy for complex patterns
 ```
 
 **Enterprise directory (50k employees):**

@@ -12,6 +12,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .classifier import SetFitClassifier
+from .bert_classifier import BERTClassifier
 from .normalizer import TextNormalizer
 from ..utils.validation import (
     validate_entities,
@@ -20,6 +21,8 @@ from ..utils.validation import (
 )
 from ..utils.embeddings import ModelCache, get_default_cache
 from ..config import (
+    resolve_bert_model_alias,
+    is_bert_model,
     is_static_embedding_model,
     resolve_model_alias,
     resolve_training_model_alias,
@@ -142,6 +145,7 @@ class Matcher:
                 - 'zero-shot': No training, embedding similarity only
                 - 'head-only': Train classifier head only (fast, ~30s)
                 - 'full': Full SetFit training (accurate, ~3min)
+                - 'bert': BERT-based classifier (high accuracy, slower)
                 - 'hybrid': Blocking + retrieval + reranking pipeline
             blocking_strategy: Optional blocking strategy used by hybrid mode.
             reranker_model: Reranker model alias or name used by hybrid mode.
@@ -154,6 +158,7 @@ class Matcher:
         self.model_name = resolve_model_alias(model)
         self._requested_model = model
         self._training_model_name = resolve_training_model_alias(model)
+        self._bert_model_name = resolve_bert_model_alias(model)
         self.threshold = threshold
         self.normalize = normalize
         self.mode = mode
@@ -164,7 +169,7 @@ class Matcher:
         # Auto-detect mode if not explicitly set
         if mode is None or mode == "auto":
             self._training_mode = "auto"
-        elif mode in ("zero-shot", "head-only", "full", "hybrid"):
+        elif mode in ("zero-shot", "head-only", "full", "hybrid", "bert"):
             self._training_mode = mode
         else:
             raise ModeError(
@@ -176,6 +181,7 @@ class Matcher:
         # Using Any type to avoid forward reference issues since Matcher is defined before EntityMatcher/EmbeddingMatcher
         self._embedding_matcher: Optional[Any] = None
         self._entity_matcher: Optional[Any] = None
+        self._bert_matcher: Optional[Any] = None
         self._hybrid_matcher: Optional[Any] = None
         self._has_training_data = False
         self._active_matcher: Optional[Any] = None
@@ -204,8 +210,23 @@ class Matcher:
                 model_name=self._training_model_name,
                 threshold=self.threshold,
                 normalize=self.normalize,
+                classifier_type="setfit",
             )
         return self._entity_matcher
+
+    @property
+    def bert_matcher(self) -> Any:
+        """Lazy initialization of EntityMatcher with BERT classifier."""
+        if self._bert_matcher is None:
+            # Reference classes defined later in this module
+            self._bert_matcher = EntityMatcher(
+                entities=self.entities,
+                model_name=self._bert_model_name,
+                threshold=self.threshold,
+                normalize=self.normalize,
+                classifier_type="bert",
+            )
+        return self._bert_matcher
 
     @property
     def hybrid_matcher(self) -> Any:
@@ -244,13 +265,14 @@ class Matcher:
         Rules:
         - No training data → zero-shot
         - < 3 examples per entity → head-only (fast)
-        - ≥ 3 examples per entity → full training
+        - ≥ 3 examples per entity, < 100 total examples → full SetFit training
+        - ≥ 100 total examples, ≥ 8 examples per entity → bert (high accuracy)
 
         Args:
             training_data: Training examples with 'text' and 'label' keys.
 
         Returns:
-            Detected mode: 'zero-shot', 'head-only', or 'full'.
+            Detected mode: 'zero-shot', 'head-only', 'full', or 'bert'.
         """
         if training_data is None:
             detected = "zero-shot"
@@ -261,9 +283,18 @@ class Matcher:
                 entity_counts[item["label"]] += 1
 
             examples_per_entity = list(entity_counts.values())
+            min_examples = min(examples_per_entity) if examples_per_entity else 0
+            max_examples = max(examples_per_entity) if examples_per_entity else 0
+            total_examples = len(training_data)
 
+            # Recommend BERT for data-rich scenarios
+            if min_examples >= 8 and total_examples >= 100:
+                detected = "bert"
             # Check if we have enough examples for full training
-            detected = "head-only" if max(examples_per_entity) < 3 else "full"
+            elif max_examples < 3:
+                detected = "head-only"
+            else:
+                detected = "full"
 
         # Store for transparency
         self._detected_mode = detected
@@ -277,6 +308,8 @@ class Matcher:
             return self.embedding_matcher
         elif mode in ("head-only", "full"):
             return self.entity_matcher
+        elif mode == "bert":
+            return self.bert_matcher
         elif mode == "hybrid":
             return self.hybrid_matcher
         elif mode == "auto":
@@ -284,6 +317,12 @@ class Matcher:
             return self.embedding_matcher
         else:
             raise ModeError(f"Unknown mode: {mode}", invalid_mode=mode)
+
+    def _resolve_classifier_matcher(self) -> Any:
+        """Return the classifier-backed matcher for the active training mode."""
+        return (
+            self.bert_matcher if self._training_mode == "bert" else self.entity_matcher
+        )
 
     def fit(
         self,
@@ -304,6 +343,7 @@ class Matcher:
                 - 'zero-shot': Skip training, use embedding similarity
                 - 'head-only': Train classifier head only (fast)
                 - 'full': Full SetFit training (accurate)
+                - 'bert': BERT-based training (high accuracy)
             show_progress: Whether to show progress bar during training.
                 Requires tqdm installed (pip install semantic-matcher[jupyter]).
             **kwargs: Additional arguments passed to training:
@@ -327,7 +367,7 @@ class Matcher:
 
         # Determine the mode to use
         if mode is not None:
-            if mode not in ("zero-shot", "head-only", "full", "hybrid"):
+            if mode not in ("zero-shot", "head-only", "full", "hybrid", "bert"):
                 raise ModeError(
                     f"Invalid mode: {mode}",
                     invalid_mode=mode,
@@ -374,25 +414,39 @@ class Matcher:
         # Train the entity matcher for head-only or full training
         if training_data is None:
             raise ValidationError(
-                "training_data is required for modes 'head-only' and 'full'",
+                "training_data is required for modes 'head-only', 'full', and 'bert'",
                 suggestion="Provide training_data or use mode='zero-shot' for matching without training",
             )
 
         # For now, both head-only and full use the same training
         # SetFit handles head-only vs full via different internal settings
         # In the future, we can add explicit head_only parameter to EntityMatcher.train()
-        if self._training_mode in ("head-only", "full"):
+        if self._training_mode in ("head-only", "full", "bert"):
             self._log(f"Training in {self._training_mode} mode")
-            if not supports_training_model(self._requested_model):
+
+            # Check if model supports the selected mode
+            if self._training_mode == "bert" and not is_bert_model(
+                self._requested_model
+            ):
+                # Using a non-BERT model with bert mode - warn but proceed
+                self._log(
+                    f"Using non-BERT model '{self._requested_model}' with bert mode. "
+                    "For optimal results, use a BERT-based model.",
+                    "warning",
+                )
+            elif self._training_mode in (
+                "head-only",
+                "full",
+            ) and not supports_training_model(self._requested_model):
                 self._log(
                     "Requested model is retrieval-only; falling back to "
                     f"{self._training_model_name} for training",
                     "warning",
                 )
-            self.entity_matcher.train(
-                training_data, show_progress=show_progress, **kwargs
-            )
-            self._active_matcher = self.entity_matcher
+
+            matcher = self._resolve_classifier_matcher()
+            matcher.train(training_data, show_progress=show_progress, **kwargs)
+            self._active_matcher = matcher
             self._has_training_data = True
             self._log("Training complete")
             return self
@@ -446,8 +500,15 @@ class Matcher:
             return self._match_hybrid(texts, top_k=top_k, **kwargs)
         if self._training_mode == "zero-shot":
             return self.embedding_matcher.match(texts, top_k=top_k, **kwargs)
+        elif self._training_mode == "bert":
+            # BERT mode supports candidate filtering
+            return self.bert_matcher.match(
+                texts,
+                candidates=kwargs.get("candidates"),
+                top_k=top_k,
+            )
         else:
-            # Trained mode currently supports candidate filtering, but not batch_size.
+            # Trained mode (head-only, full) supports candidate filtering
             return self.entity_matcher.match(
                 texts,
                 candidates=kwargs.get("candidates"),
@@ -495,6 +556,8 @@ class Matcher:
             self._embedding_matcher.threshold = self.threshold
         if self._entity_matcher:
             self._entity_matcher.threshold = self.threshold
+        if self._bert_matcher:
+            self._bert_matcher.threshold = self.threshold
 
         return self
 
@@ -590,6 +653,14 @@ class Matcher:
             classifier = getattr(self._entity_matcher, "classifier", None)
             stats["classifier_trained"] = (
                 getattr(classifier, "is_trained", self._entity_matcher.is_trained)
+                if classifier is not None
+                else False
+            )
+
+        if hasattr(self, "_bert_matcher") and self._bert_matcher:
+            classifier = getattr(self._bert_matcher, "classifier", None)
+            stats["bert_classifier_trained"] = (
+                getattr(classifier, "is_trained", self._bert_matcher.is_trained)
                 if classifier is not None
                 else False
             )
@@ -717,7 +788,7 @@ class Matcher:
 
 
 class EntityMatcher:
-    """SetFit-based entity matching with optional text normalization."""
+    """SetFit-based or BERT-based entity matching with optional text normalization."""
 
     def __init__(
         self,
@@ -725,7 +796,18 @@ class EntityMatcher:
         model_name: str = "sentence-transformers/paraphrase-mpnet-base-v2",
         threshold: float = 0.7,
         normalize: bool = True,
+        classifier_type: str = "setfit",
     ):
+        """
+        Initialize EntityMatcher.
+
+        Args:
+            entities: List of entity dictionaries with 'id' and 'name' keys.
+            model_name: Model name or alias for training.
+            threshold: Minimum confidence threshold (0-1) for matches.
+            normalize: Whether to apply text normalization.
+            classifier_type: Type of classifier to use. Either "setfit" or "bert".
+        """
         validate_entities(entities)
         validate_model_name(model_name)
 
@@ -733,9 +815,10 @@ class EntityMatcher:
         self.model_name = model_name
         self.threshold = validate_threshold(threshold)
         self.normalize = normalize
+        self.classifier_type = classifier_type
 
         self.normalizer = TextNormalizer() if normalize else None
-        self.classifier: Optional[SetFitClassifier] = None
+        self.classifier: Optional[Union[SetFitClassifier, BERTClassifier]] = None
         self.is_trained = False
 
     def _get_training_data(self, training_data: List[dict]) -> List[dict]:
@@ -751,12 +834,22 @@ class EntityMatcher:
         normalized_data = self._get_training_data(training_data)
         labels = list(dict.fromkeys(item["label"] for item in normalized_data))
 
-        self.classifier = SetFitClassifier(
-            labels=labels,
-            model_name=self.model_name,
-            num_epochs=num_epochs,
-            batch_size=batch_size,
-        )
+        # Initialize appropriate classifier based on classifier_type
+        if self.classifier_type == "bert":
+            self.classifier = BERTClassifier(
+                labels=labels,
+                model_name=self.model_name,
+                num_epochs=num_epochs,
+                batch_size=batch_size,
+            )
+        else:  # Default to SetFit
+            self.classifier = SetFitClassifier(
+                labels=labels,
+                model_name=self.model_name,
+                num_epochs=num_epochs,
+                batch_size=batch_size,
+            )
+
         self.classifier.train(
             normalized_data,
             num_epochs=num_epochs,

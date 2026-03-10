@@ -1,7 +1,11 @@
 from semanticmatcher.config import (
+    BERT_DEFAULT_MODEL,
     Config,
     RETRIEVAL_DEFAULT_MODEL,
     TRAINING_DEFAULT_MODEL,
+    get_bert_model_aliases,
+    is_bert_model,
+    resolve_bert_model_alias,
     get_embedding_model_aliases,
     get_training_model_aliases,
     is_static_embedding_model,
@@ -101,6 +105,36 @@ def test_training_model_resolution_uses_training_default_for_public_default():
     assert resolve_training_model_alias("default").endswith("all-mpnet-base-v2")
 
 
+def test_training_model_resolution_falls_back_for_bert_models():
+    assert resolve_training_model_alias("distilbert").endswith("all-mpnet-base-v2")
+
+
+def test_bert_model_aliases_are_discoverable():
+    aliases = get_bert_model_aliases()
+    assert BERT_DEFAULT_MODEL in aliases
+    assert "mpnet" not in aliases
+
+
+def test_bert_model_detection_accepts_alias_and_resolved_name():
+    assert is_bert_model("distilbert") is True
+    assert is_bert_model("distilbert-base-uncased") is True
+    assert is_bert_model("mpnet") is False
+
+
+def test_bert_model_resolution_uses_bert_default_for_public_default():
+    assert resolve_bert_model_alias("default") == "distilbert-base-uncased"
+
+
+def test_bert_model_resolution_preserves_bert_models():
+    assert resolve_bert_model_alias("distilbert") == "distilbert-base-uncased"
+    assert resolve_bert_model_alias("roberta-base") == "roberta-base"
+
+
+def test_bert_model_resolution_falls_back_for_non_bert_models():
+    assert resolve_bert_model_alias("mpnet") == "distilbert-base-uncased"
+    assert resolve_bert_model_alias("potion-8m") == "distilbert-base-uncased"
+
+
 def test_static_models_are_marked_retrieval_only():
     assert is_static_embedding_model(RETRIEVAL_DEFAULT_MODEL) is True
     assert supports_training_model(RETRIEVAL_DEFAULT_MODEL) is False
@@ -108,15 +142,18 @@ def test_static_models_are_marked_retrieval_only():
 
 def test_dynamic_models_are_training_compatible():
     assert supports_training_model(TRAINING_DEFAULT_MODEL) is True
+    assert supports_training_model("distilbert") is False
 
 
 def test_training_model_aliases_exclude_static_models():
     aliases = get_training_model_aliases()
     assert "mpnet" in aliases
     assert "potion-8m" not in aliases
+    assert "distilbert" not in aliases
 
 
 def test_embedding_model_aliases_include_static_and_dynamic_entries():
     aliases = get_embedding_model_aliases()
     assert "potion-8m" in aliases
     assert "mpnet" in aliases
+    assert "distilbert" not in aliases

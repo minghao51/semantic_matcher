@@ -423,6 +423,12 @@ class TestUnifiedMatcher:
         with pytest.raises(ValueError, match="training_data is required"):
             matcher.fit()
 
+    def test_matcher_fit_without_training_data_raises_for_bert(self, sample_entities):
+        """Test fit() without training data in bert mode raises updated guidance."""
+        matcher = Matcher(entities=sample_entities, mode="bert")
+        with pytest.raises(ValueError, match="'head-only', 'full', and 'bert'"):
+            matcher.fit()
+
     def test_matcher_fit_hybrid_initializes_pipeline(
         self, sample_entities, monkeypatch
     ):
@@ -781,3 +787,219 @@ class TestUnifiedMatcher:
             _ = NewMatcher(entities=sample_entities)
             # No warnings expected
             assert len(w) == 0
+
+
+class TestMatcherBERTMode:
+    """Tests for BERT mode in Matcher."""
+
+    @pytest.fixture
+    def sample_entities(self):
+        return [
+            {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
+            {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
+            {"id": "US", "name": "United States", "aliases": ["USA"]},
+        ]
+
+    @pytest.fixture
+    def training_data_rich(self):
+        """Rich training data that should trigger BERT auto-detection."""
+        data = []
+        for entity_id, country in [("DE", "Germany"), ("FR", "France"), ("US", "USA")]:
+            # Include the base name
+            data.append({"text": country, "label": entity_id})
+            # Include aliases
+            if country == "Germany":
+                data.append({"text": "Deutschland", "label": entity_id})
+            elif country == "France":
+                data.append({"text": "Frankreich", "label": entity_id})
+            elif country == "USA":
+                data.append({"text": "America", "label": entity_id})
+            # Add variants
+            for i in range(47):  # Total 50 examples per entity
+                data.append({"text": f"{country} variant {i}", "label": entity_id})
+        return data
+
+    def test_matcher_bert_mode_initialization(self, sample_entities):
+        """Test BERT mode initialization."""
+        matcher = Matcher(entities=sample_entities, mode="bert")
+        assert matcher._training_mode == "bert"
+        assert matcher._bert_model_name == "distilbert-base-uncased"
+
+    def test_matcher_bert_mode_fit(self, sample_entities, training_data_rich):
+        """Test fit() with BERT mode."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.5)
+        matcher.fit(training_data_rich, num_epochs=1)
+        assert matcher._has_training_data
+        assert matcher._active_matcher is not None
+        assert matcher._training_mode == "bert"
+
+    def test_matcher_bert_mode_match(self, sample_entities, training_data_rich):
+        """Test match() after BERT training."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=2)
+        result = matcher.match("Germany")
+        assert result is not None
+        assert result["id"] == "DE"
+
+    def test_matcher_bert_mode_with_candidates(
+        self, sample_entities, training_data_rich
+    ):
+        """Test BERT mode with candidate filtering."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=1)
+
+        candidates = [sample_entities[0], sample_entities[1]]  # DE and FR only
+        result = matcher.match("Germany", candidates=candidates)
+        assert result is not None
+        assert result["id"] in ["DE", "FR"]
+
+    def test_matcher_auto_detect_bert_for_rich_data(
+        self, sample_entities, training_data_rich
+    ):
+        """Test auto-detection selects BERT for rich datasets."""
+        matcher = Matcher(entities=sample_entities)
+        detected = matcher._detect_training_mode(training_data_rich)
+        assert detected == "bert"
+
+    def test_matcher_bert_mode_predict(self, sample_entities, training_data_rich):
+        """Test predict() convenience method with BERT mode."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=2)
+        result = matcher.predict("Germany")
+        assert result == "DE"
+
+    def test_matcher_bert_mode_predict_batch(self, sample_entities, training_data_rich):
+        """Test predict() with batch in BERT mode."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=2)
+        results = matcher.predict(["Germany", "France", "USA"])
+        assert len(results) == 3
+        assert results[0] == "DE"
+        assert results[1] == "FR"
+        assert results[2] == "US"
+
+    def test_matcher_set_threshold_updates_bert_matcher(self, sample_entities):
+        """Test set_threshold updates BERT matcher."""
+        matcher = Matcher(entities=sample_entities, mode="bert")
+        matcher._bert_matcher = type("FakeBERTMatcher", (), {"threshold": 0.7})()
+
+        returned = matcher.set_threshold(0.42)
+
+        assert returned is matcher
+        assert matcher.threshold == 0.42
+        assert matcher._bert_matcher.threshold == 0.42
+
+    def test_matcher_get_statistics_includes_bert(self, sample_entities):
+        """Test get_statistics includes BERT classifier status."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.55)
+        fake_bert_matcher = type(
+            "FakeBERTMatcher",
+            (),
+            {
+                "is_trained": True,
+                "classifier": type("FakeClassifier", (), {"is_trained": True})(),
+            },
+        )()
+        matcher._bert_matcher = fake_bert_matcher
+        matcher._active_matcher = fake_bert_matcher
+        matcher._training_mode = "bert"
+        matcher._has_training_data = True
+
+        stats = matcher.get_statistics()
+
+        assert stats["num_entities"] == 3
+        assert stats["training_mode"] == "bert"
+        assert stats["is_trained"] is True
+        assert stats.get("bert_classifier_trained") is True
+
+    def test_matcher_bert_interface_compatibility(self, sample_entities):
+        """Test that BERT mode has same interface as other modes."""
+        matcher = Matcher(entities=sample_entities, mode="bert")
+
+        # Should support all the same methods
+        assert hasattr(matcher, "fit")
+        assert hasattr(matcher, "match")
+        assert hasattr(matcher, "predict")
+        assert hasattr(matcher, "set_threshold")
+        assert hasattr(matcher, "get_training_info")
+        assert hasattr(matcher, "get_statistics")
+
+    def test_matcher_bert_model_alias_resolution(self, sample_entities):
+        """Test BERT model alias resolution."""
+        matcher = Matcher(entities=sample_entities, mode="bert", model="distilbert")
+        assert matcher._bert_model_name == "distilbert-base-uncased"
+
+    def test_matcher_bert_mode_default_model_uses_bert_backbone(self, sample_entities):
+        """Test bert mode uses the BERT default instead of the SetFit default."""
+        matcher = Matcher(entities=sample_entities, mode="bert", model="default")
+        assert matcher._bert_model_name == "distilbert-base-uncased"
+        assert matcher._training_model_name == "sentence-transformers/all-mpnet-base-v2"
+
+    def test_matcher_bert_mode_non_bert_model_warns_and_falls_back(
+        self, sample_entities, training_data_rich, monkeypatch, capsys
+    ):
+        """Test explicit bert mode falls back to the default BERT backbone."""
+        trained_models = []
+
+        def fake_train(self, training_data, **kwargs):
+            trained_models.append(self.model_name)
+            self.is_trained = True
+
+        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+
+        matcher = Matcher(
+            entities=sample_entities,
+            mode="bert",
+            model="mpnet",
+            verbose=True,
+        )
+        matcher.fit(training_data_rich, show_progress=False)
+        captured = capsys.readouterr()
+
+        assert matcher._bert_model_name == "distilbert-base-uncased"
+        assert trained_models == ["distilbert-base-uncased"]
+        assert "Using non-BERT model 'mpnet' with bert mode" in captured.out
+
+    def test_matcher_auto_detected_bert_uses_bert_backbone(
+        self, sample_entities, training_data_rich, monkeypatch
+    ):
+        """Test auto-detected bert mode resolves the BERT backbone consistently."""
+        trained_models = []
+
+        def fake_train(self, training_data, **kwargs):
+            trained_models.append(self.model_name)
+            self.is_trained = True
+
+        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+
+        matcher = Matcher(entities=sample_entities, model="default")
+        matcher.fit(training_data_rich, show_progress=False)
+
+        assert matcher._training_mode == "bert"
+        assert matcher._bert_model_name == "distilbert-base-uncased"
+        assert trained_models == ["distilbert-base-uncased"]
+
+    def test_matcher_explain_match_with_bert(self, sample_entities, training_data_rich):
+        """Test explain_match works with BERT mode."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=2)
+
+        explanation = matcher.explain_match("Germany", top_k=2)
+
+        assert explanation["query"] == "Germany"
+        assert explanation["matched"] is True
+        assert explanation["best_match"] is not None
+        assert explanation["best_match"]["id"] == "DE"
+        assert len(explanation["top_k"]) <= 2
+        assert explanation["mode"] == "bert"
+
+    def test_matcher_diagnose_with_bert(self, sample_entities, training_data_rich):
+        """Test diagnose works with BERT mode."""
+        matcher = Matcher(entities=sample_entities, mode="bert", threshold=0.3)
+        matcher.fit(training_data_rich, num_epochs=2)
+
+        diagnosis = matcher.diagnose("Germany")
+
+        assert diagnosis["matcher_ready"] is True
+        assert diagnosis["active_matcher"] == "EntityMatcher"
+        assert diagnosis["matched"] is True
