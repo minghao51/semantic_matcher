@@ -359,3 +359,69 @@ class TestAsyncCancellation:
                 await task
 
 
+class TestAsyncConcurrency:
+    @pytest.fixture
+    def sample_entities(self):
+        return [
+            {"id": str(i), "name": f"Entity {i}"}
+            for i in range(10)
+        ]
+
+    @pytest.mark.asyncio
+    async def test_concurrent_matchers(self, sample_entities):
+        """Test multiple matchers running concurrently"""
+        async def match_entity(entity_id):
+            async with Matcher(entities=sample_entities) as matcher:
+                await matcher.fit_async()
+                return await matcher.match_async(f"Entity {entity_id}")
+
+        # Run multiple matchers concurrently
+        results = await asyncio.gather(
+            match_entity(0),
+            match_entity(1),
+            match_entity(2),
+        )
+
+        assert len(results) == 3
+        assert all(r is not None for r in results)
+
+    @pytest.mark.asyncio
+    async def test_concurrent_queries_on_same_matcher(self, sample_entities):
+        """Test multiple queries on the same matcher concurrently"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+
+            async def match_query(query):
+                return await matcher.match_async(query)
+
+            # Run multiple queries concurrently
+            results = await asyncio.gather(
+                match_query("Entity 0"),
+                match_query("Entity 1"),
+                match_query("Entity 2"),
+            )
+
+            assert len(results) == 3
+            assert all(r is not None for r in results)
+
+    @pytest.mark.asyncio
+    async def test_concurrent_batch_operations(self, sample_entities):
+        """Test concurrent batch operations"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+
+            async def match_batch(start_idx):
+                queries = [f"Entity {i}" for i in range(start_idx, start_idx + 5)]
+                return await matcher.match_batch_async(queries, batch_size=2)
+
+            # Run multiple batch operations concurrently
+            results = await asyncio.gather(
+                match_batch(0),
+                match_batch(5),
+                match_batch(2),
+            )
+
+            assert len(results) == 3
+            assert all(len(r) == 5 for r in results)
+
+
