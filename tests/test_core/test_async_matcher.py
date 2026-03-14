@@ -199,3 +199,36 @@ class TestMatcherMatchBatchAsync:
             assert results[1] is None
 
 
+class TestMatcherExplainAsync:
+    @pytest.fixture
+    def sample_entities(self):
+        return [
+            {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
+            {"id": "US", "name": "United States", "aliases": ["USA"]},
+        ]
+
+    @pytest.mark.asyncio
+    async def test_explain_match_async(self, sample_entities):
+        """Test async explain_match"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+            explanation = await matcher.explain_match_async("USA", top_k=3)
+
+            assert explanation["query"] == "USA"
+            assert "matched" in explanation
+            assert "best_match" in explanation
+            assert "top_k" in explanation
+            assert explanation["threshold"] == 0.7
+
+    @pytest.mark.asyncio
+    async def test_diagnose_async(self, sample_entities):
+        """Test async diagnose"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+            diagnosis = await matcher.diagnose_async("USA")
+
+            assert diagnosis["query"] == "USA"
+            assert diagnosis["matcher_ready"] is True
+            assert "matched" in diagnosis
+
+

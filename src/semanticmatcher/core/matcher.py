@@ -801,6 +801,123 @@ class Matcher:
 
         return results
 
+    async def explain_match_async(
+        self,
+        query: str,
+        top_k: int = 5,
+    ) -> Dict[str, Any]:
+        """
+        Async version of explain_match(). Explain matching results for debugging.
+
+        Args:
+            query: The input text to match
+            top_k: Number of top candidates to show
+
+        Returns:
+            Dict with query, normalized query, match status, best match, top_k, threshold, mode
+        """
+        # Lazy initialization of async executor
+        if self._async_executor is None:
+            from .async_utils import AsyncExecutor
+            self._async_executor = AsyncExecutor()
+
+        if not self._active_matcher:
+            raise TrainingError(
+                "Matcher not ready. Call fit() or fit_async() first.",
+                details={"mode": self._training_mode},
+            )
+
+        # Get all candidates by temporarily lowering threshold
+        original_threshold = self.threshold
+        await self._async_executor.run_in_thread(self.set_threshold, 0.0)
+
+        try:
+            results = await self.match_async(query, top_k=top_k)
+        finally:
+            await self._async_executor.run_in_thread(self.set_threshold, original_threshold)
+
+        if results is None:
+            result_list = []
+        elif isinstance(results, list):
+            result_list = results
+        else:
+            result_list = [results]
+
+        # Normalize query if applicable
+        query_normalized = None
+        if self.normalize:
+            normalizer = TextNormalizer()
+            query_normalized = await self._async_executor.run_in_thread(
+                normalizer.normalize, query
+            )
+
+        # Get best match and check if it passes threshold
+        best = result_list[0] if result_list else None
+        matched = best and best.get("score", 0) >= self.threshold
+
+        return {
+            "query": query,
+            "query_normalized": query_normalized,
+            "matched": matched,
+            "best_match": best,
+            "top_k": result_list,
+            "threshold": self.threshold,
+            "mode": self._training_mode,
+        }
+
+    async def diagnose_async(self, query: str) -> Dict[str, Any]:
+        """
+        Async version of diagnose(). Run diagnostics on a query.
+
+        Args:
+            query: Input text to diagnose
+
+        Returns:
+            Dict with diagnostic information and suggestions
+        """
+        diagnosis = {
+            "query": query,
+            "matcher_ready": self._active_matcher is not None,
+            "active_matcher": (
+                type(self._active_matcher).__name__ if self._active_matcher else None
+            ),
+        }
+
+        if not self._active_matcher:
+            diagnosis["issue"] = "Matcher not ready"
+            diagnosis["suggestion"] = "Call matcher.fit() or matcher.fit_async() to initialize"
+            return diagnosis
+
+        # Try the match
+        try:
+            explanation = await self.explain_match_async(query, top_k=3)
+            diagnosis.update(explanation)
+
+            # Add suggestions based on results
+            if not explanation["matched"]:
+                if explanation["best_match"]:
+                    score = explanation["best_match"].get("score", 0)
+                    threshold = explanation["threshold"]
+                    diagnosis["issue"] = (
+                        f"Score {score:.2f} below threshold {threshold}"
+                    )
+                    suggested_threshold = max(0.1, threshold - 0.1)
+                    diagnosis["suggestion"] = (
+                        f"Lower threshold with matcher.set_threshold({suggested_threshold:.1f}) "
+                        f"or add more training examples"
+                    )
+                else:
+                    diagnosis["issue"] = "No candidates found"
+                    diagnosis["suggestion"] = (
+                        "Check entity data and text normalization. "
+                        "Ensure entities have relevant names/aliases."
+                    )
+        except Exception as e:
+            diagnosis["error"] = str(e)
+            diagnosis["suggestion"] = "Check input format and entity configuration"
+
+        return diagnosis
+
     def _format_hybrid_results(
         self, results: Optional[List[Dict[str, Any]]], top_k: int
     ) -> Any:
