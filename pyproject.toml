@@ -88,6 +88,7 @@ dev = [
     "html-to-markdown>=1.8.0",
     "patchright>=1.58.0",
     "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
     "ruff>=0.1.0",
     "twine>=5.1.1",
 ]
@@ -111,3 +112,4 @@ markers = [
     "slow: tests that are expensive to run in default CI",
     "hf: Hugging Face model-backed tests",
 ]
+asyncio_mode = "auto"
