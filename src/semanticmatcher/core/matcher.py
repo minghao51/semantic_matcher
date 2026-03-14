@@ -718,9 +718,10 @@ class Matcher:
         **kwargs,
     ) -> List[Any]:
         """
-        Async batch matching with progress tracking.
+        Async batch matching with progress tracking and cancellation support.
 
         Processes queries in batches, reporting progress via callback.
+        Supports graceful cancellation via asyncio.CancelledError.
 
         Args:
             queries: List of query texts to match
@@ -751,7 +752,6 @@ class Matcher:
         # Apply temporary threshold if provided
         if threshold is not None:
             self.threshold = threshold
-            # Update threshold in active matcher
             if self._embedding_matcher:
                 self._embedding_matcher.threshold = threshold
             if self._entity_matcher:
@@ -762,6 +762,10 @@ class Matcher:
         try:
             # Process in batches
             for i in range(0, total, batch_size):
+                # Check for cancellation
+                if asyncio.current_task().cancelled():
+                    raise asyncio.CancelledError()
+
                 batch = queries[i:i+batch_size]
 
                 # Run batch matching in thread pool
@@ -787,6 +791,13 @@ class Matcher:
                         await on_progress(completed, total)
                     else:
                         on_progress(completed, total)
+
+        except asyncio.CancelledError:
+            # Clean up on cancellation
+            if self._async_executor:
+                self._async_executor.shutdown()
+                self._async_executor = None
+            raise
 
         finally:
             # Restore original threshold

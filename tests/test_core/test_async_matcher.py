@@ -305,3 +305,57 @@ class TestEmbeddingMatcherAsync:
         assert result["id"] == "US"
 
 
+class TestAsyncCancellation:
+    @pytest.fixture
+    def sample_entities(self):
+        return [
+            {"id": str(i), "name": f"Entity {i}"}
+            for i in range(10)
+        ]
+
+    @pytest.mark.asyncio
+    async def test_match_batch_async_cancellation(self, sample_entities):
+        """Test that batch matching can be cancelled"""
+        from semanticmatcher.core.matcher import Matcher
+
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+
+            # Create a large batch
+            queries = [f"Entity {i}" for i in range(1000)]
+
+            # Create a task that can be cancelled
+            task = asyncio.create_task(
+                matcher.match_batch_async(queries, batch_size=10)
+            )
+
+            # Cancel immediately
+            task.cancel()
+
+            # Should raise CancelledError
+            with pytest.raises(asyncio.CancelledError):
+                await task
+
+    @pytest.mark.asyncio
+    async def test_fit_async_cancellation(self, sample_entities):
+        """Test that fit can be cancelled"""
+        training_data = [
+            {"text": f"Entity {i}", "label": str(i)}
+            for i in range(10)
+        ]
+
+        async with Matcher(entities=sample_entities) as matcher:
+            # Create a task that can be cancelled
+            task = asyncio.create_task(
+                matcher.fit_async(training_data, mode="full", num_epochs=10)
+            )
+
+            # Wait a bit then cancel
+            await asyncio.sleep(0.1)
+            task.cancel()
+
+            # Should raise CancelledError
+            with pytest.raises(asyncio.CancelledError):
+                await task
+
+
