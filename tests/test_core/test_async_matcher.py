@@ -37,3 +37,50 @@ class TestMatcherAsyncLifecycle:
             await matcher.fit_async()
             executor_id_after = id(matcher._async_executor)
             assert executor_id_before == executor_id_after
+
+
+class TestMatcherFitAsync:
+    @pytest.fixture
+    def sample_entities(self):
+        return [
+            {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
+            {"id": "US", "name": "United States", "aliases": ["USA"]},
+        ]
+
+    @pytest.fixture
+    def training_data(self):
+        return [
+            {"text": "Germany", "label": "DE"},
+            {"text": "USA", "label": "US"},
+        ]
+
+    @pytest.mark.asyncio
+    async def test_fit_async_zero_shot(self, sample_entities):
+        """Test async fit in zero-shot mode"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+            assert matcher._active_matcher is not None
+            assert matcher._training_mode == "zero-shot"
+
+    @pytest.mark.asyncio
+    async def test_fit_async_with_training_data(self, sample_entities, training_data):
+        """Test async fit with training data"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async(training_data, num_epochs=1)
+            assert matcher._active_matcher is not None
+            assert matcher._has_training_data
+
+    @pytest.mark.asyncio
+    async def test_fit_async_explicit_mode(self, sample_entities, training_data):
+        """Test async fit with explicit mode"""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async(training_data, mode="head-only", num_epochs=1)
+            assert matcher._training_mode == "head-only"
+
+    @pytest.mark.asyncio
+    async def test_fit_async_returns_self(self, sample_entities):
+        """Test that fit_async returns self for method chaining"""
+        async with Matcher(entities=sample_entities) as matcher:
+            result = await matcher.fit_async()
+            assert result is matcher
+
