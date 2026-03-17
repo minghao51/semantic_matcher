@@ -52,9 +52,7 @@ async def example_with_progress():
                 print(f"Progress: {completed}/{total} ({percent:.1f}%)")
 
         results = await matcher.match_batch_async(
-            queries,
-            batch_size=50,
-            on_progress=show_progress
+            queries, batch_size=50, on_progress=show_progress
         )
 
         print(f"Matched {len(results)} queries")
@@ -73,14 +71,20 @@ async def example_concurrent_matchers():
     # Run multiple matchers in parallel
     results = await asyncio.gather(
         match_category("Countries", SAMPLE_ENTITIES),
-        match_category("Products", [
-            {"id": "1", "name": "Laptop"},
-            {"id": "2", "name": "Mouse"},
-        ]),
-        match_category("Cities", [
-            {"id": "1", "name": "Berlin"},
-            {"id": "2", "name": "Paris"},
-        ]),
+        match_category(
+            "Products",
+            [
+                {"id": "1", "name": "Laptop"},
+                {"id": "2", "name": "Mouse"},
+            ],
+        ),
+        match_category(
+            "Cities",
+            [
+                {"id": "1", "name": "Berlin"},
+                {"id": "2", "name": "Paris"},
+            ],
+        ),
     )
 
     for category, result in results:
@@ -143,9 +147,7 @@ async def example_cancellation():
 
         # Create a long-running task
         queries = [f"Entity {i}" for i in range(10000)]
-        task = asyncio.create_task(
-            matcher.match_batch_async(queries, batch_size=10)
-        )
+        task = asyncio.create_task(matcher.match_batch_async(queries, batch_size=10))
 
         # Cancel after a short delay
         await asyncio.sleep(0.01)
@@ -166,15 +168,13 @@ async def example_threshold_override():
 
         # High threshold - fewer matches
         results_strict = await matcher.match_batch_async(
-            ["USA", "Deutschland", "Unknown Country"],
-            threshold=0.9
+            ["USA", "Deutschland", "Unknown Country"], threshold=0.9
         )
         print(f"Strict threshold: {sum(1 for r in results_strict if r)} matches")
 
         # Low threshold - more matches
         results_lenient = await matcher.match_batch_async(
-            ["USA", "Deutschland", "Unknown Country"],
-            threshold=0.5
+            ["USA", "Deutschland", "Unknown Country"], threshold=0.5
         )
         print(f"Lenient threshold: {sum(1 for r in results_lenient if r)} matches")
 

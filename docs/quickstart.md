@@ -20,33 +20,45 @@ uv sync --group dev
 
 ## Basic Zero-Shot Matching
 
-Use zero-shot mode when you do not have labeled training data yet.
+Use zero-shot mode when you do not have labeled training data yet. The async route is the recommended default for new integrations.
 
 ```python
+import asyncio
 from semanticmatcher import Matcher
 
-entities = [
-    {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
-    {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
-    {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
-]
+async def main():
+    entities = [
+        {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
+        {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
+        {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
+    ]
 
-matcher = Matcher(entities=entities)
-matcher.fit()
+    async with Matcher(entities=entities) as matcher:
+        await matcher.fit_async()
 
-print(matcher.match("Deutschland"))
-# {'id': 'DE', 'score': 0.9..., 'text': 'Germany'}
+        print(await matcher.match_async("Deutschland"))
+        # {'id': 'DE', 'score': 0.9..., 'text': 'Germany'}
 
-print(matcher.predict("America"))
-# 'US'
+        print(await matcher.match_async("America"))
+        # {'id': 'US', 'score': 0.9..., 'text': 'United States'}
+
+asyncio.run(main())
 ```
 
 What happens here:
 
 - `Matcher(...)` validates and stores your entity catalog.
-- `fit()` builds the embedding index.
-- `match()` returns match objects with scores.
-- `predict()` returns only the entity ID.
+- `fit_async()` builds the embedding index without blocking the event loop.
+- `match_async()` returns match objects with scores.
+- `predict()` remains available for sync-first scripts.
+
+Sync alternative:
+
+```python
+matcher = Matcher(entities=entities)
+matcher.fit()
+print(matcher.predict("America"))
+```
 
 ## Entity Format
 

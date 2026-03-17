@@ -178,6 +178,7 @@ class Matcher:
 
         # Async support
         self._async_executor = None
+        self._async_fit_lock = asyncio.Lock()
 
         # Auto-detect mode if not explicitly set
         if mode is None or mode == "auto":
@@ -199,6 +200,118 @@ class Matcher:
         self._has_training_data = False
         self._active_matcher: Optional[Any] = None
         self._detected_mode: Optional[str] = None  # Store auto-detected mode
+
+    def _ensure_async_executor(self):
+        """Lazily create the shared executor used by async wrapper methods."""
+        if self._async_executor is None:
+            from .async_utils import AsyncExecutor
+
+            self._async_executor = AsyncExecutor()
+        return self._async_executor
+
+    def _apply_threshold(self, threshold: float) -> None:
+        """Propagate threshold updates to all initialized matcher variants."""
+        self.threshold = validate_threshold(threshold)
+        if self._embedding_matcher:
+            self._embedding_matcher.threshold = self.threshold
+        if self._entity_matcher:
+            self._entity_matcher.threshold = self.threshold
+        if self._bert_matcher:
+            self._bert_matcher.threshold = self.threshold
+
+    @staticmethod
+    def _resolve_threshold(
+        threshold_override: Optional[float], default: float
+    ) -> float:
+        """Resolve a per-call threshold override without mutating matcher state."""
+        if threshold_override is None:
+            return default
+        return validate_threshold(threshold_override)
+
+    def _match_sync_impl(
+        self,
+        texts: TextInput,
+        top_k: int = 1,
+        threshold_override: Optional[float] = None,
+        **kwargs,
+    ) -> Any:
+        """Shared sync matching implementation with local threshold semantics."""
+        effective_threshold = self._resolve_threshold(
+            threshold_override, self.threshold
+        )
+
+        if self._training_mode == "hybrid":
+            return self._match_hybrid(
+                texts,
+                top_k=top_k,
+                threshold_override=effective_threshold,
+                **kwargs,
+            )
+        if self._training_mode == "zero-shot":
+            return self.embedding_matcher.match(
+                texts,
+                top_k=top_k,
+                threshold_override=effective_threshold,
+                **kwargs,
+            )
+        if self._training_mode == "bert":
+            return self.bert_matcher.match(
+                texts,
+                candidates=kwargs.get("candidates"),
+                top_k=top_k,
+                threshold_override=effective_threshold,
+            )
+        return self.entity_matcher.match(
+            texts,
+            candidates=kwargs.get("candidates"),
+            top_k=top_k,
+            threshold_override=effective_threshold,
+        )
+
+    async def _match_async_impl(
+        self,
+        texts: TextInput,
+        top_k: int = 1,
+        threshold_override: Optional[float] = None,
+        **kwargs,
+    ) -> Any:
+        """Shared async matching implementation with local threshold semantics."""
+        effective_threshold = self._resolve_threshold(
+            threshold_override, self.threshold
+        )
+        executor = self._ensure_async_executor()
+
+        if self._training_mode == "hybrid":
+            return await self._match_hybrid_async(
+                texts,
+                top_k=top_k,
+                threshold_override=effective_threshold,
+                **kwargs,
+            )
+        if self._training_mode == "zero-shot":
+            return await executor.run_in_thread(
+                self.embedding_matcher.match,
+                texts=texts,
+                candidates=kwargs.get("candidates"),
+                top_k=top_k,
+                batch_size=kwargs.get("batch_size"),
+                threshold_override=effective_threshold,
+            )
+        if self._training_mode == "bert":
+            return await executor.run_in_thread(
+                self.bert_matcher.match,
+                texts=texts,
+                candidates=kwargs.get("candidates"),
+                top_k=top_k,
+                threshold_override=effective_threshold,
+            )
+        return await executor.run_in_thread(
+            self.entity_matcher.match,
+            texts=texts,
+            candidates=kwargs.get("candidates"),
+            top_k=top_k,
+            threshold_override=effective_threshold,
+        )
 
     @property
     def embedding_matcher(self) -> Any:
@@ -470,17 +583,21 @@ class Matcher:
         Returns:
             self, for method chaining
         """
-        # Lazy initialization of async executor
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
+        async with self._async_fit_lock:
+            # Avoid duplicate auto-fit work when concurrent async calls race on a
+            # fresh matcher.
+            if (
+                self._active_matcher is not None
+                and training_data is None
+                and mode is None
+            ):
+                return self
 
-            self._async_executor = AsyncExecutor()
-
-        # Run sync fit in thread pool
-        # The sync fit() handles all the mode detection and training logic
-        await self._async_executor.run_in_thread(
-            self.fit, training_data, mode, show_progress, **kwargs
-        )
+            # Run sync fit in thread pool. The sync fit() handles all the mode
+            # detection and training logic.
+            await self._ensure_async_executor().run_in_thread(
+                self.fit, training_data, mode, show_progress, **kwargs
+            )
         return self
 
     def match(
@@ -521,26 +638,13 @@ class Matcher:
         if self._active_matcher is None:
             # Auto-fit if not yet fitted
             self.fit()
-
-        # Route to appropriate matcher based on mode
-        if self._training_mode == "hybrid":
-            return self._match_hybrid(texts, top_k=top_k, **kwargs)
-        if self._training_mode == "zero-shot":
-            return self.embedding_matcher.match(texts, top_k=top_k, **kwargs)
-        elif self._training_mode == "bert":
-            # BERT mode supports candidate filtering
-            return self.bert_matcher.match(
-                texts,
-                candidates=kwargs.get("candidates"),
-                top_k=top_k,
-            )
-        else:
-            # Trained mode (head-only, full) supports candidate filtering
-            return self.entity_matcher.match(
-                texts,
-                candidates=kwargs.get("candidates"),
-                top_k=top_k,
-            )
+        threshold_override = kwargs.pop("_threshold_override", None)
+        return self._match_sync_impl(
+            texts,
+            top_k=top_k,
+            threshold_override=threshold_override,
+            **kwargs,
+        )
 
     async def match_async(
         self,
@@ -562,40 +666,13 @@ class Matcher:
         # Auto-fit if not yet fitted
         if self._active_matcher is None:
             await self.fit_async()
-
-        # Lazy initialization of async executor
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
-
-        # Route to appropriate matcher based on mode
-        if self._training_mode == "hybrid":
-            # Hybrid matcher needs special handling
-            return await self._match_hybrid_async(texts, top_k=top_k, **kwargs)
-        elif self._training_mode == "zero-shot":
-            return await self._async_executor.run_in_thread(
-                self.embedding_matcher.match,
-                texts=texts,
-                candidates=kwargs.get("candidates"),
-                top_k=top_k,
-                batch_size=kwargs.get("batch_size"),
-            )
-        elif self._training_mode == "bert":
-            return await self._async_executor.run_in_thread(
-                self.bert_matcher.match,
-                texts=texts,
-                candidates=kwargs.get("candidates"),
-                top_k=top_k,
-            )
-        else:
-            # Trained mode (head-only, full)
-            return await self._async_executor.run_in_thread(
-                self.entity_matcher.match,
-                texts=texts,
-                candidates=kwargs.get("candidates"),
-                top_k=top_k,
-            )
+        threshold_override = kwargs.pop("_threshold_override", None)
+        return await self._match_async_impl(
+            texts,
+            top_k=top_k,
+            threshold_override=threshold_override,
+            **kwargs,
+        )
 
     def predict(
         self,
@@ -631,25 +708,25 @@ class Matcher:
         Returns:
             self, for method chaining.
         """
-        self.threshold = validate_threshold(threshold)
-
-        # Update threshold in underlying matchers if they exist
-        if self._embedding_matcher:
-            self._embedding_matcher.threshold = self.threshold
-        if self._entity_matcher:
-            self._entity_matcher.threshold = self.threshold
-        if self._bert_matcher:
-            self._bert_matcher.threshold = self.threshold
-
+        self._apply_threshold(threshold)
         return self
 
-    def _match_hybrid(self, texts: TextInput, top_k: int = 1, **kwargs) -> Any:
+    def _match_hybrid(
+        self,
+        texts: TextInput,
+        top_k: int = 1,
+        threshold_override: Optional[float] = None,
+        **kwargs,
+    ) -> Any:
         """Run hybrid matching while preserving unified Matcher return semantics."""
         blocking_top_k = kwargs.get("blocking_top_k", 1000)
         retrieval_top_k = kwargs.get("retrieval_top_k", max(50, top_k))
         final_top_k = kwargs.get("final_top_k", top_k)
         n_jobs = kwargs.get("n_jobs", -1)
         chunk_size = kwargs.get("chunk_size")
+        effective_threshold = self._resolve_threshold(
+            threshold_override, self.threshold
+        )
 
         texts, single_input = _coerce_texts(texts)
 
@@ -660,7 +737,11 @@ class Matcher:
                 retrieval_top_k=retrieval_top_k,
                 final_top_k=final_top_k,
             )
-            return self._format_hybrid_results(raw_results, top_k=top_k)
+            return self._format_hybrid_results(
+                raw_results,
+                top_k=top_k,
+                threshold=effective_threshold,
+            )
 
         raw_results = self.hybrid_matcher.match_bulk(
             texts,
@@ -671,32 +752,44 @@ class Matcher:
             chunk_size=chunk_size,
         )
         return [
-            self._format_hybrid_results(results, top_k=top_k) for results in raw_results
+            self._format_hybrid_results(
+                results,
+                top_k=top_k,
+                threshold=effective_threshold,
+            )
+            for results in raw_results
         ]
 
     async def _match_hybrid_async(
-        self, texts: TextInput, top_k: int = 1, **kwargs
+        self,
+        texts: TextInput,
+        top_k: int = 1,
+        threshold_override: Optional[float] = None,
+        **kwargs,
     ) -> Any:
         """Async version of _match_hybrid."""
-        # Lazy initialization of async executor
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
+        executor = self._ensure_async_executor()
+        effective_threshold = self._resolve_threshold(
+            threshold_override, self.threshold
+        )
 
         texts, single_input = _coerce_texts(texts)
 
         if single_input:
-            raw_results = await self._async_executor.run_in_thread(
+            raw_results = await executor.run_in_thread(
                 self.hybrid_matcher.match,
                 texts[0],
                 kwargs.get("blocking_top_k", 1000),
                 kwargs.get("retrieval_top_k", max(50, top_k)),
                 kwargs.get("final_top_k", top_k),
             )
-            return self._format_hybrid_results(raw_results, top_k=top_k)
+            return self._format_hybrid_results(
+                raw_results,
+                top_k=top_k,
+                threshold=effective_threshold,
+            )
 
-        raw_results = await self._async_executor.run_in_thread(
+        raw_results = await executor.run_in_thread(
             self.hybrid_matcher.match_bulk,
             texts,
             kwargs.get("blocking_top_k", 1000),
@@ -706,7 +799,12 @@ class Matcher:
             kwargs.get("chunk_size"),
         )
         return [
-            self._format_hybrid_results(results, top_k=top_k) for results in raw_results
+            self._format_hybrid_results(
+                results,
+                top_k=top_k,
+                threshold=effective_threshold,
+            )
+            for results in raw_results
         ]
 
     async def match_batch_async(
@@ -738,76 +836,57 @@ class Matcher:
         if self._active_matcher is None:
             await self.fit_async()
 
-        # Lazy initialization of async executor
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
+        executor = self._ensure_async_executor()
+        return await self._match_batch_async_impl(
+            executor,
+            queries,
+            top_k,
+            batch_size,
+            on_progress,
+            threshold_override=threshold,
+            **kwargs,
+        )
 
-            self._async_executor = AsyncExecutor()
-
+    async def _match_batch_async_impl(
+        self,
+        executor: Any,
+        queries: List[str],
+        top_k: int,
+        batch_size: int,
+        on_progress: Optional[Callable[[int, int], None]],
+        threshold_override: Optional[float] = None,
+        **kwargs,
+    ) -> List[Any]:
         total = len(queries)
         results = []
         completed = 0
 
-        # Save original threshold
-        original_threshold = self.threshold
+        for i in range(0, total, batch_size):
+            if asyncio.current_task().cancelled():
+                raise asyncio.CancelledError()
 
-        # Apply temporary threshold if provided
-        if threshold is not None:
-            self.threshold = threshold
-            if self._embedding_matcher:
-                self._embedding_matcher.threshold = threshold
-            if self._entity_matcher:
-                self._entity_matcher.threshold = threshold
-            if self._bert_matcher:
-                self._bert_matcher.threshold = threshold
+            batch = queries[i : i + batch_size]
+            batch_results = await executor.run_in_thread(
+                self.match,
+                batch,
+                top_k,
+                _threshold_override=threshold_override,
+                **kwargs,
+            )
 
-        try:
-            # Process in batches
-            for i in range(0, total, batch_size):
-                # Check for cancellation
-                if asyncio.current_task().cancelled():
-                    raise asyncio.CancelledError()
+            if isinstance(batch_results, dict):
+                batch_results = [batch_results]
+            elif not isinstance(batch_results, list):
+                batch_results = list(batch_results)
 
-                batch = queries[i : i + batch_size]
+            results.extend(batch_results)
+            completed += len(batch)
 
-                # Run batch matching in thread pool
-                batch_results = await self._async_executor.run_in_thread(
-                    self.match, batch, top_k, **kwargs
-                )
-
-                # Ensure batch_results is always a list
-                if isinstance(batch_results, dict):
-                    batch_results = [batch_results]
-                elif not isinstance(batch_results, list):
-                    batch_results = list(batch_results)
-
-                results.extend(batch_results)
-                completed += len(batch)
-
-                # Report progress non-blocking
-                if on_progress:
-                    if asyncio.iscoroutinefunction(on_progress):
-                        await on_progress(completed, total)
-                    else:
-                        on_progress(completed, total)
-
-        except asyncio.CancelledError:
-            # Clean up on cancellation
-            if self._async_executor:
-                self._async_executor.shutdown()
-                self._async_executor = None
-            raise
-
-        finally:
-            # Restore original threshold
-            if threshold is not None:
-                self.threshold = original_threshold
-                if self._embedding_matcher:
-                    self._embedding_matcher.threshold = original_threshold
-                if self._entity_matcher:
-                    self._entity_matcher.threshold = original_threshold
-                if self._bert_matcher:
-                    self._bert_matcher.threshold = original_threshold
+            if on_progress:
+                if asyncio.iscoroutinefunction(on_progress):
+                    await on_progress(completed, total)
+                else:
+                    on_progress(completed, total)
 
         return results
 
@@ -826,11 +905,7 @@ class Matcher:
         Returns:
             Dict with query, normalized query, match status, best match, top_k, threshold, mode
         """
-        # Lazy initialization of async executor
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
+        executor = self._ensure_async_executor()
 
         if not self._active_matcher:
             raise TrainingError(
@@ -838,16 +913,12 @@ class Matcher:
                 details={"mode": self._training_mode},
             )
 
-        # Get all candidates by temporarily lowering threshold
-        original_threshold = self.threshold
-        await self._async_executor.run_in_thread(self.set_threshold, 0.0)
-
-        try:
-            results = await self.match_async(query, top_k=top_k)
-        finally:
-            await self._async_executor.run_in_thread(
-                self.set_threshold, original_threshold
-            )
+        evaluation_threshold = self.threshold
+        results = await self.match_async(
+            query,
+            top_k=top_k,
+            _threshold_override=0.0,
+        )
 
         if results is None:
             result_list = []
@@ -860,13 +931,11 @@ class Matcher:
         query_normalized = None
         if self.normalize:
             normalizer = TextNormalizer()
-            query_normalized = await self._async_executor.run_in_thread(
-                normalizer.normalize, query
-            )
+            query_normalized = await executor.run_in_thread(normalizer.normalize, query)
 
         # Get best match and check if it passes threshold
         best = result_list[0] if result_list else None
-        matched = best and best.get("score", 0) >= self.threshold
+        matched = bool(best and best.get("score", 0) >= evaluation_threshold)
 
         return {
             "query": query,
@@ -874,7 +943,7 @@ class Matcher:
             "matched": matched,
             "best_match": best,
             "top_k": result_list,
-            "threshold": self.threshold,
+            "threshold": evaluation_threshold,
             "mode": self._training_mode,
         }
 
@@ -934,12 +1003,16 @@ class Matcher:
         return diagnosis
 
     def _format_hybrid_results(
-        self, results: Optional[List[Dict[str, Any]]], top_k: int
+        self,
+        results: Optional[List[Dict[str, Any]]],
+        top_k: int,
+        threshold: Optional[float] = None,
     ) -> Any:
         """Apply threshold filtering and shape normalization to hybrid results."""
+        effective_threshold = self._resolve_threshold(threshold, self.threshold)
         filtered = []
         for result in results or []:
-            if result.get("score", 0.0) < self.threshold:
+            if result.get("score", 0.0) < effective_threshold:
                 continue
             filtered.append(result)
 
@@ -1035,13 +1108,8 @@ class Matcher:
                 details={"mode": self._training_mode},
             )
 
-        # Get all candidates with scores by temporarily lowering matcher threshold.
-        original_threshold = self.threshold
-        self.set_threshold(0.0)
-        try:
-            results = self.match(query, top_k=top_k)
-        finally:
-            self.set_threshold(original_threshold)
+        evaluation_threshold = self.threshold
+        results = self.match(query, top_k=top_k, _threshold_override=0.0)
 
         if results is None:
             result_list = []
@@ -1058,7 +1126,7 @@ class Matcher:
 
         # Get best match and check if it passes threshold
         best = result_list[0] if result_list else None
-        matched = best and best.get("score", 0) >= self.threshold
+        matched = bool(best and best.get("score", 0) >= evaluation_threshold)
 
         return {
             "query": query,
@@ -1066,7 +1134,7 @@ class Matcher:
             "matched": matched,
             "best_match": best,
             "top_k": result_list,
-            "threshold": self.threshold,
+            "threshold": evaluation_threshold,
             "mode": self._training_mode,
         }
 
@@ -1140,11 +1208,7 @@ class Matcher:
 
     async def __aenter__(self):
         """Async context manager entry."""
-        # Initialize async executor on context entry
-        if self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
+        self._ensure_async_executor()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -1185,6 +1249,14 @@ class EntityMatcher:
         self.normalizer = TextNormalizer() if normalize else None
         self.classifier: Optional[Union[SetFitClassifier, BERTClassifier]] = None
         self.is_trained = False
+        self._async_executor = None
+
+    def _ensure_async_executor(self):
+        if self._async_executor is None:
+            from .async_utils import AsyncExecutor
+
+            self._async_executor = AsyncExecutor()
+        return self._async_executor
 
     def _get_training_data(self, training_data: List[dict]) -> List[dict]:
         return _normalize_training_data(training_data, self.normalizer, self.normalize)
@@ -1238,6 +1310,7 @@ class EntityMatcher:
         texts: TextInput,
         candidates: Optional[List[Dict[str, Any]]] = None,
         top_k: int = 1,
+        threshold_override: Optional[float] = None,
     ) -> Any:
         if not self.is_trained or self.classifier is None:
             raise RuntimeError("Model not trained. Call train() first.")
@@ -1248,6 +1321,9 @@ class EntityMatcher:
         texts = _normalize_texts(texts, self.normalizer, self.normalize)
         entity_lookup = {entity["id"]: entity for entity in self.entities}
         candidate_ids = None
+        effective_threshold = Matcher._resolve_threshold(
+            threshold_override, self.threshold
+        )
         if candidates is not None:
             candidate_ids = {candidate["id"] for candidate in candidates}
 
@@ -1263,7 +1339,7 @@ class EntityMatcher:
                 matches = []
                 for label, score in ranked_matches:
                     score = float(score)
-                    if score < self.threshold:
+                    if score < effective_threshold:
                         continue
                     if candidate_ids is not None and label not in candidate_ids:
                         continue
@@ -1294,13 +1370,7 @@ class EntityMatcher:
         show_progress: bool = True,
     ):
         """Async version of train()."""
-        # Lazy initialization of async executor
-        if not hasattr(self, "_async_executor") or self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
-
-        await self._async_executor.run_in_thread(
+        await self._ensure_async_executor().run_in_thread(
             self.train,
             training_data,
             num_epochs,
@@ -1313,6 +1383,7 @@ class EntityMatcher:
         texts: TextInput,
         candidates: Optional[List[Dict[str, Any]]] = None,
         top_k: int = 1,
+        threshold_override: Optional[float] = None,
     ) -> Any:
         """Async version of match()."""
         if not self.is_trained or self.classifier is None:
@@ -1320,17 +1391,12 @@ class EntityMatcher:
                 "Model not trained. Call train() or train_async() first."
             )
 
-        # Lazy initialization of async executor
-        if not hasattr(self, "_async_executor") or self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
-
-        return await self._async_executor.run_in_thread(
+        return await self._ensure_async_executor().run_in_thread(
             self.match,
             texts,
             candidates,
             top_k,
+            threshold_override,
         )
 
     async def predict_async(
@@ -1387,6 +1453,14 @@ class EmbeddingMatcher:
         self.entity_texts: List[str] = []
         self.entity_ids: List[str] = []
         self.embeddings: Optional[np.ndarray] = None
+        self._async_executor = None
+
+    def _ensure_async_executor(self):
+        if self._async_executor is None:
+            from .async_utils import AsyncExecutor
+
+            self._async_executor = AsyncExecutor()
+        return self._async_executor
 
     def build_index(self, batch_size: Optional[int] = None):
         """
@@ -1462,6 +1536,7 @@ class EmbeddingMatcher:
         candidates: Optional[List[Dict[str, Any]]] = None,
         top_k: int = 1,
         batch_size: Optional[int] = None,
+        threshold_override: Optional[float] = None,
     ) -> Any:
         """
         Match texts against indexed entities.
@@ -1483,6 +1558,9 @@ class EmbeddingMatcher:
         texts, single_input = _coerce_texts(texts)
         texts = _normalize_texts(texts, self.normalizer, self.normalize)
         entity_lookup = {entity["id"]: entity for entity in self.entities}
+        effective_threshold = Matcher._resolve_threshold(
+            threshold_override, self.threshold
+        )
 
         # Use provided candidates or all entities
         if candidates is not None:
@@ -1534,7 +1612,7 @@ class EmbeddingMatcher:
             seen_ids = set()
             for idx in sorted_indices:
                 score = sim_row[idx]
-                if score < self.threshold:
+                if score < effective_threshold:
                     continue
                 entity_id = candidate_ids_list[idx]
                 if entity_id in seen_ids:
@@ -1562,13 +1640,7 @@ class EmbeddingMatcher:
 
     async def build_index_async(self, batch_size: Optional[int] = None):
         """Async version of build_index()."""
-        # Lazy initialization of async executor
-        if not hasattr(self, "_async_executor") or self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
-
-        await self._async_executor.run_in_thread(
+        await self._ensure_async_executor().run_in_thread(
             self.build_index,
             batch_size,
         )
@@ -1579,6 +1651,7 @@ class EmbeddingMatcher:
         candidates: Optional[List[Dict[str, Any]]] = None,
         top_k: int = 1,
         batch_size: Optional[int] = None,
+        threshold_override: Optional[float] = None,
     ) -> Any:
         """Async version of match()."""
         if self.embeddings is None or self.model is None:
@@ -1586,16 +1659,11 @@ class EmbeddingMatcher:
                 "Index not built. Call build_index() or build_index_async() first."
             )
 
-        # Lazy initialization of async executor
-        if not hasattr(self, "_async_executor") or self._async_executor is None:
-            from .async_utils import AsyncExecutor
-
-            self._async_executor = AsyncExecutor()
-
-        return await self._async_executor.run_in_thread(
+        return await self._ensure_async_executor().run_in_thread(
             self.match,
             texts,
             candidates,
             top_k,
             batch_size,
+            threshold_override,
         )

@@ -20,6 +20,7 @@ This folder is split into stable user guides, experiment docs, and archived proj
 - [`experiments/country-classifier-scripts.md`](./experiments/country-classifier-scripts.md): country classifier experiment walkthrough
 - [`experiments/benchmarking.md`](./experiments/benchmarking.md): how to run and interpret benchmarks
 - [`experiments/benchmark-results.md`](./experiments/benchmark-results.md): latest published benchmark summary
+- [`experiments/speed-benchmark-results.md`](./experiments/speed-benchmark-results.md): sync vs async route benchmark summary
 
 ## Internals
 

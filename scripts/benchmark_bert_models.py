@@ -197,7 +197,9 @@ def run_benchmark(
             print(f"  Training time: {train_metrics['training_time']:.2f}s")
             print(f"  Peak memory: {train_metrics['memory_peak_mb']:.2f} MB")
             print(f"  Inference time: {infer_metrics['inference_time']:.2f}s")
-            print(f"  Throughput: {infer_metrics['throughput_samples_per_sec']:.2f} samples/s")
+            print(
+                f"  Throughput: {infer_metrics['throughput_samples_per_sec']:.2f} samples/s"
+            )
             print(f"  Accuracy: {infer_metrics['accuracy']:.2%}")
 
         except Exception as e:
@@ -229,7 +231,9 @@ def print_comparison(results: Dict[str, Dict]):
     print(f"\n{'=' * 80}")
     print("BERT Model Comparison Table:")
     print(f"{'=' * 80}")
-    print(f"{'Model':<25} {'Train(s)':<10} {'Mem(MB)':<10} {'Infer(s)':<10} {'Thru(/s)':<12} {'Acc':<8}")
+    print(
+        f"{'Model':<25} {'Train(s)':<10} {'Mem(MB)':<10} {'Infer(s)':<10} {'Thru(/s)':<12} {'Acc':<8}"
+    )
     print(f"{'-' * 80}")
 
     for model_name, metrics in sorted(successful.items()):
@@ -247,16 +251,24 @@ def print_comparison(results: Dict[str, Dict]):
     # Find best model for each metric
     print("Best Models by Metric:")
     best_train = min(successful.items(), key=lambda x: x[1]["training_time"])
-    print(f"  Fastest Training: {best_train[0]} ({best_train[1]['training_time']:.2f}s)")
+    print(
+        f"  Fastest Training: {best_train[0]} ({best_train[1]['training_time']:.2f}s)"
+    )
 
     best_mem = min(successful.items(), key=lambda x: x[1]["memory_peak_mb"])
     print(f"  Lowest Memory: {best_mem[0]} ({best_mem[1]['memory_peak_mb']:.2f} MB)")
 
     best_infer = min(successful.items(), key=lambda x: x[1]["inference_time"])
-    print(f"  Fastest Inference: {best_infer[0]} ({best_infer[1]['inference_time']:.2f}s)")
+    print(
+        f"  Fastest Inference: {best_infer[0]} ({best_infer[1]['inference_time']:.2f}s)"
+    )
 
-    best_thru = max(successful.items(), key=lambda x: x[1]["throughput_samples_per_sec"])
-    print(f"  Highest Throughput: {best_thru[0]} ({best_thru[1]['throughput_samples_per_sec']:.2f} samples/s)")
+    best_thru = max(
+        successful.items(), key=lambda x: x[1]["throughput_samples_per_sec"]
+    )
+    print(
+        f"  Highest Throughput: {best_thru[0]} ({best_thru[1]['throughput_samples_per_sec']:.2f} samples/s)"
+    )
 
     best_acc = max(successful.items(), key=lambda x: x[1]["accuracy"])
     print(f"  Highest Accuracy: {best_acc[0]} ({best_acc[1]['accuracy']:.2%})")
@@ -269,7 +281,11 @@ def main():
     parser.add_argument(
         "--models",
         nargs="+",
-        default=["distilbert-base-uncased", "huawei-noah/TinyBERT_General_4L_312D", "roberta-base"],
+        default=[
+            "distilbert-base-uncased",
+            "huawei-noah/TinyBERT_General_4L_312D",
+            "roberta-base",
+        ],
         help="BERT models to benchmark (default: distilbert tinybert roberta-base)",
     )
     parser.add_argument(

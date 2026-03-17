@@ -62,6 +62,7 @@ def main(argv=None):
 
     if args.dataset == "all":
         print("Running all ingestions...")
+        failures = []
         for name, func in INGESTORS.items():
             if name == "all":
                 continue
@@ -72,6 +73,12 @@ def main(argv=None):
                 func(raw_dir=args.raw_dir, processed_dir=args.processed_dir)
             except Exception as e:
                 print(f"Error ingesting {name}: {e}")
+                failures.append((name, e))
+        if failures:
+            print("\nIngestion completed with failures:")
+            for name, error in failures:
+                print(f"  - {name}: {error}")
+            raise SystemExit(1)
         print("\nAll ingestions complete!")
     else:
         func = INGESTORS.get(args.dataset)

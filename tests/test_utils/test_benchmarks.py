@@ -24,9 +24,65 @@ def test_load_processed_sections_reads_csv_sections(tmp_path):
 
     assert len(sections) == 1
     assert sections[0]["section"] == "languages/languages"
-    assert sections[0]["entities"][0]["aliases"] == ["en", "anglais"]
+    assert sections[0]["entities"][0]["aliases"] == ["anglais"]
     assert sections[0]["queries"]
     assert sections[0]["training_data"]
+    assert sections[0]["base_pairs"]
+    assert sections[0]["train_pairs"]
+    assert sections[0]["base_pairs"][0]["query"] not in {
+        pair["query"] for pair in sections[0]["train_pairs"]
+    }
+    train_texts = {item["text"] for item in sections[0]["training_data"]}
+    eval_texts = {
+        item["query"] for item in sections[0]["val_pairs"] + sections[0]["test_pairs"]
+    }
+    assert train_texts.isdisjoint(eval_texts)
+
+
+def test_load_processed_sections_skips_eval_for_single_text_entities(tmp_path):
+    section_dir = tmp_path / "products"
+    section_dir.mkdir()
+    csv_path = section_dir / "products.csv"
+    csv_path.write_text(
+        "id,name,aliases,type\nsku-1,Widget,,product\n",
+        encoding="utf-8",
+    )
+
+    sections = benchmarks.load_processed_sections(
+        processed_dir=tmp_path,
+        max_entities_per_section=10,
+        max_queries_per_section=5,
+    )
+
+    assert len(sections) == 1
+    assert sections[0]["training_data"] == [{"text": "Widget", "label": "sku-1"}]
+    assert sections[0]["evaluation_pairs"]
+    assert sections[0]["val_pairs"]
+    assert sections[0]["test_pairs"] == []
+    assert sections[0]["evaluation_pairs"][0]["query"] != "Widget"
+
+
+def test_load_processed_sections_drops_shared_aliases(tmp_path):
+    section_dir = tmp_path / "products"
+    section_dir.mkdir()
+    csv_path = section_dir / "products.csv"
+    csv_path.write_text(
+        "id,name,aliases,type\n"
+        "sku-1,Widget,common|alpha,product\n"
+        "sku-2,Gadget,common|beta,product\n",
+        encoding="utf-8",
+    )
+
+    sections = benchmarks.load_processed_sections(
+        processed_dir=tmp_path,
+        max_entities_per_section=10,
+        max_queries_per_section=5,
+    )
+
+    assert len(sections) == 1
+    assert sections[0]["entities"][0]["aliases"] == ["alpha"]
+    assert sections[0]["entities"][1]["aliases"] == ["beta"]
+    assert all("common" not in pair["query"] for pair in sections[0]["base_pairs"])
 
 
 def test_benchmark_embedding_models_expands_registry(monkeypatch):

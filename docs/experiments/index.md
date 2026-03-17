@@ -1,6 +1,6 @@
 # Experiments Index
 
-Related docs: [`../index.md`](../index.md) | [`country-classifier-scripts.md`](./country-classifier-scripts.md) | [`benchmarking.md`](./benchmarking.md)
+Related docs: [`../index.md`](../index.md) | [`country-classifier-scripts.md`](./country-classifier-scripts.md) | [`benchmarking.md`](./benchmarking.md) | [`benchmark-results.md`](./benchmark-results.md) | [`speed-benchmark-results.md`](./speed-benchmark-results.md)
 
 This section documents exploratory assets under `experiments/`.
 

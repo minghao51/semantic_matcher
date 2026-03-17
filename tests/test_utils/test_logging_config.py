@@ -28,4 +28,6 @@ def test_get_logger_preserves_package_namespace():
         logging_config.get_logger("semanticmatcher.core.matcher").name
         == "semanticmatcher.core.matcher"
     )
-    assert logging_config.get_logger("core.matcher").name == "semanticmatcher.core.matcher"
+    assert (
+        logging_config.get_logger("core.matcher").name == "semanticmatcher.core.matcher"
+    )

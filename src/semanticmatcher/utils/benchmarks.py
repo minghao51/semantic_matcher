@@ -5,10 +5,12 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import time
+from collections import Counter
 from pathlib import Path
 from statistics import mean
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import pandas as pd
 
@@ -18,6 +20,7 @@ from ..config import (
     get_training_model_aliases,
 )
 from ..core.matcher import EmbeddingMatcher, Matcher
+from .preprocessing import clean_text
 
 try:
     from tqdm.auto import tqdm
@@ -40,8 +43,17 @@ def _dataset_section_name(path: Path) -> str:
     return f"{path.parent.name}/{path.stem}"
 
 
-def _row_to_entity(row: Dict[str, str]) -> Dict[str, Any]:
+def _row_to_entity(
+    row: Dict[str, str],
+    alias_counts: Optional[Counter[str]] = None,
+) -> Dict[str, Any]:
     aliases = _parse_aliases(row.get("aliases", ""))
+    if alias_counts is not None:
+        aliases = [
+            alias
+            for alias in aliases
+            if alias_counts.get(alias, 0) == 1 and alias != row["id"]
+        ]
     entity = {
         "id": row["id"],
         "name": row["name"],
@@ -51,6 +63,188 @@ def _row_to_entity(row: Dict[str, str]) -> Dict[str, Any]:
     if row.get("type"):
         entity["type"] = row["type"]
     return entity
+
+
+def _dedupe_texts(entity: Dict[str, Any], include_id: bool = True) -> List[str]:
+    texts = [entity["name"], *entity.get("aliases", [])]
+    if include_id:
+        texts.append(entity["id"])
+    unique_texts = []
+    for text in texts:
+        if text and text not in unique_texts:
+            unique_texts.append(text)
+    return unique_texts
+
+
+def _normalize_eval_text(text: str) -> str:
+    return clean_text(text, lowercase=True, remove_punct=True)
+
+
+def _remove_parenthetical(text: str) -> str:
+    return re.sub(r"\([^)]*\)", " ", text)
+
+
+def _first_clause(text: str) -> str:
+    return re.split(r"[,;]", text, maxsplit=1)[0]
+
+
+def _introduce_typo(text: str) -> str:
+    tokens = text.split()
+    if not tokens:
+        return text
+
+    longest_idx = max(range(len(tokens)), key=lambda idx: len(tokens[idx]))
+    token = tokens[longest_idx]
+    if len(token) < 5:
+        return text
+
+    midpoint = len(token) // 2
+    typo = token[:midpoint] + token[midpoint + 1 :]
+    if typo == token:
+        return text
+
+    tokens[longest_idx] = typo
+    return " ".join(tokens)
+
+
+def _generate_holdout_queries(
+    source_text: str,
+    excluded_texts: Iterable[str],
+) -> List[Tuple[str, str]]:
+    """Generate labeled non-verbatim evaluation queries from a source text."""
+    excluded = {_normalize_eval_text(text) for text in excluded_texts if text}
+    candidates: List[Tuple[str, str]] = []
+    raw_candidates = [
+        (
+            "typo",
+            _normalize_eval_text(_introduce_typo(_normalize_eval_text(source_text))),
+        ),
+        (
+            "remove_parenthetical",
+            _normalize_eval_text(_remove_parenthetical(source_text)),
+        ),
+        ("ampersand_expanded", _normalize_eval_text(source_text.replace("&", " and "))),
+        ("first_clause", _normalize_eval_text(_first_clause(source_text))),
+        ("normalized_verbatim", _normalize_eval_text(source_text)),
+    ]
+
+    seen_candidates = set()
+    for label, candidate in raw_candidates:
+        if not candidate or candidate in excluded:
+            continue
+        if candidate in seen_candidates:
+            continue
+        candidates.append((label, candidate))
+        seen_candidates.add(candidate)
+
+    return candidates
+
+
+def _build_split_pairs(entity: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+    """Build exact-match and holdout query splits for benchmarking."""
+    indexed_texts = _dedupe_texts(entity, include_id=False)
+    if not indexed_texts:
+        return {
+            "base": [],
+            "train": [],
+            "val": [],
+            "test": [],
+            "typo": [],
+            "remove_parenthetical": [],
+            "ampersand_expanded": [],
+            "first_clause": [],
+            "normalized_verbatim": [],
+        }
+
+    base_query = indexed_texts[0]
+    base_pairs = [{"query": base_query, "expected_id": entity["id"]}]
+    train_pairs = [
+        {"query": text, "expected_id": entity["id"]}
+        for text in indexed_texts[1:3]
+        if text != base_query
+    ]
+
+    holdout_source = indexed_texts[-1]
+    holdout_queries = _generate_holdout_queries(holdout_source, indexed_texts)
+    perturbation_pairs = {
+        label: [{"query": query, "expected_id": entity["id"]}]
+        for label, query in holdout_queries
+    }
+    val_pairs = (
+        [{"query": holdout_queries[0][1], "expected_id": entity["id"]}]
+        if len(holdout_queries) >= 1
+        else []
+    )
+    test_pairs = (
+        [{"query": holdout_queries[1][1], "expected_id": entity["id"]}]
+        if len(holdout_queries) >= 2
+        else []
+    )
+
+    return {
+        "base": base_pairs,
+        "train": train_pairs,
+        "val": val_pairs,
+        "test": test_pairs,
+        "typo": perturbation_pairs.get("typo", []),
+        "remove_parenthetical": perturbation_pairs.get("remove_parenthetical", []),
+        "ampersand_expanded": perturbation_pairs.get("ampersand_expanded", []),
+        "first_clause": perturbation_pairs.get("first_clause", []),
+        "normalized_verbatim": perturbation_pairs.get("normalized_verbatim", []),
+    }
+
+
+def _split_train_eval_texts(entity: Dict[str, Any]) -> Tuple[List[str], Optional[str]]:
+    """Reserve one unseen text for trained-mode evaluation when possible."""
+    unique_texts = _dedupe_texts(entity, include_id=False)
+    if len(unique_texts) < 2:
+        return unique_texts[:1], None
+    return unique_texts[:-1], unique_texts[-1]
+
+
+def _select_primary_queries(split_pairs: Dict[str, List[Dict[str, Any]]]) -> List[str]:
+    for split in ("test", "val", "train", "base"):
+        pairs = split_pairs.get(split, [])
+        if pairs:
+            return [pair["query"] for pair in pairs]
+    return []
+
+
+def _split_accuracy_fields(
+    matcher: Any,
+    split_pairs: Dict[str, List[Dict[str, Any]]],
+) -> Dict[str, Any]:
+    fields: Dict[str, Any] = {}
+
+    metric_splits = (
+        "base",
+        "train",
+        "val",
+        "test",
+        "typo",
+        "remove_parenthetical",
+        "ampersand_expanded",
+        "first_clause",
+        "normalized_verbatim",
+    )
+    for split_name in metric_splits:
+        metrics = benchmark_accuracy(matcher, split_pairs.get(split_name, []))
+        fields[f"{split_name}_accuracy"] = metrics["accuracy"]
+        fields[f"{split_name}_avg_score"] = metrics["avg_score"]
+        fields[f"{split_name}_total_pairs"] = metrics["total_pairs"]
+
+    for preferred in ("test", "val", "train", "base"):
+        if fields[f"{preferred}_total_pairs"] > 0:
+            fields["accuracy"] = fields[f"{preferred}_accuracy"]
+            fields["avg_score"] = fields[f"{preferred}_avg_score"]
+            fields["accuracy_split"] = preferred
+            break
+    else:
+        fields["accuracy"] = 0.0
+        fields["avg_score"] = 0.0
+        fields["accuracy_split"] = "none"
+
+    return fields
 
 
 def iter_processed_dataset_paths(
@@ -80,36 +274,58 @@ def load_processed_sections(
         with path.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
 
+        alias_counts: Counter[str] = Counter()
+        for row in rows:
+            alias_counts.update(_parse_aliases(row.get("aliases", "")))
+
         entities = []
         queries = []
         accuracy_pairs = []
         training_data = []
         evaluation_pairs = []
+        base_pairs = []
+        train_pairs = []
+        val_pairs = []
+        test_pairs = []
+        perturbation_pairs = {
+            "typo": [],
+            "remove_parenthetical": [],
+            "ampersand_expanded": [],
+            "first_clause": [],
+            "normalized_verbatim": [],
+        }
 
         for row in rows[:max_entities_per_section]:
-            entity = _row_to_entity(row)
+            entity = _row_to_entity(row, alias_counts=alias_counts)
             entities.append(entity)
+            split_pairs = _build_split_pairs(entity)
 
-            texts = [entity["name"], *entity.get("aliases", []), entity["id"]]
-            unique_texts = []
-            for text in texts:
-                if text and text not in unique_texts:
-                    unique_texts.append(text)
+            if len(base_pairs) < max_queries_per_section:
+                base_pairs.extend(split_pairs["base"])
+            if len(train_pairs) < max_queries_per_section:
+                train_pairs.extend(split_pairs["train"])
+            if len(val_pairs) < max_queries_per_section:
+                val_pairs.extend(split_pairs["val"])
+            if len(test_pairs) < max_queries_per_section:
+                test_pairs.extend(split_pairs["test"])
+            for label in perturbation_pairs:
+                if len(perturbation_pairs[label]) < max_queries_per_section:
+                    perturbation_pairs[label].extend(split_pairs[label])
 
-            if len(queries) < max_queries_per_section:
-                query = unique_texts[1] if len(unique_texts) > 1 else unique_texts[0]
-                queries.append(query)
-                accuracy_pairs.append({"query": query, "expected_id": entity["id"]})
-
-            for text in unique_texts[:3]:
+            training_texts = [base_query["query"] for base_query in split_pairs["base"]]
+            training_texts.extend(pair["query"] for pair in split_pairs["train"])
+            for text in training_texts[:3]:
                 training_data.append({"text": text, "label": entity["id"]})
 
-            evaluation_query = (
-                unique_texts[1] if len(unique_texts) > 1 else unique_texts[0]
-            )
-            evaluation_pairs.append(
-                {"query": evaluation_query, "expected_id": entity["id"]}
-            )
+        split_map = {
+            "base": base_pairs[:max_queries_per_section],
+            "train": train_pairs[:max_queries_per_section],
+            "val": val_pairs[:max_queries_per_section],
+            "test": test_pairs[:max_queries_per_section],
+        }
+        queries = _select_primary_queries(split_map)
+        accuracy_pairs = split_map["base"]
+        evaluation_pairs = split_map["test"] or split_map["val"]
 
         if not entities or not queries:
             continue
@@ -123,6 +339,23 @@ def load_processed_sections(
                 "accuracy_pairs": accuracy_pairs,
                 "training_data": training_data[: max_queries_per_section * 3],
                 "evaluation_pairs": evaluation_pairs[:max_queries_per_section],
+                "base_pairs": split_map["base"],
+                "train_pairs": split_map["train"],
+                "val_pairs": split_map["val"],
+                "test_pairs": split_map["test"],
+                "typo_pairs": perturbation_pairs["typo"][:max_queries_per_section],
+                "remove_parenthetical_pairs": perturbation_pairs[
+                    "remove_parenthetical"
+                ][:max_queries_per_section],
+                "ampersand_expanded_pairs": perturbation_pairs["ampersand_expanded"][
+                    :max_queries_per_section
+                ],
+                "first_clause_pairs": perturbation_pairs["first_clause"][
+                    :max_queries_per_section
+                ],
+                "normalized_verbatim_pairs": perturbation_pairs["normalized_verbatim"][
+                    :max_queries_per_section
+                ],
             }
         )
 
@@ -147,9 +380,21 @@ def build_embedding_benchmark_dataset(
 
 def build_trained_benchmark_dataset() -> Dict[str, Any]:
     """Backward-compatible single-section loader for trained benchmarks."""
-    section = load_processed_sections(
+    sections = load_processed_sections(
         max_entities_per_section=40, max_queries_per_section=20
-    )[0]
+    )
+    section = next(
+        (
+            item
+            for item in sections
+            if item["training_data"] and item["evaluation_pairs"]
+        ),
+        None,
+    )
+    if section is None:
+        raise ValueError(
+            "No processed sections contain a non-overlapping train/eval split"
+        )
     return {
         "entities": section["entities"],
         "training_data": section["training_data"],
@@ -275,7 +520,19 @@ def benchmark_embedding_models(
         section_name = section_data["section"]
         section_entities = section_data["entities"]
         section_queries = section_data["queries"]
-        section_accuracy = section_data["accuracy_pairs"]
+        split_pairs = {
+            "base": section_data.get(
+                "base_pairs", section_data.get("accuracy_pairs", [])
+            ),
+            "train": section_data.get("train_pairs", []),
+            "val": section_data.get("val_pairs", []),
+            "test": section_data.get("test_pairs", []),
+            "typo": section_data.get("typo_pairs", []),
+            "remove_parenthetical": section_data.get("remove_parenthetical_pairs", []),
+            "ampersand_expanded": section_data.get("ampersand_expanded_pairs", []),
+            "first_clause": section_data.get("first_clause_pairs", []),
+            "normalized_verbatim": section_data.get("normalized_verbatim_pairs", []),
+        }
 
         for alias in tqdm(model_names, desc=f"Embedding benchmarks [{section_name}]"):
             spec = get_model_spec(alias) or {}
@@ -296,7 +553,7 @@ def benchmark_embedding_models(
                 latency = benchmark_latency(
                     matcher, section_queries, iterations=iterations, warmup_iterations=1
                 )
-                accuracy = benchmark_accuracy(matcher, section_accuracy)
+                accuracy_fields = _split_accuracy_fields(matcher, split_pairs)
 
                 bulk_times = []
                 for _ in range(iterations):
@@ -321,8 +578,7 @@ def benchmark_embedding_models(
                         if avg_bulk_time
                         else 0.0,
                         "bulk_time": avg_bulk_time,
-                        "accuracy": accuracy["accuracy"],
-                        "avg_score": accuracy["avg_score"],
+                        **accuracy_fields,
                         "skip_reason": "",
                     }
                 )
@@ -343,6 +599,34 @@ def benchmark_embedding_models(
                         "bulk_time": None,
                         "accuracy": None,
                         "avg_score": None,
+                        "accuracy_split": None,
+                        "base_accuracy": None,
+                        "train_accuracy": None,
+                        "val_accuracy": None,
+                        "test_accuracy": None,
+                        "base_avg_score": None,
+                        "train_avg_score": None,
+                        "val_avg_score": None,
+                        "test_avg_score": None,
+                        "base_total_pairs": None,
+                        "train_total_pairs": None,
+                        "val_total_pairs": None,
+                        "test_total_pairs": None,
+                        "typo_accuracy": None,
+                        "remove_parenthetical_accuracy": None,
+                        "ampersand_expanded_accuracy": None,
+                        "first_clause_accuracy": None,
+                        "normalized_verbatim_accuracy": None,
+                        "typo_avg_score": None,
+                        "remove_parenthetical_avg_score": None,
+                        "ampersand_expanded_avg_score": None,
+                        "first_clause_avg_score": None,
+                        "normalized_verbatim_avg_score": None,
+                        "typo_total_pairs": None,
+                        "remove_parenthetical_total_pairs": None,
+                        "ampersand_expanded_total_pairs": None,
+                        "first_clause_total_pairs": None,
+                        "normalized_verbatim_total_pairs": None,
                         "skip_reason": str(exc),
                     }
                 )
@@ -408,8 +692,27 @@ def benchmark_trained_modes(
         section_name = section_data["section"]
         section_entities = section_data["entities"]
         section_training = section_data["training_data"]
-        section_evaluation = section_data["evaluation_pairs"]
         section_queries = section_data["queries"]
+        split_pairs = {
+            "base": section_data.get("base_pairs", []),
+            "train": section_data.get("train_pairs", []),
+            "val": section_data.get("val_pairs", []),
+            "test": section_data.get(
+                "test_pairs", section_data.get("evaluation_pairs", [])
+            ),
+            "typo": section_data.get("typo_pairs", []),
+            "remove_parenthetical": section_data.get("remove_parenthetical_pairs", []),
+            "ampersand_expanded": section_data.get("ampersand_expanded_pairs", []),
+            "first_clause": section_data.get("first_clause_pairs", []),
+            "normalized_verbatim": section_data.get("normalized_verbatim_pairs", []),
+        }
+
+        if (
+            not section_training
+            or not (split_pairs["val"] or split_pairs["test"])
+            or not section_queries
+        ):
+            continue
 
         for alias in tqdm(model_names, desc=f"Training benchmarks [{section_name}]"):
             for mode in modes:
@@ -431,7 +734,7 @@ def benchmark_trained_modes(
                     latency = benchmark_latency(
                         matcher, section_queries, iterations=3, warmup_iterations=1
                     )
-                    accuracy = benchmark_accuracy(matcher, section_evaluation)
+                    accuracy_fields = _split_accuracy_fields(matcher, split_pairs)
 
                     bulk_times = []
                     for _ in range(3):
@@ -454,8 +757,7 @@ def benchmark_trained_modes(
                             "throughput_qps": len(section_queries) / avg_bulk_time
                             if avg_bulk_time
                             else 0.0,
-                            "accuracy": accuracy["accuracy"],
-                            "avg_score": accuracy["avg_score"],
+                            **accuracy_fields,
                             "skip_reason": "",
                         }
                     )
@@ -477,6 +779,34 @@ def benchmark_trained_modes(
                             "throughput_qps": None,
                             "accuracy": None,
                             "avg_score": None,
+                            "accuracy_split": None,
+                            "base_accuracy": None,
+                            "train_accuracy": None,
+                            "val_accuracy": None,
+                            "test_accuracy": None,
+                            "base_avg_score": None,
+                            "train_avg_score": None,
+                            "val_avg_score": None,
+                            "test_avg_score": None,
+                            "base_total_pairs": None,
+                            "train_total_pairs": None,
+                            "val_total_pairs": None,
+                            "test_total_pairs": None,
+                            "typo_accuracy": None,
+                            "remove_parenthetical_accuracy": None,
+                            "ampersand_expanded_accuracy": None,
+                            "first_clause_accuracy": None,
+                            "normalized_verbatim_accuracy": None,
+                            "typo_avg_score": None,
+                            "remove_parenthetical_avg_score": None,
+                            "ampersand_expanded_avg_score": None,
+                            "first_clause_avg_score": None,
+                            "normalized_verbatim_avg_score": None,
+                            "typo_total_pairs": None,
+                            "remove_parenthetical_total_pairs": None,
+                            "ampersand_expanded_total_pairs": None,
+                            "first_clause_total_pairs": None,
+                            "normalized_verbatim_total_pairs": None,
                             "skip_reason": str(exc),
                         }
                     )
@@ -526,7 +856,10 @@ def format_benchmark_summary(results: pd.DataFrame) -> str:
                         "model",
                         "status",
                         "throughput_qps",
-                        "accuracy",
+                        "base_accuracy",
+                        "train_accuracy",
+                        "val_accuracy",
+                        "test_accuracy",
                         "skip_reason",
                     ]
                     if col in section_subset.columns
@@ -539,7 +872,10 @@ def format_benchmark_summary(results: pd.DataFrame) -> str:
                         "backend",
                         "status",
                         "throughput_qps",
-                        "accuracy",
+                        "base_accuracy",
+                        "train_accuracy",
+                        "val_accuracy",
+                        "test_accuracy",
                         "speedup_vs_minilm",
                         "skip_reason",
                     ]

@@ -34,3 +34,36 @@ def test_cli_forwards_base_dirs(monkeypatch, tmp_path):
     )
 
     assert calls == [(Path(raw_base), Path(processed_base))]
+
+
+def test_cli_all_exits_non_zero_on_failure(monkeypatch, capsys):
+    calls = []
+
+    def ok_ingestor(raw_dir=None, processed_dir=None):
+        calls.append("ok")
+
+    def failing_ingestor(raw_dir=None, processed_dir=None):
+        calls.append("fail")
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(
+        cli,
+        "INGESTORS",
+        {
+            "languages": ok_ingestor,
+            "currencies": failing_ingestor,
+            "all": None,
+        },
+    )
+
+    try:
+        cli.main(["all"])
+    except SystemExit as exc:
+        assert exc.code == 1
+    else:
+        raise AssertionError("Expected SystemExit(1)")
+
+    out = capsys.readouterr().out
+    assert calls == ["ok", "fail"]
+    assert "Error ingesting currencies: boom" in out
+    assert "Ingestion completed with failures:" in out

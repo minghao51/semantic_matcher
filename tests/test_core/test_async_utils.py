@@ -42,3 +42,11 @@ class TestAsyncExecutor:
         executor.shutdown()
         # Should not raise
         executor.shutdown()
+
+    @pytest.mark.asyncio
+    async def test_run_after_shutdown_raises(self):
+        executor = AsyncExecutor()
+        executor.shutdown()
+
+        with pytest.raises(RuntimeError, match="shut down"):
+            await executor.run_in_thread(lambda: 1)

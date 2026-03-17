@@ -24,11 +24,12 @@ pip install semantic-matcher
 
 ## Quick Start
 
-### The New Unified API (Recommended)
+### The New Unified API (Recommended Async Default)
 
-**Single `Matcher` class that auto-detects the best approach:**
+**Single `Matcher` class that auto-detects the best approach, with async shown first:**
 
 ```python
+import asyncio
 from semanticmatcher import Matcher
 
 entities = [
@@ -36,25 +37,38 @@ entities = [
     {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
 ]
 
-# Zero-shot mode (no training required)
-matcher = Matcher(entities=entities)
-matcher.fit()
-print(matcher.match("America"))  # {"id": "US", "score": 0.95}
+async def main():
+    async with Matcher(entities=entities) as matcher:
+        await matcher.fit_async()
+        print(await matcher.match_async("America"))  # {"id": "US", "score": 0.95}
 
-# Or with training data (auto-detects training mode)
-training_data = [
-    {"text": "Germany", "label": "DE"},
-    {"text": "Deutschland", "label": "DE"},
-    {"text": "USA", "label": "US"},
-]
-matcher.fit(training_data)  # Auto: head-only for <3 examples, full training for ≥3
-print(matcher.match("Deutschland"))  # {"id": "DE", "score": 1.0}
+        training_data = [
+            {"text": "Germany", "label": "DE"},
+            {"text": "Deutschland", "label": "DE"},
+            {"text": "USA", "label": "US"},
+        ]
+        await matcher.fit_async(training_data)  # Auto: head-only for <3 examples, full for ≥3
+        print(await matcher.match_async("Deutschland"))  # {"id": "DE", "score": 1.0}
+
+asyncio.run(main())
 ```
+
+Prefer the async API for new integrations, especially in web services, batch jobs, or concurrent workloads. The sync API remains fully supported for scripts and simple one-off usage.
 
 **How it works:**
 - No training data → zero-shot (embedding similarity)
 - < 3 examples/entity → head-only training (~30s)
 - ≥ 3 examples/entity → full training (~3min)
+
+### Sync Alternative
+
+```python
+from semanticmatcher import Matcher
+
+matcher = Matcher(entities=entities)
+matcher.fit()
+print(matcher.match("America"))
+```
 
 ### Alternative: Explicit Mode Selection
 
@@ -85,7 +99,7 @@ results = matcher.match("America", top_k=3)
 
 ## Async API
 
-For high-concurrency scenarios (1K-100K queries), the async API provides non-blocking operations with progress tracking and cancellation support:
+The async API is the recommended default for new code. It provides non-blocking operations with progress tracking and cancellation support:
 
 ```python
 import asyncio
@@ -200,6 +214,12 @@ Run the comprehensive benchmark suite with:
 
 ```bash
 uv run python scripts/benchmark_embeddings.py --track all --output artifacts/benchmarks/benchmark-results.json
+```
+
+Run a lightweight async-vs-sync comparison with:
+
+```bash
+uv run python scripts/benchmark_async.py --multiplier 20 --concurrency 8
 ```
 
 ## Documentation

@@ -666,8 +666,13 @@ class TestUnifiedMatcher:
         class ThresholdAwareMatcher:
             def __init__(self, threshold):
                 self.threshold = threshold
+                self.seen_thresholds = []
 
-            def match(self, _query, top_k=5):
+            def match(self, _query, top_k=5, threshold_override=None):
+                effective_threshold = (
+                    self.threshold if threshold_override is None else threshold_override
+                )
+                self.seen_thresholds.append(effective_threshold)
                 candidates = [
                     {"id": "FR", "score": 0.65, "text": "France"},
                     {"id": "US", "score": 0.25, "text": "United States"},
@@ -675,7 +680,7 @@ class TestUnifiedMatcher:
                 results = [
                     candidate
                     for candidate in candidates
-                    if candidate["score"] >= self.threshold
+                    if candidate["score"] >= effective_threshold
                 ]
                 return results[:top_k]
 
@@ -692,6 +697,7 @@ class TestUnifiedMatcher:
         assert explanation["matched"] is False
         assert matcher.threshold == 0.8
         assert fake.threshold == 0.8
+        assert fake.seen_thresholds == [0.0]
 
     def test_matcher_explain_match_hybrid_uses_wrapper_threshold(self, sample_entities):
         class FakeHybridMatcher:

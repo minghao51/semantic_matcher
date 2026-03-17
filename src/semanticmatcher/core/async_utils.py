@@ -25,6 +25,15 @@ class AsyncExecutor:
             # Default to CPU count * 2 for I/O bound work
             max_workers = min(32, (os.cpu_count() or 1) * 2)
         self._executor = ThreadPoolExecutor(max_workers=max_workers)
+        self._is_shutdown = False
+
+    def _require_executor(self) -> ThreadPoolExecutor:
+        if self._is_shutdown or self._executor is None:
+            raise RuntimeError(
+                "AsyncExecutor has been shut down. Create a new executor before "
+                "submitting more work."
+            )
+        return self._executor
 
     async def run_in_thread(self, func: Callable, *args, **kwargs) -> Any:
         """
@@ -40,7 +49,7 @@ class AsyncExecutor:
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
-            self._executor, functools.partial(func, *args, **kwargs)
+            self._require_executor(), functools.partial(func, *args, **kwargs)
         )
 
     async def run_in_thread_batch(
@@ -70,3 +79,4 @@ class AsyncExecutor:
         if hasattr(self, "_executor") and self._executor is not None:
             self._executor.shutdown(wait=True)
             self._executor = None
+        self._is_shutdown = True

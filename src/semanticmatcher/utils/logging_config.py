@@ -149,7 +149,9 @@ def suppress_third_party_loggers() -> None:
     # Suppress specific warnings from third-party libraries
     warnings.filterwarnings("ignore", category=UserWarning, module="torch")
     warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
-    warnings.filterwarnings("ignore", category=FutureWarning, module="sentence_transformers")
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning, module="sentence_transformers"
+    )
 
 
 def get_logger(name: str) -> logging.Logger:

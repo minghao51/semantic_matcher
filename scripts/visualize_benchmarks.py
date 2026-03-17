@@ -15,10 +15,9 @@ Usage:
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 
@@ -61,14 +60,16 @@ def extract_embedding_data(results: Any) -> pd.DataFrame:
             }
             model = model_map.get(model, model)
 
-            rows.append({
-                "section": section,
-                "model": model,
-                "throughput_qps": entry.get("throughput_qps", 0),
-                "avg_latency_ms": entry.get("avg_latency", 0) * 1000,
-                "p95_latency_ms": entry.get("p95_latency", 0) * 1000,
-                "accuracy": entry.get("accuracy", 0),
-            })
+            rows.append(
+                {
+                    "section": section,
+                    "model": model,
+                    "throughput_qps": entry.get("throughput_qps", 0),
+                    "avg_latency_ms": entry.get("avg_latency", 0) * 1000,
+                    "p95_latency_ms": entry.get("p95_latency", 0) * 1000,
+                    "accuracy": entry.get("accuracy", 0),
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -96,16 +97,18 @@ def extract_training_data(results: Any) -> pd.DataFrame:
             }
             model = model_map.get(model, model)
 
-            rows.append({
-                "section": section,
-                "mode": entry.get("mode", "unknown"),
-                "model": model,
-                "throughput_qps": entry.get("throughput_qps", 0),
-                "avg_latency_ms": entry.get("avg_latency", 0) * 1000,
-                "p95_latency_ms": entry.get("p95_latency", 0) * 1000,
-                "accuracy": entry.get("accuracy", 0),
-                "training_time_s": entry.get("training_time", 0),
-            })
+            rows.append(
+                {
+                    "section": section,
+                    "mode": entry.get("mode", "unknown"),
+                    "model": model,
+                    "throughput_qps": entry.get("throughput_qps", 0),
+                    "avg_latency_ms": entry.get("avg_latency", 0) * 1000,
+                    "p95_latency_ms": entry.get("p95_latency", 0) * 1000,
+                    "accuracy": entry.get("accuracy", 0),
+                    "training_time_s": entry.get("training_time", 0),
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -129,14 +132,18 @@ def extract_bert_data(results: Any) -> pd.DataFrame:
                 elif "bert-multilingual" in model_name:
                     short_name = "bert-multilingual"
 
-                rows.append({
-                    "model": short_name,
-                    "training_time_s": metrics.get("training_time", 0),
-                    "memory_peak_mb": metrics.get("memory_peak_mb", 0),
-                    "inference_time_s": metrics.get("inference_time", 0),
-                    "throughput_samples_per_sec": metrics.get("throughput_samples_per_sec", 0),
-                    "accuracy": metrics.get("accuracy", 0),
-                })
+                rows.append(
+                    {
+                        "model": short_name,
+                        "training_time_s": metrics.get("training_time", 0),
+                        "memory_peak_mb": metrics.get("memory_peak_mb", 0),
+                        "inference_time_s": metrics.get("inference_time", 0),
+                        "throughput_samples_per_sec": metrics.get(
+                            "throughput_samples_per_sec", 0
+                        ),
+                        "accuracy": metrics.get("accuracy", 0),
+                    }
+                )
     return pd.DataFrame(rows)
 
 
@@ -214,11 +221,13 @@ def plot_accuracy_comparison(
     for model in embedding_df["model"].unique():
         subset = embedding_df[embedding_df["model"] == model]
         avg_acc = subset["accuracy"].mean() * 100
-        data.append({
-            "model": model,
-            "route": "zero-shot",
-            "accuracy": avg_acc,
-        })
+        data.append(
+            {
+                "model": model,
+                "route": "zero-shot",
+                "accuracy": avg_acc,
+            }
+        )
 
     # Training routes - average across sections and models
     for mode in training_df["mode"].unique():
@@ -227,19 +236,23 @@ def plot_accuracy_comparison(
         for model in subset["model"].unique():
             model_subset = subset[subset["model"] == model]
             avg_acc = model_subset["accuracy"].mean() * 100
-            data.append({
-                "model": model,
-                "route": mode,
-                "accuracy": avg_acc,
-            })
+            data.append(
+                {
+                    "model": model,
+                    "route": mode,
+                    "accuracy": avg_acc,
+                }
+            )
 
     # BERT - single accuracy value per model
     for _, row in bert_df.iterrows():
-        data.append({
-            "model": row["model"],
-            "route": "bert",
-            "accuracy": row["accuracy"] * 100,
-        })
+        data.append(
+            {
+                "model": row["model"],
+                "route": "bert",
+                "accuracy": row["accuracy"] * 100,
+            }
+        )
 
     plot_df = pd.DataFrame(data)
 
@@ -281,27 +294,33 @@ def plot_training_vs_accuracy(
     fig, ax = plt.subplots(figsize=(12, 8))
 
     # SetFit routes
-    setfit_df = training_df[
-        training_df["mode"].isin(["head-only", "full"])
-    ].copy()
+    setfit_df = training_df[training_df["mode"].isin(["head-only", "full"])].copy()
     setfit_df["classifier_type"] = "SetFit"
 
     # BERT data (need to reshape)
     bert_rows = []
     for _, row in bert_df.iterrows():
-        bert_rows.append({
-            "model": row["model"].split("/")[-1],
-            "training_time_s": row["training_time_s"],
-            "accuracy": row["accuracy"] * 100,
-            "classifier_type": "BERT",
-        })
+        bert_rows.append(
+            {
+                "model": row["model"].split("/")[-1],
+                "training_time_s": row["training_time_s"],
+                "accuracy": row["accuracy"] * 100,
+                "classifier_type": "BERT",
+            }
+        )
     bert_plot_df = pd.DataFrame(bert_rows)
 
     # Combine
-    setfit_grouped = setfit_df.groupby("model").agg({
-        "training_time_s": "mean",
-        "accuracy": lambda x: (x * 100).mean(),
-    }).reset_index()
+    setfit_grouped = (
+        setfit_df.groupby("model")
+        .agg(
+            {
+                "training_time_s": "mean",
+                "accuracy": lambda x: (x * 100).mean(),
+            }
+        )
+        .reset_index()
+    )
     setfit_grouped["classifier_type"] = "SetFit"
 
     combined_df = pd.concat([setfit_grouped, bert_plot_df], ignore_index=True)
@@ -362,9 +381,7 @@ def plot_static_vs_dynamic(
 
     # Throughput comparison
     throughput_data = (
-        df.groupby(["embedding_type", "model"])["throughput_qps"]
-        .mean()
-        .reset_index()
+        df.groupby(["embedding_type", "model"])["throughput_qps"].mean().reset_index()
     )
 
     for etype, color in [("Static", "steelblue"), ("Dynamic", "coral")]:
@@ -384,9 +401,7 @@ def plot_static_vs_dynamic(
 
     # Accuracy comparison
     accuracy_data = (
-        df.groupby(["embedding_type", "model"])["accuracy"]
-        .mean()
-        .reset_index()
+        df.groupby(["embedding_type", "model"])["accuracy"].mean().reset_index()
     )
 
     for etype, color in [("Static", "steelblue"), ("Dynamic", "coral")]:

@@ -1,5 +1,8 @@
 import pytest
 import asyncio
+import threading
+import time
+from types import MethodType
 from semanticmatcher.core.matcher import Matcher
 
 
@@ -165,9 +168,7 @@ class TestMatcherMatchBatchAsync:
 
             queries = ["USA", "Germany"] * 5
             results = await matcher.match_batch_async(
-                queries,
-                batch_size=2,
-                on_progress=progress_callback
+                queries, batch_size=2, on_progress=progress_callback
             )
 
             assert len(results) == 10
@@ -308,10 +309,7 @@ class TestEmbeddingMatcherAsync:
 class TestAsyncCancellation:
     @pytest.fixture
     def sample_entities(self):
-        return [
-            {"id": str(i), "name": f"Entity {i}"}
-            for i in range(10)
-        ]
+        return [{"id": str(i), "name": f"Entity {i}"} for i in range(10)]
 
     @pytest.mark.asyncio
     async def test_match_batch_async_cancellation(self, sample_entities):
@@ -339,10 +337,7 @@ class TestAsyncCancellation:
     @pytest.mark.asyncio
     async def test_fit_async_cancellation(self, sample_entities):
         """Test that fit can be cancelled"""
-        training_data = [
-            {"text": f"Entity {i}", "label": str(i)}
-            for i in range(10)
-        ]
+        training_data = [{"text": f"Entity {i}", "label": str(i)} for i in range(10)]
 
         async with Matcher(entities=sample_entities) as matcher:
             # Create a task that can be cancelled
@@ -362,14 +357,12 @@ class TestAsyncCancellation:
 class TestAsyncConcurrency:
     @pytest.fixture
     def sample_entities(self):
-        return [
-            {"id": str(i), "name": f"Entity {i}"}
-            for i in range(10)
-        ]
+        return [{"id": str(i), "name": f"Entity {i}"} for i in range(10)]
 
     @pytest.mark.asyncio
     async def test_concurrent_matchers(self, sample_entities):
         """Test multiple matchers running concurrently"""
+
         async def match_entity(entity_id):
             async with Matcher(entities=sample_entities) as matcher:
                 await matcher.fit_async()
@@ -424,4 +417,181 @@ class TestAsyncConcurrency:
             assert len(results) == 3
             assert all(len(r) == 5 for r in results)
 
+    @pytest.mark.asyncio
+    async def test_concurrent_match_async_autofit_only_runs_once(self, sample_entities):
+        """Concurrent async callers should not duplicate lazy fit work."""
+        matcher = Matcher(entities=sample_entities)
+        original_fit = matcher.fit
+        fit_calls = 0
 
+        def wrapped_fit(self, *args, **kwargs):
+            nonlocal fit_calls
+            fit_calls += 1
+            return original_fit(*args, **kwargs)
+
+        matcher.fit = MethodType(wrapped_fit, matcher)
+
+        try:
+            results = await asyncio.gather(
+                matcher.match_async("Entity 0"),
+                matcher.match_async("Entity 1"),
+                matcher.match_async("Entity 2"),
+            )
+        finally:
+            await matcher.aclose()
+
+        assert len(results) == 3
+        assert all(result is not None for result in results)
+        assert fit_calls == 1
+
+    @pytest.mark.asyncio
+    async def test_concurrent_temporary_threshold_operations_restore_state(
+        self, sample_entities
+    ):
+        """Temporary threshold overrides should not leak after concurrent calls."""
+        async with Matcher(entities=sample_entities, threshold=0.95) as matcher:
+            await matcher.fit_async()
+
+            explanation_task = matcher.explain_match_async("Entity 0", top_k=3)
+            batch_task = matcher.match_batch_async(
+                ["Entity 0", "Entity 1", "missing"],
+                threshold=0.0,
+                batch_size=1,
+            )
+
+            explanation, batch_results = await asyncio.gather(
+                explanation_task,
+                batch_task,
+            )
+
+            assert explanation["threshold"] == 0.95
+            assert matcher.threshold == 0.95
+            assert len(batch_results) == 3
+
+    @pytest.mark.asyncio
+    async def test_explain_match_async_threshold_override_is_call_local(
+        self, sample_entities
+    ):
+        """Concurrent explain calls must not lower threshold for plain matches."""
+        async with Matcher(entities=sample_entities, threshold=0.95) as matcher:
+            await matcher.fit_async()
+
+            seen_thresholds = []
+            gate = threading.Event()
+
+            def instrumented_match(*args, **kwargs):
+                threshold = kwargs.get(
+                    "threshold_override", matcher.embedding_matcher.threshold
+                )
+                seen_thresholds.append(threshold)
+                if len(seen_thresholds) == 1:
+                    gate.wait(timeout=1.0)
+                texts = kwargs.get("texts", args[0] if args else None)
+                result = {"id": "probe", "score": threshold, "text": "probe"}
+                if isinstance(texts, list):
+                    return [result for _ in texts]
+                return result
+
+            matcher.embedding_matcher.match = instrumented_match
+
+            explain_task = asyncio.create_task(
+                matcher.explain_match_async("Entity 0", top_k=1)
+            )
+            while len(seen_thresholds) < 1:
+                await asyncio.sleep(0.01)
+
+            plain_task = asyncio.create_task(matcher.match_async("Entity 1", top_k=1))
+            while len(seen_thresholds) < 2:
+                await asyncio.sleep(0.01)
+
+            gate.set()
+            plain_result = await plain_task
+            explanation = await explain_task
+
+            assert seen_thresholds == [0.0, 0.95]
+            assert plain_result["score"] == 0.95
+            assert explanation["threshold"] == 0.95
+            assert matcher.threshold == 0.95
+
+    @pytest.mark.asyncio
+    async def test_match_batch_async_threshold_override_is_call_local(
+        self, sample_entities
+    ):
+        """Batch threshold overrides must not leak into concurrent plain matches."""
+        async with Matcher(entities=sample_entities, threshold=0.92) as matcher:
+            await matcher.fit_async()
+
+            seen_thresholds = []
+            gate = threading.Event()
+
+            def instrumented_match(*args, **kwargs):
+                threshold = kwargs.get(
+                    "threshold_override", matcher.embedding_matcher.threshold
+                )
+                seen_thresholds.append(threshold)
+                if len(seen_thresholds) == 1:
+                    gate.wait(timeout=1.0)
+                texts = kwargs.get("texts", args[0] if args else None)
+                result = {"id": "probe", "score": threshold, "text": "probe"}
+                if isinstance(texts, list):
+                    return [result for _ in texts]
+                return result
+
+            matcher.embedding_matcher.match = instrumented_match
+
+            batch_task = asyncio.create_task(
+                matcher.match_batch_async(["Entity 0"], threshold=0.0, batch_size=1)
+            )
+            while len(seen_thresholds) < 1:
+                await asyncio.sleep(0.01)
+
+            plain_task = asyncio.create_task(matcher.match_async("Entity 1", top_k=1))
+            while len(seen_thresholds) < 2:
+                await asyncio.sleep(0.01)
+
+            gate.set()
+            plain_result = await plain_task
+            batch_result = await batch_task
+
+            assert seen_thresholds == [0.0, 0.92]
+            assert plain_result["score"] == 0.92
+            assert batch_result[0]["score"] == 0.0
+            assert matcher.threshold == 0.92
+
+    @pytest.mark.asyncio
+    async def test_match_batch_async_cancellation_keeps_executor_usable(
+        self, sample_entities
+    ):
+        """Cancelling one batch should not tear down the shared executor."""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+
+            original_match = matcher.embedding_matcher.match
+            entered = threading.Event()
+            release = threading.Event()
+
+            def slow_match(*args, **kwargs):
+                entered.set()
+                release.wait(timeout=1.0)
+                return original_match(*args, **kwargs)
+
+            matcher.embedding_matcher.match = slow_match
+
+            task = asyncio.create_task(
+                matcher.match_batch_async(["Entity 0", "Entity 1"], batch_size=1)
+            )
+            while not entered.wait(timeout=0.05):
+                await asyncio.sleep(0.01)
+
+            start = time.perf_counter()
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+            cancelled_after = time.perf_counter() - start
+
+            assert cancelled_after < 0.2
+            assert matcher._async_executor is not None
+
+            release.set()
+            result = await matcher.match_async("Entity 0")
+            assert result["id"] == "0"
