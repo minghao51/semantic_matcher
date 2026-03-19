@@ -9,7 +9,7 @@ This guide covers the main `semanticmatcher.Matcher` workflow. Use it when you w
 ### From PyPI
 
 ```bash
-pip install semantic-matcher
+uv add semantic-matcher
 ```
 
 ### For local development
@@ -17,6 +17,8 @@ pip install semantic-matcher
 ```bash
 uv sync --group dev
 ```
+
+If you are not using `uv`, `pip install semantic-matcher` also works.
 
 ## Basic Zero-Shot Matching
 

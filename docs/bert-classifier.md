@@ -339,10 +339,10 @@ clf = BERTClassifier(labels=labels, model_name="roberta-base")
 ```python
 # Error: "transformers is required"
 # Solution: Install dependencies
-pip install transformers torch
+uv add transformers torch
 
-# Or install with extras
-pip install semantic-matcher[bert]
+# Or, if you are not using uv
+pip install transformers torch
 ```
 
 ## API Reference

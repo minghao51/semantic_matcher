@@ -19,7 +19,33 @@ Example: `"Deutchland"` → `DE`
 ## Installation
 
 ```bash
+uv add semantic-matcher
+```
+
+Optional extras:
+
+```bash
+# Novel class detection and ANN-backed discovery
+uv add "semantic-matcher[novelty]"
+
+# LiteLLM-powered embeddings, reranking, and class proposal features
+uv add "semantic-matcher[llm]"
+
+# Benchmark visualization scripts
+uv add "semantic-matcher[viz]"
+
+# Everything
+uv add "semantic-matcher[all]"
+```
+
+If you are not using `uv`, the equivalent `pip` commands still work:
+
+```bash
 pip install semantic-matcher
+pip install "semantic-matcher[novelty]"
+pip install "semantic-matcher[llm]"
+pip install "semantic-matcher[viz]"
+pip install "semantic-matcher[all]"
 ```
 
 ## Quick Start

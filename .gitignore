@@ -50,6 +50,8 @@ tmp/
 .tmp/
 logs/
 artifacts/
+proposals/
+.claude/
 benchmark-results.json
 benchmarks_bert_results.json
 benchmarks_embedding_results.json
@@ -58,3 +60,7 @@ benchmarks_training_results.json
 # Local config (user-specific)
 config.yaml
 .python-version
+
+# HuggingFace benchmark cache
+data/hf_benchmarks/
+*.parquet

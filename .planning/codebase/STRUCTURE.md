@@ -1,476 +1,228 @@
-# Semantic Matcher Codebase Structure
+# Structure
 
 ## Directory Layout
 
 ```
 semantic_matcher/
-├── .github/                   # GitHub workflows & CI/CD
-│   └── workflows/
-│       └── lint.yml          # Linting workflow
+├── src/
+│   └── semanticmatcher/
+│       ├── __init__.py              # Package entry with unified API
+│       ├── config.py                # Model registry and configuration
+│       ├── cli.py                   # Command-line interface (if exists)
+│       │
+│       ├── core/                    # Core matching logic
+│       │   ├── matcher.py           # Main Matcher class (1,869 lines)
+│       │   ├── classifier.py        # Entity classification
+│       │   ├── normalizer.py        # Text preprocessing
+│       │   └── blocking.py          # Candidate selection strategies
+│       │
+│       ├── backends/                # Backend implementations
+│       │   ├── __init__.py          # Backend factory
+│       │   ├── sentence_transformers.py  # Dynamic embeddings
+│       │   ├── static_embeddings.py      # Model2Vec integration
+│       │   ├── litellm.py              # LLM/embedding API
+│       │   └── reranking.py            # Cross-encoder reranking
+│       │
+│       ├── ingestion/               # Data ingestion modules
+│       │   ├── cli.py               # Ingestion CLI tool
+│       │   ├── industries.py        # Industry data
+│       │   ├── languages.py         # Language codes
+│       │   ├── currencies.py        # Currency data
+│       │   └── timezones.py         # Timezone database
+│       │
+│       ├── novelty/                 # Novelty detection system
+│       │   ├── __init__.py          # Package exports
+│       │   ├── detector_api.py      # NovelClassDetector API
+│       │   ├── detector.py          # Detection strategies
+│       │   ├── llm_proposer.py      # LLM-based class naming
+│       │   └── schemas.py           # Pydantic configuration schemas
+│       │
+│       ├── utils/                   # Utilities
+│       │   ├── __init__.py          # Utility exports
+│       │   ├── validation.py        # Input validation
+│       │   ├── embeddings.py        # Embedding utilities
+│       │   ├── preprocessing.py     # Text preprocessing
+│       │   ├── caching.py           # Caching utilities
+│       │   └── benchmarks.py        # Performance benchmarks (1,000 lines)
+│       │
+│       └── data/                    # Static assets
+│           ├── country_codes.py     # Country code mappings
+│           └── default_config.yml   # Default configuration
 │
-├── .planning/                 # Planning and analysis documents
-│   └── codebase/
-│       ├── ARCHITECTURE.md   # This file
-│       └── STRUCTURE.md      # Project structure documentation
+├── tests/                           # Test suite
+│   ├── __init__.py
+│   ├── test_matcher.py              # Matcher tests
+│   ├── test_classifier.py           # Classifier tests
+│   ├── test_normalizer.py           # Normalizer tests
+│   ├── test_backends/               # Backend tests
+│   ├── test_novelty/                # Novelty detection tests
+│   ├── test_integration.py          # Integration tests
+│   └── conftest.py                  # Test fixtures
 │
-├── checkpoints/               # Model training checkpoints
+├── examples/                        # Usage examples
+│   ├── basic_matching.py
+│   ├── novelty_detection.py
+│   └── async_api.py
 │
-├── data/                      # Data storage
-│   ├── raw/                  # Raw downloaded datasets
-│   │   ├── currencies/
-│   │   ├── industries/
-│   │   ├── languages/
-│   │   ├── occupations/
-│   │   ├── products/
-│   │   ├── timezones/
-│   │   └── universities/
-│   └── processed/            # Processed/ingested data
-│       ├── currencies/
-│       ├── industries/
-│       ├── languages/
-│       ├── occupations/
-│       ├── products/
-│       ├── timezones/
-│       └── universities/
+├── docs/                            # Documentation
+│   ├── architecture.md
+│   ├── api_reference.md
+│   └── CHANGELOG.md
 │
-├── docs/                      # Documentation
-│   ├── architecture/         # Architecture documentation
-│   │   └── hierarchical-matching.md
-│   ├── plans/                # Project plans and designs
-│   │   ├── 2026-03-04-hierarchical-entity-categorization.md
-│   │   └── 2026-03-04-hierarchical-entity-categorization-design.md
-│   ├── architecture.md       # Main architecture docs
-│   ├── examples.md           # Usage examples
-│   ├── index.md              # Documentation index
-│   ├── migration-guide.md    # API migration guide
-│   ├── notebooks.md          # Notebook documentation
-│   ├── quickstart.md         # Quick start guide
-│   ├── troubleshooting.md    # Troubleshooting guide
-│   └── *.md                  # Other documentation files
+├── scripts/                         # Utility scripts
+│   ├── setup_llm.sh
+│   └── benchmark.py
 │
-├── examples/                  # Usage examples and demos
-│   ├── basic_usage.py
-│   ├── embedding_matcher_demo.py
-│   ├── hybrid_matching_demo.py
-│   ├── zero_shot_classification.py
-│   ├── threshold_tuning.py
-│   ├── entity_matcher_demo.py
-│   ├── matcher_comparison.py
-│   ├── model_persistence.py
-│   ├── batch_processing.py
-│   ├── country_matching.py
-│   ├── hierarchical_matching_example.py
-│   └── custom_backend.py
-│
-├── experiments/               # Experimental scripts and notebooks
-│   └── country_classifier/
-│       ├── country_classifier.py
-│       ├── country_classifier_advanced.py
-│       └── country_classifier_quick.py
-│
-├── notebooks/                 # Jupyter notebooks
-│
-├── src/semanticmatcher/      # Main package source
-│   ├── __init__.py           # Public API (lazy exports)
-│   ├── config.py             # Configuration management
-│   ├── exceptions.py         # Custom exception classes
-│   │
-│   ├── backends/             # ML backend abstractions
-│   │   ├── __init__.py       # Backend factory functions
-│   │   ├── base.py           # Abstract base classes
-│   │   ├── litellm.py        # LiteLLM backend
-│   │   ├── reranker_st.py    # SentenceTransformer reranker
-│   │   └── sentencetransformer.py  # HF sentence-transformer backend
-│   │
-│   ├── core/                 # Core matching logic
-│   │   ├── __init__.py       # Core module exports
-│   │   ├── blocking.py       # Blocking strategies (BM25, TF-IDF, Fuzzy)
-│   │   ├── classifier.py     # SetFit classifier wrapper
-│   │   ├── hierarchy.py      # Hierarchical matching (DAG-based)
-│   │   ├── hybrid.py         # Hybrid matcher (3-stage pipeline)
-│   │   ├── matcher.py        # Main matcher classes (Matcher, EntityMatcher, EmbeddingMatcher)
-│   │   ├── monitoring.py     # Performance monitoring
-│   │   ├── normalizer.py     # Text normalization
-│   │   └── reranker.py       # Cross-encoder reranker
-│   │
-│   ├── data/                 # Package data
-│   │   └── __init__.py
-│   │
-│   ├── ingestion/            # Data ingestion scripts
-│   │   ├── __init__.py       # Ingestion module exports
-│   │   ├── base.py           # Base ingestion classes
-│   │   ├── cli.py            # CLI for data ingestion
-│   │   ├── currencies.py     # Currency data ingestion
-│   │   ├── industries.py     # Industry data ingestion
-│   │   ├── languages.py      # Language data ingestion
-│   │   ├── occupations.py    # Occupation data ingestion
-│   │   ├── products.py       # Product data ingestion
-│   │   ├── timezones.py      # Timezone data ingestion
-│   │   └── universities.py   # University data ingestion
-│   │
-│   └── utils/                # Utility functions
-│       ├── __init__.py       # Utils module exports
-│       ├── benchmarks.py     # Performance benchmarking
-│       ├── embeddings.py     # Embedding utilities & caching
-│       ├── preprocessing.py  # Text preprocessing
-│       └── validation.py     # Input validation
-│
-├── tests/                     # Test suite
-│   ├── conftest.py           # Pytest configuration & fixtures
-│   ├── test_config.py        # Config tests
-│   ├── test_packaging.py     # Packaging tests
-│   │
-│   ├── fixtures/             # Test fixtures and data
-│   │
-│   ├── test_backends/        # Backend tests
-│   │   ├── test_backend_imports.py
-│   │   ├── test_huggingface.py
-│   │   ├── test_litellm.py
-│   │   └── test_reranker_contracts.py
-│   │
-│   ├── test_core/            # Core matcher tests
-│   │   ├── test_classifier.py
-│   │   ├── test_hierarchy.py
-│   │   ├── test_matcher.py
-│   │   └── test_normalizer.py
-│   │
-│   ├── test_ingestion/       # Ingestion tests
-│   │   ├── test_cli.py
-│   │   └── test_timezones.py
-│   │
-│   └── test_utils/           # Utility tests
-│       ├── test_embeddings.py
-│       ├── test_preprocessing.py
-│       └── test_validation.py
-│
-├── .claude/                   # Claude-specific configuration
-├── .gitignore                 # Git ignore rules
-├── .python-version            # Python version (3.13)
-├── .ruff_cache/               # Ruff linting cache
-├── .pytest_cache/             # Pytest cache
-├── .venv/                     # Virtual environment
-├── CLAUDE.md                  # Project guidelines for Claude
-├── config.yaml                # Default configuration
-├── CONTRIBUTING.md            # Contribution guidelines
-├── LICENSE                    # MIT License
-├── pyproject.toml             # Project configuration & dependencies
-├── README.md                  # Project README
-└── uv.lock                    # UV lock file for dependencies
+├── pyproject.toml                   # Project configuration
+├── ruff.toml                        # Linting rules
+├── README.md                        # Project documentation
+├── CHANGELOG.md                     # Version history
+└── CLAUDE.md                        # Claude Code instructions
 ```
 
-## Key Locations Summary
+## Key Locations
 
 ### Entry Points
+- **Main API**: `src/semanticmatcher/__init__.py` - Exports `Matcher` class
+- **Core Logic**: `src/semanticmatcher/core/matcher.py` - Main implementation
+- **CLI**: `src/semanticmatcher/ingestion/cli.py` - Ingestion commands
+- **Novelty Detection**: `src/semanticmatcher/novelty/detector_api.py` - NovelClassDetector
 
-| Location | Purpose |
-|----------|---------|
-| `src/semanticmatcher/__init__.py` | Main package entry point (lazy exports) |
-| `src/semanticmatcher/ingestion/cli.py` | CLI entry point (`semanticmatcher-ingest`) |
-| `pyproject.toml` | Package configuration and entry points |
+### Configuration
+- **Model Registry**: `src/semanticmatcher/config.py` - 13+ pre-configured models
+- **Default Config**: `src/semanticmatcher/data/default_config.yml`
+- **Project Config**: `pyproject.toml` - Dependencies and project metadata
+- **Linting**: `ruff.toml` - Code style rules
 
-### Core Business Logic
-
-| Location | Purpose |
-|----------|---------|
-| `src/semanticmatcher/core/matcher.py` | Main matcher classes (3650+ lines) |
-| `src/semanticmatcher/core/classifier.py` | SetFit classifier wrapper |
-| `src/semanticmatcher/core/hybrid.py` | Hybrid matching pipeline |
-| `src/semanticmatcher/core/hierarchy.py` | Hierarchical entity matching |
-| `src/semanticmatcher/core/blocking.py` | Blocking strategies |
-| `src/semanticmatcher/core/reranker.py` | Cross-encoder reranking |
-
-### Backend Abstractions
-
-| Location | Purpose |
-|----------|---------|
-| `src/semanticmatcher/backends/base.py` | Abstract backend interfaces |
-| `src/semanticmatcher/backends/sentencetransformer.py` | HF sentence-transformer backend |
-| `src/semanticmatcher/backends/reranker_st.py` | SentenceTransformer reranker |
-| `src/semanticmatcher/backends/litellm.py` | LiteLLM integration |
-
-### Configuration & Utilities
-
-| Location | Purpose |
-|----------|---------|
-| `src/semanticmatcher/config.py` | Configuration management & model registries |
-| `src/semanticmatcher/utils/validation.py` | Input validation with helpful errors |
-| `src/semanticmatcher/utils/embeddings.py` | Embedding utilities & model caching |
-| `src/semanticmatcher/utils/preprocessing.py` | Text preprocessing utilities |
-| `src/semanticmatcher/exceptions.py` | Custom exception hierarchy |
-
-### Data Ingestion
-
-| Location | Purpose |
-|----------|---------|
-| `src/semanticmatcher/ingestion/cli.py` | CLI for data ingestion |
-| `src/semanticmatcher/ingestion/*.py` | Domain-specific ingestion scripts |
+### Data Storage
+- **Static Data**: `src/semanticmatcher/data/` - Country codes, defaults
+- **Ingestion Data**: JSON files in project root (industries, languages, etc.)
+- **Model Cache**: `~/.cache/huggingface/` - Downloaded models
+- **Embedding Cache**: `.parquet` files for pre-computed embeddings
 
 ### Testing
+- **Test Suite**: `tests/` - Comprehensive test coverage
+- **Fixtures**: `tests/conftest.py` - Shared test data and configurations
+- **Integration Tests**: `tests/test_integration.py` - End-to-end tests
 
-| Location | Purpose |
-|----------|---------|
-| `tests/test_core/` | Core matcher tests |
-| `tests/test_backends/` | Backend contract tests |
-| `tests/test_utils/` | Utility function tests |
-| `tests/test_ingestion/` | Data ingestion tests |
+## Naming Conventions
 
-### Documentation
+### Files and Directories
+- **Snake case** for all files and directories
+- **Descriptive names** - `sentence_transformers.py`, `novel_class_detector.py`
+- **Module grouping** - Related files in subdirectories
+- **Test files** - `test_<module>.py` pattern
 
-| Location | Purpose |
-|----------|---------|
-| `docs/architecture.md` | Architecture overview |
-| `docs/quickstart.md` | Quick start guide |
-| `docs/migration-guide.md` | API migration guide |
-| `docs/examples.md` | Usage examples |
-| `docs/troubleshooting.md` | Troubleshooting guide |
+### Classes
+- **PascalCase** for all classes
+- **Descriptive names** - `TextNormalizer`, `BM25Blocking`, `NovelClassDetector`
+- **Base classes** - Prefixed with `Base` (e.g., `BaseMatcher`, `BaseBackend`)
 
-### Examples & Demos
+### Functions and Methods
+- **snake_case** for all functions and methods
+- **Verb-based** - `compute_similarity`, `normalize_text`, `detect_novelty`
+- **Async variants** - `async_match`, `async_fit`, `async_batch_match`
 
-| Location | Purpose |
-|----------|---------|
-| `examples/basic_usage.py` | Basic usage example |
-| `examples/hybrid_matching_demo.py` | Hybrid matching demo |
-| `examples/hierarchical_matching_example.py` | Hierarchical matching demo |
-| `examples/*.py` | Other usage examples |
+### Variables
+- **snake_case** for all variables
+- **Descriptive names** - `embedding_matrix`, `candidate_entities`, `similarity_scores`
+- **Constants** - `UPPER_SNAKE_CASE` (e.g., `MODEL_SPECS`, `DEFAULT_THRESHOLD`)
 
-### Configuration Files
+### Type Variables
+- **PascalCase** with `_T` suffix for type variables
+- **Generic types** - `Entity_T`, `Embedding_T`, `Model_T`
 
-| Location | Purpose |
-|----------|---------|
-| `pyproject.toml` | Project metadata, dependencies, build config |
-| `config.yaml` | Default configuration values |
-| `uv.lock` | Dependency lock file |
-| `.github/workflows/lint.yml` | CI/CD linting workflow |
+## Import Organization
 
-## File Naming Conventions
+### Import Order
+1. Standard library imports
+2. Third-party imports
+3. Local imports (relative imports within package)
 
-### Python Files
-- **Modules**: `lowercase_with_underscores.py` (e.g., `matcher.py`, `blocking.py`)
-- **Classes**: `CapitalizedWords` (e.g., `Matcher`, `EmbeddingMatcher`)
-- **Functions/Methods**: `lowercase_with_underscores` (e.g., `fit()`, `match()`)
-- **Constants**: `UPPERCASE_WITH_UNDERSCORES` (e.g., `MODEL_REGISTRY`)
-
-### Documentation Files
-- **Format**: `YYYYMMDD-filename.md` (e.g., `20260228-examples-fixes-report.md`)
-- **Exception**: Core docs use simple names (e.g., `architecture.md`, `quickstart.md`)
-
-### Test Files
-- **Format**: `test_<module>.py` (e.g., `test_matcher.py`, `test_validation.py`)
-- **Location**: Mirror source structure in `tests/` directory
-
-## Import Patterns
-
-### Public API (User-Facing)
+### Example
 ```python
-from semanticmatcher import Matcher  # Recommended
-from semanticmatcher import EntityMatcher  # Deprecated but available
-from semanticmatcher import EmbeddingMatcher  # Deprecated but available
-from semanticmatcher import SetFitClassifier
-from semanticmatcher import HierarchicalMatcher
+# Standard library
+import os
+from typing import Optional, List
+
+# Third-party
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+# Local
+from .classifier import EntityClassifier
+from .utils import validate_entities
 ```
 
-### Internal Imports
-```python
-from semanticmatcher.core.matcher import Matcher, EntityMatcher, EmbeddingMatcher
-from semanticmatcher.core.classifier import SetFitClassifier
-from semanticmatcher.utils.validation import validate_entities
-from semanticmatcher.config import resolve_model_alias
-```
-
-### Backend Imports
-```python
-from semanticmatcher.backends import get_embedding_backend, get_reranker_backend
-from semanticmatcher.backends.base import EmbeddingBackend, RerankerBackend
-```
+### Public API
+- **`__all__` exports** defined in `__init__.py` files
+- **Explicit exports** for public interfaces
+- **Internal modules** prefixed with underscore (`_internal.py`)
 
 ## Module Dependencies
 
 ### Core Dependencies
-```
-matcher.py
-  ├── classifier.py (SetFitClassifier)
-  ├── normalizer.py (TextNormalizer)
-  ├── utils/validation.py (validation functions)
-  ├── utils/embeddings.py (ModelCache)
-  └── config.py (model aliases)
-
-hybrid.py
-  ├── matcher.py (EmbeddingMatcher)
-  ├── reranker.py (CrossEncoderReranker)
-  └── blocking.py (BlockingStrategy)
-
-hierarchy.py
-  ├── matcher.py (EmbeddingMatcher)
-  └── normalizer.py (TextNormalizer)
-```
+- `matcher.py` depends on: classifier, normalizer, blocking, backends
+- `classifier.py` depends on: backends, utils
+- `normalizer.py` depends on: utils
+- `blocking.py` depends on: backends, utils
 
 ### Backend Dependencies
-```
-backends/base.py (abstract interfaces)
-  ├── backends/sentencetransformer.py (concrete implementation)
-  ├── backends/reranker_st.py (concrete implementation)
-  └── backends/litellm.py (concrete implementation)
-```
+- `sentence_transformers.py` depends on: utils, caching
+- `static_embeddings.py` depends on: utils, caching
+- `litellm.py` depends on: utils, caching
 
-## Important Patterns
+### Novelty Detection Dependencies
+- `detector_api.py` depends on: detector, llm_proposer, schemas
+- `detector.py` depends on: backends, utils
+- `llm_proposer.py` depends on: litellm backend, schemas
 
-### Lazy Loading Pattern (`__init__.py`)
-- Defers imports until first access
-- Reduces startup time
-- Enables circular dependency resolution
-- Provides deprecation warnings
+### Utils Dependencies
+- `validation.py` - Minimal dependencies (pydantic)
+- `embeddings.py` - Minimal dependencies (numpy)
+- `preprocessing.py` - Minimal dependencies (nltk)
+- `benchmarks.py` - Depends on: core, backends
 
-### Factory Pattern (`backends/__init__.py`)
-```python
-def get_embedding_backend(provider, model, **kwargs) -> EmbeddingBackend:
-    if provider == "huggingface":
-        return HFEmbedding(model)
-```
+## File Size Indicators
 
-### Strategy Pattern (`core/blocking.py`)
-```python
-class BlockingStrategy(ABC):
-    @abstractmethod
-    def block(self, query, entities, top_k):
-        pass
+### Large Files (>500 lines)
+- `core/matcher.py` - 1,869 lines (main implementation)
+- `utils/benchmarks.py` - 1,000 lines (performance testing)
+- `config.py` - 502 lines (model registry)
 
-class BM25Blocking(BlockingStrategy):
-    def block(self, query, entities, top_k):
-        # BM25 implementation
-```
+### Medium Files (100-500 lines)
+- Most backend implementations
+- Core service modules
+- Test files
 
-### Registry Pattern (`config.py`)
-```python
-MODEL_REGISTRY = {
-    "default": "sentence-transformers/all-mpnet-base-v2",
-    "bge-base": "BAAI/bge-base-en-v1.5",
-}
-```
+### Small Files (<100 lines)
+- Utility modules
+- Schema definitions
+- CLI entry points
 
-## Testing Structure
+## Test Structure
 
 ### Test Organization
-- **Unit Tests**: Test individual functions/classes
-- **Integration Tests**: Test component interactions
-- **Contract Tests**: Test backend interface compliance
-- **Marker System**: `@pytest.mark.integration`, `@pytest.mark.slow`, `@pytest.mark.hf`
+- Mirrors source directory structure
+- `test_<module>.py` for each source module
+- `conftest.py` for shared fixtures
+- Integration tests in `test_integration.py`
 
-### Test Fixtures
-- Located in `tests/fixtures/`
-- Shared test data and utilities
-- Configured in `tests/conftest.py`
+### Test Categories
+- **Unit tests** - Individual component testing
+- **Integration tests** - End-to-end pipeline testing
+- **Performance tests** - Benchmark and timing tests
+- **Markers** - `@pytest.mark.integration`, `@pytest.mark.slow`, `@pytest.mark.hf`
 
-## Build & Packaging
+## Documentation Locations
 
-### Build System
-- **Tool**: Hatchling
-- **Source**: `src/semanticmatcher/`
-- **Entry Points**: Defined in `pyproject.toml`
+### Code Documentation
+- **Docstrings** - All public classes and methods
+- **Type hints** - Comprehensive type annotations
+- **Comments** - Complex logic explanation
 
-### Distribution
-- **Wheel**: `semantic_matcher-*.whl`
-- **Source**: `semantic_matcher-*.tar.gz`
-- **Python Versions**: 3.9, 3.10, 3.11, 3.12
-
-## Development Workflow
-
-### Adding New Features
-1. Implement in `src/semanticmatcher/core/` or appropriate module
-2. Add exports to `src/semanticmatcher/__init__.py`
-3. Write tests in `tests/test_*/`
-4. Update documentation in `docs/`
-5. Add examples in `examples/`
-
-### Adding New Backends
-1. Create class inheriting from `EmbeddingBackend` or `RerankerBackend`
-2. Implement required abstract methods
-3. Add factory function in `backends/__init__.py`
-4. Add tests in `tests/test_backends/`
-
-### Adding New Ingestion Sources
-1. Create module in `ingestion/` following existing pattern
-2. Implement `run_*()` function
-3. Add to `INGESTORS` dict in `ingestion/cli.py`
-4. Add tests in `tests/test_ingestion/`
-
-## Performance Considerations
-
-### Caching
-- **Model Cache**: `utils/embeddings.py` - Thread-safe LRU cache
-- **Backend Caching**: Models cached to reduce loading overhead
-
-### Lazy Initialization
-- **Matcher Classes**: Matchers created only when needed
-- **Module Imports**: Defers imports via `__getattr__`
-
-### Batch Processing
-- **EmbeddingMatcher**: Supports `batch_size` parameter
-- **HybridMatcher**: Parallel bulk matching with `n_jobs`
-
-## Configuration Locations
-
-### Runtime Configuration
-- **Default**: `config.yaml` (repo root)
-- **Package**: `src/semanticmatcher/data/default_config.json`
-- **CWD**: `./config.yaml`
-- **Custom**: Via `Config(custom_path=path)`
-
-### Model Registries
-- **Embedding Models**: `config.py` - `MODEL_REGISTRY`
-- **Reranker Models**: `config.py` - `RERANKER_REGISTRY`
-- **Matcher Modes**: `config.py` - `MATCHER_MODE_REGISTRY`
-
-## Documentation Structure
-
-### User Documentation
-- **Quick Start**: `docs/quickstart.md`
-- **Examples**: `docs/examples.md`, `examples/*.py`
-- **Migration**: `docs/migration-guide.md`
-- **Troubleshooting**: `docs/troubleshooting.md`
-
-### Developer Documentation
-- **Architecture**: `docs/architecture.md`, `docs/architecture/*.md`
-- **Planning**: `docs/plans/*.md`
-- **Analysis**: `.planning/codebase/*.md`
-
-### API Documentation
-- **Public API**: `src/semanticmatcher/__init__.py`
-- **Internal APIs**: Docstrings in source files
-- **Type Hints**: Throughout codebase
-
-## Security & Best Practices
-
-### Input Validation
-- **Location**: `utils/validation.py`
-- **Pattern**: Validate early, fail fast with helpful errors
-- **Coverage**: Entities, thresholds, model names, training data
-
-### Error Handling
-- **Location**: `exceptions.py`
-- **Pattern**: Rich exceptions with context and suggestions
-- **Hierarchy**: Base exception with specialized subclasses
-
-### Dependency Management
-- **Tool**: `uv`
-- **Lock File**: `uv.lock`
-- **Python**: `.python-version` (3.13)
-
-## Key Files to Understand
-
-### For New Contributors
-1. `src/semanticmatcher/__init__.py` - Public API
-2. `src/semanticmatcher/core/matcher.py` - Main matcher logic
-3. `docs/quickstart.md` - How to use
-4. `examples/basic_usage.py` - Working examples
-
-### For Architecture Understanding
-1. `docs/architecture.md` - Architecture overview
-2. `src/semanticmatcher/core/hybrid.py` - Pipeline architecture
-3. `src/semanticmatcher/backends/base.py` - Backend abstractions
-4. `src/semanticmatcher/config.py` - Configuration system
-
-### For Extending Functionality
-1. `src/semanticmatcher/backends/base.py` - Backend interfaces
-2. `src/semanticmatcher/core/blocking.py` - Strategy pattern example
-3. `src/semanticmatcher/exceptions.py` - Exception patterns
-4. `tests/test_backends/test_backend_imports.py` - Backend contract tests
+### External Documentation
+- **README.md** - Project overview and quick start
+- **docs/** - Detailed documentation
+- **CHANGELOG.md** - Version history and changes
+- **CLAUDE.md** - Claude Code specific instructions
