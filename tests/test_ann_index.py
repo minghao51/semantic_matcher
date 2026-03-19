@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from semanticmatcher.novelty.ann_index import ANNIndex, ANNBackend
+from semanticmatcher.novelty.storage.index import ANNIndex, ANNBackend
 
 # Check if hnswlib is available
 try:
@@ -109,20 +109,24 @@ class TestANNIndex:
         """Test getting distance matrix."""
         queries = sample_embeddings[:10]
         distances = hnswlib_index.get_distance_matrix(queries)
+        expected = hnswlib_index._normalize(queries) @ hnswlib_index._normalize(
+            sample_embeddings
+        ).T
 
         assert distances.shape == (10, 100)
-        # Just check that we get a valid distance matrix
-        # Values can vary due to cosine similarity computation
-        assert not np.all(np.isnan(distances))  # Should not have NaN values
-        assert distances.size > 0  # Should have values
+        np.testing.assert_allclose(distances, expected, atol=1e-5)
 
     def test_get_distance_matrix_with_targets(self, hnswlib_index, sample_embeddings):
         """Test getting distance matrix with specific targets."""
         queries = sample_embeddings[:5]
         targets = sample_embeddings[5:15]
         distances = hnswlib_index.get_distance_matrix(queries, targets)
+        expected = hnswlib_index._normalize(queries) @ hnswlib_index._normalize(
+            targets
+        ).T
 
         assert distances.shape == (5, 10)
+        np.testing.assert_allclose(distances, expected, atol=1e-5)
 
     def test_empty_query(self, hnswlib_index):
         """Test query with empty array."""
@@ -136,6 +140,8 @@ class TestANNIndex:
     def test_save_load_hnswlib(self, hnswlib_index, tmp_path):
         """Test saving and loading HNSWlib index."""
         save_path = tmp_path / "test_index"
+        queries = np.eye(3, 128, dtype=np.float32)
+        before = hnswlib_index.get_distance_matrix(queries)
 
         # Save
         hnswlib_index.save(save_path)
@@ -147,12 +153,15 @@ class TestANNIndex:
         # Check that elements match
         assert new_index.n_elements == hnswlib_index.n_elements
         assert new_index.labels == hnswlib_index.labels
+        np.testing.assert_allclose(new_index.get_distance_matrix(queries), before)
 
     def test_faiss_save_load(self, sample_embeddings, tmp_path):
         """Test saving and loading FAISS index."""
         index = ANNIndex(dim=128, backend=ANNBackend.FAISS)
         labels = [f"doc_{i}" for i in range(100)]
         index.add_vectors(sample_embeddings, labels)
+        queries = np.eye(3, 128, dtype=np.float32)
+        before = index.get_distance_matrix(queries)
 
         save_path = tmp_path / "test_index"
         index.save(save_path)
@@ -163,6 +172,7 @@ class TestANNIndex:
 
         assert new_index.n_elements == index.n_elements
         assert new_index.labels == labels
+        np.testing.assert_allclose(new_index.get_distance_matrix(queries), before)
 
     def test_load_nonexistent_file(self):
         """Test that loading non-existent file raises FileNotFoundError."""

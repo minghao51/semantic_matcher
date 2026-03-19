@@ -9,12 +9,34 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
+import numpy as np
 import yaml
 
-from .schemas import NovelClassDiscoveryReport
-from ..utils.logging_config import get_logger
+from semanticmatcher.novelty.schemas import (
+    ClassProposal,
+    NovelClassAnalysis,
+    NovelClassDiscoveryReport,
+    NovelSampleMetadata,
+    NovelSampleReport,
+)
+from semanticmatcher.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+
+def _to_builtin(value: Any) -> Any:
+    """Recursively convert NumPy values to plain Python types for serialization."""
+    if isinstance(value, dict):
+        return {str(k): _to_builtin(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_to_builtin(item) for item in value]
+    if isinstance(value, tuple):
+        return [_to_builtin(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
 
 
 def save_proposals(
@@ -165,69 +187,19 @@ def list_proposals(
 
 def _report_to_dict(report: NovelClassDiscoveryReport) -> Dict[str, Any]:
     """Convert NovelClassDiscoveryReport to dict for serialization."""
-    # Convert detection_config to dict, handling enums properly
-    detection_config_dict = (
-        report.detection_config.model_dump()
-        if hasattr(report.detection_config, "model_dump")
-        else dict(report.detection_config)
-    )
-
-    # Convert DetectionStrategy enums to strings in detection_config
-    if "strategies" in detection_config_dict:
-        detection_config_dict["strategies"] = [
-            s.value if hasattr(s, "value") else str(s)
-            for s in detection_config_dict["strategies"]
-        ]
-
-    # Convert novel_sample_report config to dict, handling enums properly
-    novel_sample_config = (
-        report.novel_sample_report.config.copy()
-        if hasattr(report.novel_sample_report.config, "copy")
-        else dict(report.novel_sample_report.config)
-    )
-    if "strategies" in novel_sample_config:
-        novel_sample_config["strategies"] = [
-            s.value if hasattr(s, "value") else str(s)
-            for s in novel_sample_config["strategies"]
-        ]
-
     data = {
         "discovery_id": report.discovery_id,
         "timestamp": report.timestamp.isoformat(),
-        "matcher_config": report.matcher_config,
-        "detection_config": detection_config_dict,
+        "matcher_config": _to_builtin(report.matcher_config),
+        "detection_config": _to_builtin(report.detection_config),
         "novel_sample_report": {
             "novel_samples": [
-                {
-                    "text": s.text,
-                    "index": s.index,
-                    "confidence": s.confidence,
-                    "predicted_class": s.predicted_class,
-                    "embedding_distance": s.embedding_distance,
-                    "margin_score": s.margin_score,
-                    "entropy_score": s.entropy_score,
-                    "uncertainty_score": s.uncertainty_score,
-                    "knn_novelty_score": s.knn_novelty_score,
-                    "knn_mean_distance": s.knn_mean_distance,
-                    "knn_nearest_distance": s.knn_nearest_distance,
-                    "predicted_class_neighbor_ratio": s.predicted_class_neighbor_ratio,
-                    "predicted_class_support": s.predicted_class_support,
-                    "neighbor_labels": s.neighbor_labels,
-                    "neighbor_distances": s.neighbor_distances,
-                    "cluster_id": s.cluster_id,
-                    "cluster_validation_passed": s.cluster_validation_passed,
-                    "cluster_support_score": s.cluster_support_score,
-                    "novelty_score": s.novelty_score,
-                    "signals": s.signals,
-                }
-                for s in report.novel_sample_report.novel_samples
+                _to_builtin(sample.model_dump())
+                for sample in report.novel_sample_report.novel_samples
             ],
-            # Convert DetectionStrategy enums to strings
-            "detection_strategies": [
-                s.value for s in report.novel_sample_report.detection_strategies
-            ],
-            "config": novel_sample_config,
-            "signal_counts": report.novel_sample_report.signal_counts,
+            "detection_strategies": report.novel_sample_report.detection_strategies,
+            "config": _to_builtin(report.novel_sample_report.config),
+            "signal_counts": _to_builtin(report.novel_sample_report.signal_counts),
         },
     }
 
@@ -253,21 +225,13 @@ def _report_to_dict(report: NovelClassDiscoveryReport) -> Dict[str, Any]:
         }
 
     # Add metadata
-    data["metadata"] = report.metadata
+    data["metadata"] = _to_builtin(report.metadata)
 
     return data
 
 
 def _dict_to_report(data: Dict[str, Any]) -> NovelClassDiscoveryReport:
     """Convert dict to NovelClassDiscoveryReport."""
-    from .schemas import (
-        ClassProposal,
-        NovelClassAnalysis,
-        NovelSampleMetadata,
-        NovelSampleReport,
-        DetectionStrategy,
-    )
-
     # Parse timestamp
     timestamp = datetime.fromisoformat(data["timestamp"])
 
@@ -276,20 +240,9 @@ def _dict_to_report(data: Dict[str, Any]) -> NovelClassDiscoveryReport:
         NovelSampleMetadata(**s) for s in data["novel_sample_report"]["novel_samples"]
     ]
 
-    # Handle detection_strategies - convert from strings or enum values
-    detection_strategies_raw = data["novel_sample_report"]["detection_strategies"]
-    detection_strategies = []
-    for s in detection_strategies_raw:
-        if isinstance(s, str):
-            detection_strategies.append(DetectionStrategy(s))
-        elif isinstance(s, dict) and "value" in s:
-            detection_strategies.append(DetectionStrategy(s["value"]))
-        else:
-            detection_strategies.append(DetectionStrategy(s))
-
     novel_sample_report = NovelSampleReport(
         novel_samples=novel_samples,
-        detection_strategies=detection_strategies,
+        detection_strategies=data["novel_sample_report"]["detection_strategies"],
         config=data["novel_sample_report"]["config"],
         signal_counts=data["novel_sample_report"]["signal_counts"],
     )
@@ -348,7 +301,7 @@ def export_summary(
         "## Overview",
         "",
         f"- **Novel Samples Detected:** {len(report.novel_sample_report.novel_samples)}",
-        f"- **Detection Strategies:** {', '.join([s.value for s in report.novel_sample_report.detection_strategies])}",
+        f"- **Detection Strategies:** {', '.join(report.novel_sample_report.detection_strategies)}",
         "",
     ]
 

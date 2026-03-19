@@ -350,7 +350,13 @@ def test_run_novelty_on_processed_uses_detector_and_writes_artifact(
     assert row["num_threshold_candidates"] == 1
     assert row["novel_precision"] == 1.0
     assert row["novel_recall"] == 1.0
-    artifact_path = tmp_path / "bench" / "artifacts" / "processed_ood_novelty" / "custom__test_thr_0_3.json"
+    artifact_path = (
+        tmp_path
+        / "bench"
+        / "artifacts"
+        / "processed_ood_novelty"
+        / "custom__test_thr_0_3.json"
+    )
     assert artifact_path.exists()
 
 

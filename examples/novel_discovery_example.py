@@ -7,7 +7,8 @@ and propose new classes in text data.
 
 import asyncio
 from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty.schemas import DetectionConfig, DetectionStrategy
+from semanticmatcher.novelty import DetectionConfig
+from semanticmatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
 
 
 async def main():
@@ -112,13 +113,10 @@ async def main():
     novel_matcher = NovelEntityMatcher(
         matcher=matcher,
         detection_config=DetectionConfig(
-            strategies=[
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.CENTROID,
-            ],
-            confidence_threshold=0.45,
-            distance_threshold=0.45,
-            combine_method="and",
+            strategies=["confidence", "knn_distance"],
+            confidence=ConfidenceConfig(threshold=0.45),
+            knn_distance=KNNConfig(distance_threshold=0.45),
+            combine_method="weighted",
         ),
         llm_provider=None,  # Set to "openrouter", "anthropic", or "openai" to use LLM
         auto_save=True,
@@ -158,7 +156,7 @@ async def main():
 
     print("\n" + "-" * 60)
     print(
-        f"\nDetection Strategies Used: {[s.value for s in report.novel_sample_report.detection_strategies]}"
+        f"\nDetection Strategies Used: {report.novel_sample_report.detection_strategies}"
     )
     print("Signal Counts:")
     for strategy, count in report.novel_sample_report.signal_counts.items():
@@ -206,9 +204,7 @@ async def main():
         print(f"\nLoading: {report.output_file}")
         loaded_report = load_proposals(report.output_file)
         print(f"Loaded discovery ID: {loaded_report.discovery_id}")
-        print(
-            f"Novel samples: {len(loaded_report.novel_sample_report.novel_samples)}"
-        )
+        print(f"Novel samples: {len(loaded_report.novel_sample_report.novel_samples)}")
 
     print("\n" + "=" * 60)
     print("Example complete!")

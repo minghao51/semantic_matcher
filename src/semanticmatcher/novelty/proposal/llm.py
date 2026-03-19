@@ -10,12 +10,12 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
 
-from .schemas import (
+from ..schemas import (
     ClassProposal,
     NovelClassAnalysis,
     NovelSampleMetadata,
 )
-from ..utils.logging_config import get_logger
+from semanticmatcher.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

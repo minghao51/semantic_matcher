@@ -18,7 +18,14 @@ def add_run_parser(subparsers) -> argparse.ArgumentParser:
     parser = subparsers.add_parser("run", help="Run benchmarks")
     parser.add_argument(
         "--task",
-        choices=["all", "entity_resolution", "er", "classification", "novelty", "processed"],
+        choices=[
+            "all",
+            "entity_resolution",
+            "er",
+            "classification",
+            "novelty",
+            "processed",
+        ],
         default="all",
         help="Which benchmark task to run (er=entity_resolution)",
     )
@@ -143,7 +150,8 @@ def create_parser() -> argparse.ArgumentParser:
         description="HuggingFace benchmark runner for semantic_matcher",
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Enable verbose logging",
     )
@@ -184,7 +192,9 @@ def load_datasets(
         if "error" in data:
             print(f"Failed to load {name}: {data['error']}")
         else:
-            print(f"Loaded {name}: {data.get('metadata', {}).get('num_rows', 'unknown')} rows")
+            print(
+                f"Loaded {name}: {data.get('metadata', {}).get('num_rows', 'unknown')} rows"
+            )
 
 
 def run_benchmarks(
@@ -265,7 +275,9 @@ def run_benchmarks(
         df = runner.run_novelty_on_processed(
             datasets=datasets,
             model=models[0] if models else "potion-8m",
-            confidence_thresholds=confidence_thresholds or thresholds or [0.2, 0.3, 0.4, 0.5],
+            confidence_thresholds=confidence_thresholds
+            or thresholds
+            or [0.2, 0.3, 0.4, 0.5],
         )
         results_to_save = {
             "metadata": {"task": task},
@@ -274,7 +286,9 @@ def run_benchmarks(
         print(df.to_string(index=False))
 
     if output:
-        runner.save_results(results_to_save or {"metadata": {"task": task}}, str(output))
+        runner.save_results(
+            results_to_save or {"metadata": {"task": task}}, str(output)
+        )
         print(f"\nResults saved to {output}")
 
 
@@ -302,7 +316,7 @@ def main(argv: list[str] | None = None) -> int:
                 class_counts=args.class_counts,
                 ood_ratio=args.ood_ratio,
                 output=args.output,
-                confidence_thresholds=getattr(args, 'confidence_thresholds', None),
+                confidence_thresholds=getattr(args, "confidence_thresholds", None),
             )
 
         elif args.command == "load":

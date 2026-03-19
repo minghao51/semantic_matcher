@@ -4,11 +4,8 @@ import json
 import pytest
 from unittest.mock import Mock, patch
 
-from semanticmatcher.novelty.llm_proposer import LLMClassProposer
-from semanticmatcher.novelty.schemas import (
-    NovelSampleMetadata,
-    DetectionStrategy,
-)
+from semanticmatcher.novelty.proposal.llm import LLMClassProposer
+from semanticmatcher.novelty.schemas import NovelSampleMetadata
 
 
 class TestLLMClassProposer:
@@ -23,27 +20,24 @@ class TestLLMClassProposer:
                 index=0,
                 confidence=0.45,
                 predicted_class="physics",
-                embedding_distance=0.5,
                 cluster_id=0,
-                signals={DetectionStrategy.CONFIDENCE: True},
+                signals={"confidence": True},
             ),
             NovelSampleMetadata(
                 text="quantum computing applications",
                 index=1,
                 confidence=0.52,
                 predicted_class="cs",
-                embedding_distance=0.6,
                 cluster_id=0,
-                signals={DetectionStrategy.CONFIDENCE: True},
+                signals={"confidence": True},
             ),
             NovelSampleMetadata(
                 text="CRISPR gene editing efficiency",
                 index=2,
                 confidence=0.48,
                 predicted_class="biology",
-                embedding_distance=0.55,
                 cluster_id=1,
-                signals={DetectionStrategy.CONFIDENCE: True},
+                signals={"confidence": True},
             ),
         ]
 

@@ -366,10 +366,7 @@ def build_processed_ood_sections(
         if len(entities) < (min_known_classes + 1):
             continue
 
-        entity_splits = [
-            (entity, build_split_pairs(entity))
-            for entity in entities
-        ]
+        entity_splits = [(entity, build_split_pairs(entity)) for entity in entities]
         entity_splits = [
             (entity, split_pairs)
             for entity, split_pairs in entity_splits
@@ -400,7 +397,9 @@ def build_processed_ood_sections(
             for text in _training_texts_from_split_pairs(split_pairs)[:3]:
                 training_data.append({"text": text, "label": entity["id"]})
 
-            for pair in _first_available_pairs(split_pairs, ("val", "train", "base"))[:1]:
+            for pair in _first_available_pairs(split_pairs, ("val", "train", "base"))[
+                :1
+            ]:
                 known_val_pairs.append(
                     {
                         "query": pair["query"],
@@ -410,7 +409,9 @@ def build_processed_ood_sections(
                         "split": "val_known",
                     }
                 )
-            for pair in _first_available_pairs(split_pairs, ("test", "val", "train", "base"))[:1]:
+            for pair in _first_available_pairs(
+                split_pairs, ("test", "val", "train", "base")
+            )[:1]:
                 known_test_pairs.append(
                     {
                         "query": pair["query"],
@@ -422,7 +423,9 @@ def build_processed_ood_sections(
                 )
 
         for entity, split_pairs in heldout_items:
-            for pair in _first_available_pairs(split_pairs, ("val", "train", "base"))[:1]:
+            for pair in _first_available_pairs(split_pairs, ("val", "train", "base"))[
+                :1
+            ]:
                 novel_val_pairs.append(
                     {
                         "query": pair["query"],
@@ -432,7 +435,9 @@ def build_processed_ood_sections(
                         "split": "val_novel",
                     }
                 )
-            for pair in _first_available_pairs(split_pairs, ("test", "val", "train", "base"))[:1]:
+            for pair in _first_available_pairs(
+                split_pairs, ("test", "val", "train", "base")
+            )[:1]:
                 novel_test_pairs.append(
                     {
                         "query": pair["query"],

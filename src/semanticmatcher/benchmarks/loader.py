@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from datasets import Dataset, load_dataset
+
     HF_AVAILABLE = True
 except ImportError:
     HF_AVAILABLE = False
@@ -44,6 +45,7 @@ class DatasetLoader:
             return None
         try:
             import huggingface_hub
+
             info = huggingface_hub.get_dataset_config_info(config.hf_path)
             return info.version if hasattr(info, "version") else str(hash(info.sha))
         except Exception:
@@ -51,7 +53,9 @@ class DatasetLoader:
 
     def _compute_version_hash(self, config: DatasetConfig) -> str:
         version = self._get_dataset_version(config) or "unknown"
-        return hashlib.sha256(f"{config.hf_path}:{config.split}:{version}".encode()).hexdigest()[:12]
+        return hashlib.sha256(
+            f"{config.hf_path}:{config.split}:{version}".encode()
+        ).hexdigest()[:12]
 
     def _load_metadata(self, config: DatasetConfig) -> dict[str, Any] | None:
         if not config.metadata_path.exists():
@@ -73,13 +77,17 @@ class DatasetLoader:
         current_hash = self._compute_version_hash(config)
         return metadata.get("version_hash") == current_hash
 
-    def _convert_to_parquet(self, dataset: Dataset, config: DatasetConfig) -> dict[str, Path]:
+    def _convert_to_parquet(
+        self, dataset: Dataset, config: DatasetConfig
+    ) -> dict[str, Path]:
         if config.has_pairs:
             return self._convert_pairs_to_parquet(dataset, config)
         else:
             return self._convert_classification_to_parquet(dataset, config)
 
-    def _convert_pairs_to_parquet(self, dataset: Dataset, config: DatasetConfig) -> dict[str, Path]:
+    def _convert_pairs_to_parquet(
+        self, dataset: Dataset, config: DatasetConfig
+    ) -> dict[str, Path]:
         if isinstance(dataset, dict):
             splits = {}
             for split_name, split_ds in dataset.items():
@@ -104,7 +112,9 @@ class DatasetLoader:
             df.to_parquet(output_path, index=False)
             return {config.split: output_path}
 
-    def _convert_classification_to_parquet(self, dataset: Dataset, config: DatasetConfig) -> dict[str, Path]:
+    def _convert_classification_to_parquet(
+        self, dataset: Dataset, config: DatasetConfig
+    ) -> dict[str, Path]:
         if isinstance(dataset, dict):
             splits = {}
             for split_name, split_ds in dataset.items():
@@ -135,10 +145,14 @@ class DatasetLoader:
             df.to_parquet(output_path, index=False)
             return {config.split: output_path}
 
-    async def aload_dataset(self, name: str, force_redownload: bool = False) -> dict[str, Any]:
+    async def aload_dataset(
+        self, name: str, force_redownload: bool = False
+    ) -> dict[str, Any]:
         config = get_dataset_config(name)
         if config is None:
-            raise ValueError(f"Unknown dataset: {name}. Available: {list(DATASET_REGISTRY.keys())}")
+            raise ValueError(
+                f"Unknown dataset: {name}. Available: {list(DATASET_REGISTRY.keys())}"
+            )
 
         if not force_redownload and self._is_cache_valid(config):
             logger.info(f"Loading {name} from cache")
@@ -149,7 +163,9 @@ class DatasetLoader:
             parquet_paths = await self._download_er_dataset(config)
         else:
             if not HF_AVAILABLE:
-                raise ImportError("datasets library required. Install with: pip install datasets")
+                raise ImportError(
+                    "datasets library required. Install with: pip install datasets"
+                )
             logger.info(f"Downloading {name} from HuggingFace: {config.hf_path}")
 
             def _load_sync():
@@ -197,15 +213,23 @@ class DatasetLoader:
         merged = test_pairs.merge(
             tableA.rename(columns=lambda c: f"left_{c}" if c != "id" else "ltable_id"),
             on="ltable_id",
-            how="left"
+            how="left",
         ).merge(
             tableB.rename(columns=lambda c: f"right_{c}" if c != "id" else "rtable_id"),
             on="rtable_id",
-            how="left"
+            how="left",
         )
 
-        name_col = [c for c in tableA.columns if c != "id"][0] if len(tableA.columns) > 1 else "name"
-        right_name_col = [c for c in tableB.columns if c != "id"][0] if len(tableB.columns) > 1 else "name"
+        name_col = (
+            [c for c in tableA.columns if c != "id"][0]
+            if len(tableA.columns) > 1
+            else "name"
+        )
+        right_name_col = (
+            [c for c in tableB.columns if c != "id"][0]
+            if len(tableB.columns) > 1
+            else "name"
+        )
 
         merged["left"] = merged[f"left_{name_col}"].fillna("")
         merged["right"] = merged[f"right_{right_name_col}"].fillna("")
@@ -222,7 +246,9 @@ class DatasetLoader:
     def _load_from_cache(self, config: DatasetConfig) -> dict[str, Any]:
         metadata = self._load_metadata(config)
         if metadata is None:
-            raise FileNotFoundError(f"No cache found for {config.name}. Run aload_dataset first.")
+            raise FileNotFoundError(
+                f"No cache found for {config.name}. Run aload_dataset first."
+            )
 
         result = {
             "name": config.name,
@@ -285,10 +311,12 @@ class DatasetLoader:
             config = get_dataset_config(name)
             if config and config.cache_path.exists():
                 import shutil
+
                 shutil.rmtree(config.cache_path)
                 logger.info(f"Cleared cache for {name}")
         else:
             if self.cache_dir.exists():
                 import shutil
+
                 shutil.rmtree(self.cache_dir)
                 logger.info("Cleared all caches")

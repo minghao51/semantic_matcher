@@ -114,11 +114,13 @@ class NoveltyEvaluator(BaseEvaluator[tuple[pd.DataFrame, pd.DataFrame]]):
         detection_rates = self._compute_detection_rates(true_labels, novelty_scores)
 
         all_data = pd.concat([known_data, ood_data])
-        per_sample_results = pd.DataFrame({
-            "text": all_data[text_col],
-            "true_label": all_data["is_ood"],
-            "novelty_score": novelty_scores,
-        })
+        per_sample_results = pd.DataFrame(
+            {
+                "text": all_data[text_col],
+                "true_label": all_data["is_ood"],
+                "novelty_score": novelty_scores,
+            }
+        )
 
         return EvaluationResult(
             metrics={

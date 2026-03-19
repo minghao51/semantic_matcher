@@ -16,12 +16,14 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
-from .detector import NoveltyDetector
-from .llm_proposer import LLMClassProposer
-from .schemas import DetectionConfig, DetectionStrategy, NovelClassDiscoveryReport
-from .storage import export_summary, save_proposals
+from .core.detector import NoveltyDetector
+from .config.base import DetectionConfig
+from .config.strategies import ClusteringConfig, ConfidenceConfig, KNNConfig
+from .proposal.llm import LLMClassProposer
+from .schemas import NovelClassDiscoveryReport
+from .storage.persistence import export_summary, save_proposals
 from ..core.matcher import Matcher
-from ..utils.logging_config import get_logger
+from semanticmatcher.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -42,7 +44,6 @@ class NovelEntityMatchResult:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-# Backwards-compatible alias used by benchmark imports.
 NoveltyMatchResult = NovelEntityMatchResult
 
 
@@ -95,9 +96,7 @@ class NovelEntityMatcher:
 
         self.matcher = matcher
         self.entities = (
-            entities
-            if entities is not None
-            else list(getattr(matcher, "entities", []))
+            entities if entities is not None else list(getattr(matcher, "entities", []))
         )
         self.acceptance_threshold = (
             acceptance_threshold
@@ -141,32 +140,25 @@ class NovelEntityMatcher:
         if isinstance(detection_config, dict):
             return DetectionConfig(**detection_config)
 
-        strategies: list[DetectionStrategy]
+        strategies: list[str]
         strategy = novelty_strategy.lower()
         if strategy == "confidence":
-            strategies = [DetectionStrategy.CONFIDENCE]
+            strategies = ["confidence"]
         elif strategy in {"knn", "knn_distance", "distance"}:
-            strategies = [DetectionStrategy.CONFIDENCE, DetectionStrategy.KNN_DISTANCE]
+            strategies = ["confidence", "knn_distance"]
         elif strategy in {"cluster", "clustering"}:
-            strategies = [
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.KNN_DISTANCE,
-                DetectionStrategy.CLUSTERING,
-            ]
+            strategies = ["confidence", "knn_distance", "clustering"]
         else:
-            strategies = [
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.KNN_DISTANCE,
-                DetectionStrategy.CLUSTERING,
-            ]
+            strategies = ["confidence", "knn_distance", "clustering"]
 
         return DetectionConfig(
             strategies=strategies,
-            confidence_threshold=confidence_threshold,
-            uncertainty_threshold=confidence_threshold,
-            knn_k=knn_k,
-            knn_distance_threshold=knn_distance_threshold,
-            min_cluster_size=min_cluster_size,
+            confidence=ConfidenceConfig(threshold=confidence_threshold),
+            knn_distance=KNNConfig(
+                k=knn_k,
+                distance_threshold=knn_distance_threshold,
+            ),
+            clustering=ClusteringConfig(min_cluster_size=min_cluster_size),
         )
 
     def fit(
@@ -247,7 +239,9 @@ class NovelEntityMatcher:
             return [None] * num_queries
         if num_queries == 1:
             if isinstance(raw_match_results, list):
-                if raw_match_results and all(isinstance(item, dict) for item in raw_match_results):
+                if raw_match_results and all(
+                    isinstance(item, dict) for item in raw_match_results
+                ):
                     return [raw_match_results]
                 if len(raw_match_results) == 1:
                     return [raw_match_results[0]]
@@ -262,14 +256,14 @@ class NovelEntityMatcher:
             result = await match_async(
                 queries,
                 return_metadata=True,
-                top_k=self.detection_config.uncertainty_top_k,
+                top_k=self.detection_config.candidate_top_k,
             )
         else:
             result = await asyncio.to_thread(
                 self.matcher.match,
                 queries,
                 return_metadata=True,
-                top_k=self.detection_config.uncertainty_top_k,
+                top_k=self.detection_config.candidate_top_k,
             )
 
         reference = self.get_reference_corpus()
@@ -290,7 +284,7 @@ class NovelEntityMatcher:
         result = self.matcher.match(
             queries,
             return_metadata=True,
-            top_k=self.detection_config.uncertainty_top_k,
+            top_k=self.detection_config.candidate_top_k,
         )
         reference = self.get_reference_corpus()
         raw_match_results = (result.metadata or {}).get("raw_match_results")
@@ -314,9 +308,7 @@ class NovelEntityMatcher:
         return_alternatives: bool = False,
     ) -> NovelEntityMatchResult:
         predicted_id = (
-            metadata["predicted_classes"][0]
-            if metadata["predicted_classes"]
-            else None
+            metadata["predicted_classes"][0] if metadata["predicted_classes"] else None
         )
         score = (
             float(metadata["confidences"][0])
@@ -333,7 +325,6 @@ class NovelEntityMatcher:
                 confidences=np.asarray(metadata["confidences"], dtype=float),
                 embeddings=np.asarray(metadata["embeddings"]),
                 predicted_classes=list(metadata["predicted_classes"]),
-                known_classes=self._derive_existing_classes(existing_classes),
                 candidate_results=metadata["candidate_results"],
                 reference_embeddings=metadata["reference_embeddings"],
                 reference_labels=metadata["reference_labels"],
@@ -370,7 +361,7 @@ class NovelEntityMatcher:
             id=predicted_id if accepted_known else None,
             score=score,
             is_match=accepted_known,
-            is_novel=is_novel or not accepted_known,
+            is_novel=is_novel,
             novel_score=novel_score,
             match_method=match_method,
             alternatives=alternatives if return_alternatives else [],
@@ -422,7 +413,9 @@ class NovelEntityMatcher:
                 text,
                 {
                     "predicted_classes": [metadata["predicted_classes"][idx]],
-                    "confidences": np.asarray([metadata["confidences"][idx]], dtype=float),
+                    "confidences": np.asarray(
+                        [metadata["confidences"][idx]], dtype=float
+                    ),
                     "embeddings": np.asarray([metadata["embeddings"][idx]]),
                     "candidate_results": [metadata["candidate_results"][idx]],
                     "reference_embeddings": metadata["reference_embeddings"],
@@ -461,7 +454,6 @@ class NovelEntityMatcher:
             embeddings=results["embeddings"],
             predicted_classes=results["predicted_classes"],
             candidate_results=results.get("candidate_results"),
-            known_classes=known_classes,
             reference_embeddings=results["reference_embeddings"],
             reference_labels=results["reference_labels"],
         )

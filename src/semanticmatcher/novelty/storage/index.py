@@ -10,7 +10,7 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
-from ..utils.logging_config import get_logger
+from semanticmatcher.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -52,6 +52,7 @@ class ANNIndex:
         self.max_elements = max_elements
         self._index = None
         self._labels: List[str] = []
+        self._vectors = np.empty((0, dim), dtype=np.float32)
 
         if backend == ANNBackend.HNSWLIB:
             self._init_hnswlib(ef_construction, M)
@@ -112,7 +113,7 @@ class ANNIndex:
             )
 
         # Normalize vectors for cosine similarity
-        vectors = self._normalize(vectors)
+        vectors = self._normalize(vectors).astype(np.float32, copy=False)
 
         if self.backend == ANNBackend.HNSWLIB:
             current_count = self._index.get_current_count()
@@ -124,10 +125,13 @@ class ANNIndex:
         else:  # FAISS
             self._index.add(vectors)
 
+        self._vectors = np.vstack([self._vectors, vectors])
+
         if labels:
             self._labels.extend(labels)
         else:
-            self._labels.extend([str(i) for i in range(len(vectors))])
+            start = len(self._labels)
+            self._labels.extend([str(i) for i in range(start, start + len(vectors))])
 
     def knn_query(self, query: np.ndarray, k: int = 5) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -175,27 +179,15 @@ class ANNIndex:
             queries = queries.reshape(1, -1)
 
         # Normalize queries
-        queries = self._normalize(queries)
+        queries = self._normalize(queries).astype(np.float32, copy=False)
 
         if targets is None:
-            # Get all indexed vectors
-            if self.backend == ANNBackend.HNSWLIB:
-                # HNSWlib doesn't provide direct access to vectors
-                # Use knn_query with k=n_elements
-                n_elements = self._index.get_current_count()
-                if n_elements == 0:
-                    return np.zeros((len(queries), 0))
-                return self.knn_query(queries, k=n_elements)[0]
-            else:  # FAISS
-                # FAISS also doesn't provide easy access to stored vectors
-                # Use search with all vectors
-                n_elements = self._index.ntotal
-                if n_elements == 0:
-                    return np.zeros((len(queries), 0))
-                return self.knn_query(queries, k=n_elements)[0]
+            if self._vectors.size == 0:
+                return np.zeros((len(queries), 0), dtype=np.float32)
+            return np.dot(queries, self._vectors.T)
         else:
             # Compute direct similarity
-            targets = self._normalize(targets)
+            targets = self._normalize(targets).astype(np.float32, copy=False)
             return np.dot(queries, targets.T)
 
     @staticmethod
@@ -210,6 +202,7 @@ class ANNIndex:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         labels_path = path.with_suffix(".labels.json")
+        vectors_path = path.with_suffix(".vectors.npy")
 
         if self.backend == ANNBackend.HNSWLIB:
             self._index.save_index(str(path.with_suffix(".bin")))
@@ -224,11 +217,13 @@ class ANNIndex:
             json.dumps(self._labels, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+        np.save(vectors_path, self._vectors)
 
     def load(self, path: Union[str, Path]) -> None:
         """Load index from disk."""
         path = Path(path)
         labels_path = path.with_suffix(".labels.json")
+        vectors_path = path.with_suffix(".vectors.npy")
 
         if self.backend == ANNBackend.HNSWLIB:
             bin_path = path.with_suffix(".bin")
@@ -252,6 +247,11 @@ class ANNIndex:
             # Backward-compatible fallback for older saved indexes.
             self._labels = [str(i) for i in range(self.n_elements)]
 
+        if vectors_path.exists():
+            self._vectors = np.load(vectors_path).astype(np.float32, copy=False)
+        else:
+            self._vectors = np.empty((0, self.dim), dtype=np.float32)
+
     @property
     def n_elements(self) -> int:
         """Get number of elements in the index."""
@@ -272,6 +272,7 @@ class ANNIndex:
 
             self._index = faiss.IndexFlatIP(self.dim)
             self._labels = []
+            self._vectors = np.empty((0, self.dim), dtype=np.float32)
             logger.info("Cleared FAISS index")
 
     @property

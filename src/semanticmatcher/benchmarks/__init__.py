@@ -51,8 +51,9 @@ from .novelty import (
     NoveltySample,
 )
 
-from .novel_entity_matcher import (
+from ..novelty.entity_matcher import (
     NovelEntityMatcher,
+    NovelEntityMatchResult,
     NoveltyMatchResult,
     create_novel_entity_matcher,
 )
@@ -83,6 +84,7 @@ __all__ = [
     "find_optimal_knn_params",
     "NoveltySample",
     "NovelEntityMatcher",
+    "NovelEntityMatchResult",
     "NoveltyMatchResult",
     "create_novel_entity_matcher",
 ]

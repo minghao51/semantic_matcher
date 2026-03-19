@@ -19,7 +19,7 @@ from .registry import (
 from .entity_resolution import EntityResolutionEvaluator
 from .classification import ClassificationEvaluator
 from .novelty import NoveltyEvaluator
-from .novel_entity_matcher import NovelEntityMatcher
+from ..novelty.entity_matcher import NovelEntityMatcher
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,9 @@ class BenchmarkRunner:
         section_slug = section_name.replace("/", "__")
         threshold_slug = str(threshold).replace(".", "_")
         output_path = artifact_dir / f"{section_slug}_thr_{threshold_slug}.json"
-        output_path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        output_path.write_text(
+            json.dumps(payload, indent=2, default=str), encoding="utf-8"
+        )
         return output_path
 
     def _summarize_processed_ood_results(
@@ -62,7 +64,9 @@ class BenchmarkRunner:
         results: list[dict[str, Any]],
     ) -> dict[str, float]:
         tp = sum(
-            1 for item in results if item["true_is_novel"] and item["predicted_is_novel"]
+            1
+            for item in results
+            if item["true_is_novel"] and item["predicted_is_novel"]
         )
         fp = sum(
             1
@@ -75,7 +79,9 @@ class BenchmarkRunner:
             if (not item["true_is_novel"]) and (not item["predicted_is_novel"])
         )
         fn = sum(
-            1 for item in results if item["true_is_novel"] and (not item["predicted_is_novel"])
+            1
+            for item in results
+            if item["true_is_novel"] and (not item["predicted_is_novel"])
         )
         known_correct = sum(1 for item in results if item.get("correct_known_match"))
         known_total = sum(1 for item in results if not item["true_is_novel"])
@@ -171,9 +177,7 @@ class BenchmarkRunner:
                 else label_id
             )
             aliases = [label_id] if display_name != label_id else []
-            entities.append(
-                {"id": label_id, "name": display_name, "aliases": aliases}
-            )
+            entities.append({"id": label_id, "name": display_name, "aliases": aliases})
         return entities
 
     def _create_matcher_wrapper(
@@ -227,7 +231,9 @@ class BenchmarkRunner:
                 left_id = left_result.get("id", "")
                 right_id = right_result.get("id", "")
                 if left_id and left_id == right_id:
-                    return max(left_result.get("score", 0.0), right_result.get("score", 0.0))
+                    return max(
+                        left_result.get("score", 0.0), right_result.get("score", 0.0)
+                    )
             return 0.0
 
         return wrapper
@@ -242,7 +248,9 @@ class BenchmarkRunner:
         from sentence_transformers import SentenceTransformer
         from sklearn.metrics.pairwise import cosine_similarity
 
-        all_texts = list(set(pairs_df[left_col].tolist() + pairs_df[right_col].tolist()))
+        all_texts = list(
+            set(pairs_df[left_col].tolist() + pairs_df[right_col].tolist())
+        )
         st_model = SentenceTransformer(model)
         embeddings = st_model.encode(all_texts, show_progress_bar=False)
         text_to_emb = {t: embeddings[i] for i, t in enumerate(all_texts)}
@@ -270,11 +278,13 @@ class BenchmarkRunner:
 
         entities = []
         for i, text in enumerate(sorted(entity_texts)):
-            entities.append({
-                "id": f"entity_{i}",
-                "name": text,
-                "aliases": [],
-            })
+            entities.append(
+                {
+                    "id": f"entity_{i}",
+                    "name": text,
+                    "aliases": [],
+                }
+            )
         return entities
 
     def run_entity_resolution(
@@ -322,9 +332,13 @@ class BenchmarkRunner:
                     continue
                 train_key = "train" if "train" in data else None
 
-                clf_df = self._prepare_single_label_frame(data[test_key], config.label_column)
+                clf_df = self._prepare_single_label_frame(
+                    data[test_key], config.label_column
+                )
                 if clf_df.empty:
-                    raise ValueError("No evaluable rows remain after label normalization")
+                    raise ValueError(
+                        "No evaluable rows remain after label normalization"
+                    )
 
                 raw_labels = sorted(clf_df[config.label_column].unique().tolist())
                 class_names = None
@@ -389,6 +403,7 @@ class BenchmarkRunner:
 
                 if class_counts and len(raw_labels) >= max(class_counts):
                     from .classification import evaluate_by_class_count
+
                     subset_classes = raw_labels[: max(class_counts)]
                     eval_df = clf_df[clf_df[config.label_column].isin(subset_classes)]
                     count_results = evaluate_by_class_count(
@@ -399,17 +414,23 @@ class BenchmarkRunner:
                         class_counts=class_counts,
                     )
                     for count, metrics in count_results.items():
-                        record[f"classes_{count}_accuracy"] = metrics.get("accuracy", 0.0)
-                        record[f"classes_{count}_macro_f1"] = metrics.get("macro_f1", 0.0)
+                        record[f"classes_{count}_accuracy"] = metrics.get(
+                            "accuracy", 0.0
+                        )
+                        record[f"classes_{count}_macro_f1"] = metrics.get(
+                            "macro_f1", 0.0
+                        )
 
             except Exception as e:
                 logger.error(f"Error evaluating {name}: {e}")
-                records.append({
-                    "dataset": name,
-                    "model": model,
-                    "mode": mode,
-                    "error": str(e),
-                })
+                records.append(
+                    {
+                        "dataset": name,
+                        "model": model,
+                        "mode": mode,
+                        "error": str(e),
+                    }
+                )
 
         return pd.DataFrame(records)
 
@@ -450,7 +471,9 @@ class BenchmarkRunner:
                     data[test_key], config.label_column
                 )
                 if clf_df.empty:
-                    raise ValueError("No evaluable rows remain after label normalization")
+                    raise ValueError(
+                        "No evaluable rows remain after label normalization"
+                    )
 
                 known_data, ood_data = self.novelty_evaluator.create_ood_split(
                     clf_df,
@@ -458,7 +481,9 @@ class BenchmarkRunner:
                     ood_ratio=ood_ratio,
                 )
 
-                known_classes = sorted(known_data[config.label_column].unique().tolist())
+                known_classes = sorted(
+                    known_data[config.label_column].unique().tolist()
+                )
                 known_class_names = None
                 if config.classes:
                     known_class_names = [
@@ -493,19 +518,27 @@ class BenchmarkRunner:
                     "num_ood": len(ood_data),
                     "auroc": result.metrics.get("auroc", 0.0),
                     "auprc": result.metrics.get("auprc", 0.0),
-                    "detection_rate_at_1fp": result.metrics.get("detection_rate_at_1fp", 0.0),
-                    "detection_rate_at_5fp": result.metrics.get("detection_rate_at_5fp", 0.0),
-                    "detection_rate_at_10fp": result.metrics.get("detection_rate_at_10fp", 0.0),
+                    "detection_rate_at_1fp": result.metrics.get(
+                        "detection_rate_at_1fp", 0.0
+                    ),
+                    "detection_rate_at_5fp": result.metrics.get(
+                        "detection_rate_at_5fp", 0.0
+                    ),
+                    "detection_rate_at_10fp": result.metrics.get(
+                        "detection_rate_at_10fp", 0.0
+                    ),
                 }
                 records.append(record)
 
             except Exception as e:
                 logger.error(f"Error evaluating {name}: {e}")
-                records.append({
-                    "dataset": name,
-                    "model": model,
-                    "error": str(e),
-                })
+                records.append(
+                    {
+                        "dataset": name,
+                        "model": model,
+                        "error": str(e),
+                    }
+                )
 
         return pd.DataFrame(records)
 
@@ -537,7 +570,9 @@ class BenchmarkRunner:
                     continue
 
                 pairs_df = data[test_key]
-                matcher_fn = self._create_er_embedding_similarity_fn(pairs_df, model=model)
+                matcher_fn = self._create_er_embedding_similarity_fn(
+                    pairs_df, model=model
+                )
 
                 base_record = {
                     "dataset": name,
@@ -580,6 +615,7 @@ class BenchmarkRunner:
 
         if datasets is None:
             from ..utils.benchmark_dataset import build_processed_ood_sections
+
             sections = build_processed_ood_sections(ood_ratio=ood_ratio)
             datasets = [s["section"] for s in sections]
 
@@ -599,12 +635,8 @@ class BenchmarkRunner:
                 known_entities = section["known_entities"]
                 training_data = section["training_data"]
                 known_class_ids = section["known_class_ids"]
-                val_pairs = (
-                    section["val_known_pairs"] + section["val_novel_pairs"]
-                )
-                test_pairs = (
-                    section["test_known_pairs"] + section["test_novel_pairs"]
-                )
+                val_pairs = section["val_known_pairs"] + section["val_novel_pairs"]
+                test_pairs = section["test_known_pairs"] + section["test_novel_pairs"]
 
                 if (
                     not known_entities
@@ -756,6 +788,7 @@ class BenchmarkRunner:
 
             except Exception as e:
                 import traceback
+
                 logger.error(f"Error evaluating {section_name}: {e}")
                 traceback.print_exc()
 

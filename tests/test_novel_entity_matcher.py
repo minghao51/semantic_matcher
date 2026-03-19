@@ -1,9 +1,12 @@
 """Tests for the promoted NovelEntityMatcher orchestration API."""
 
+import semanticmatcher
 import pytest
+from types import SimpleNamespace
 
 from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty.schemas import DetectionConfig, DetectionStrategy
+from semanticmatcher.novelty import DetectionConfig
+from semanticmatcher.novelty.config.strategies import ConfidenceConfig
 
 
 @pytest.fixture
@@ -40,24 +43,26 @@ class TestNovelEntityMatcher:
         novelty_matcher = NovelEntityMatcher(
             matcher=trained_matcher,
             detection_config=DetectionConfig(
-                strategies=[DetectionStrategy.CONFIDENCE],
-                confidence_threshold=0.7,
+                strategies=["confidence"],
+                confidence=ConfidenceConfig(threshold=0.7),
             ),
             auto_save=False,
         )
 
-        result = novelty_matcher.match("quantum superposition", return_alternatives=True)
+        result = novelty_matcher.match(
+            "quantum superposition", return_alternatives=True
+        )
 
         assert result.predicted_id is not None
         assert isinstance(result.is_novel, bool)
         assert isinstance(result.alternatives, list)
 
     @pytest.mark.asyncio
-    async def test_discover_novel_classes_matches_legacy_shape(self, trained_matcher):
+    async def test_discover_novel_classes_returns_report(self, trained_matcher):
         novelty_matcher = NovelEntityMatcher(
             matcher=trained_matcher,
             detection_config=DetectionConfig(
-                strategies=[DetectionStrategy.CONFIDENCE],
+                strategies=["confidence"],
             ),
             auto_save=False,
         )
@@ -78,3 +83,73 @@ class TestNovelEntityMatcher:
 
         assert novelty_matcher.acceptance_threshold == 0.42
         assert trained_matcher.threshold == 0.42
+
+    def test_removed_root_aliases_are_not_available(self):
+        for attr in [
+            "EntityMatcher",
+            "EmbeddingMatcher",
+            "HybridMatcher",
+        ]:
+            assert not hasattr(semanticmatcher, attr)
+
+    def test_below_threshold_known_prediction_is_not_novel_when_detector_disabled(
+        self, trained_matcher
+    ):
+        novelty_matcher = NovelEntityMatcher(
+            matcher=trained_matcher,
+            auto_save=False,
+            use_novelty_detector=False,
+        )
+        novelty_matcher.adjust_threshold(0.99)
+
+        result = novelty_matcher.match("quantum superposition")
+
+        assert result.predicted_id == "physics"
+        assert result.is_match is False
+        assert result.is_novel is False
+        assert result.match_method == "below_acceptance_threshold"
+
+    def test_below_threshold_known_prediction_is_not_novel_without_detector_signal(
+        self, trained_matcher
+    ):
+        novelty_matcher = NovelEntityMatcher(
+            matcher=trained_matcher,
+            detection_config=DetectionConfig(
+                strategies=["confidence"],
+                confidence=ConfidenceConfig(threshold=0.0),
+            ),
+            auto_save=False,
+        )
+        novelty_matcher.adjust_threshold(0.99)
+        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: SimpleNamespace(
+            novel_samples=[]
+        )
+
+        result = novelty_matcher.match("quantum superposition")
+
+        assert result.predicted_id == "physics"
+        assert result.is_match is False
+        assert result.is_novel is False
+        assert result.match_method == "below_acceptance_threshold"
+
+    def test_detector_flag_still_marks_prediction_as_novel(self, trained_matcher):
+        novelty_matcher = NovelEntityMatcher(
+            matcher=trained_matcher,
+            auto_save=False,
+        )
+        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: SimpleNamespace(
+            novel_samples=[
+                SimpleNamespace(
+                    novelty_score=0.91,
+                    signals={"confidence": True},
+                )
+            ]
+        )
+
+        result = novelty_matcher.match("quantum superposition")
+
+        assert result.is_match is False
+        assert result.is_novel is True
+        assert result.match_method == "novelty_detector"
+        assert result.novel_score == pytest.approx(0.91)
+        assert result.signals == {"confidence": True}

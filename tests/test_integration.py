@@ -1,13 +1,15 @@
 """Integration tests for novel class detection system."""
+
 import numpy as np
 import pytest
 from pathlib import Path
 import tempfile
 from datetime import datetime
 
-from semanticmatcher import Matcher
-from semanticmatcher.novelty.detector_api import NovelClassDetector
-from semanticmatcher.novelty.schemas import DetectionConfig, DetectionStrategy
+from semanticmatcher import Matcher, NovelEntityMatcher
+from semanticmatcher.novelty import DetectionConfig
+from semanticmatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
+from semanticmatcher.novelty.core.detector import NoveltyDetector
 from semanticmatcher.novelty.storage import load_proposals, save_proposals
 
 
@@ -98,14 +100,12 @@ class TestNovelClassDetectionIntegration:
     async def test_end_to_end_discovery(self, trained_matcher, test_queries):
         """Test end-to-end novel class discovery."""
         # Create detector
-        detector = NovelClassDetector(
+        detector = NovelEntityMatcher(
             matcher=trained_matcher,
             detection_config=DetectionConfig(
-                strategies=[
-                    DetectionStrategy.CONFIDENCE,
-                    DetectionStrategy.KNN_DISTANCE,
-                ],
-                confidence_threshold=0.7,
+                strategies=["confidence", "knn_distance"],
+                confidence=ConfidenceConfig(threshold=0.7),
+                knn_distance=KNNConfig(distance_threshold=0.4),
             ),
             llm_provider=None,  # Skip LLM for this test
             auto_save=False,
@@ -198,10 +198,10 @@ class TestNovelClassDetectionIntegration:
     @pytest.mark.asyncio
     async def test_discovery_uses_async_matcher_path(self, trained_matcher):
         """Novel discovery should use the async matcher API when available."""
-        detector = NovelClassDetector(
+        detector = NovelEntityMatcher(
             matcher=trained_matcher,
             detection_config=DetectionConfig(
-                strategies=[DetectionStrategy.CONFIDENCE],
+                strategies=["confidence"],
             ),
             auto_save=False,
         )
@@ -238,7 +238,7 @@ class TestNovelClassDetectionIntegration:
     async def test_file_persistence(self, trained_matcher, test_queries):
         """Test saving and loading discovery reports."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            detector = NovelClassDetector(
+            detector = NovelEntityMatcher(
                 matcher=trained_matcher,
                 auto_save=True,
                 output_dir=tmpdir,
@@ -266,7 +266,10 @@ class TestNovelClassDetectionIntegration:
 
     def test_save_proposals_uses_unique_filenames_per_discovery(self):
         """Reports saved in the same second should not overwrite each other."""
-        from semanticmatcher.novelty.schemas import NovelClassDiscoveryReport, NovelSampleReport
+        from semanticmatcher.novelty.schemas import (
+            NovelClassDiscoveryReport,
+            NovelSampleReport,
+        )
 
         timestamp = datetime(2026, 3, 17, 16, 33, 28)
 
@@ -277,7 +280,7 @@ class TestNovelClassDetectionIntegration:
             detection_config={"combine_method": "intersection"},
             novel_sample_report=NovelSampleReport(
                 novel_samples=[],
-                detection_strategies=[DetectionStrategy.CONFIDENCE],
+                detection_strategies=["confidence"],
                 config={"combine_method": "intersection"},
                 signal_counts={"confidence": 0},
             ),
@@ -290,7 +293,7 @@ class TestNovelClassDetectionIntegration:
             detection_config={"combine_method": "intersection"},
             novel_sample_report=NovelSampleReport(
                 novel_samples=[],
-                detection_strategies=[DetectionStrategy.CONFIDENCE],
+                detection_strategies=["confidence"],
                 config={"combine_method": "intersection"},
                 signal_counts={"confidence": 0},
             ),
@@ -315,15 +318,12 @@ class TestNovelClassDetectionIntegration:
             "unknown topic here",
         ]
 
-        # Test confidence-only strategy
-        from semanticmatcher.novelty.detector import NoveltyDetector
-
         config = DetectionConfig(
-            strategies=[DetectionStrategy.CONFIDENCE],
-            confidence_threshold=0.7,
+            strategies=["confidence"],
+            confidence=ConfidenceConfig(threshold=0.7),
         )
 
-        detector = NoveltyDetector(config=config, embedding_dim=384)
+        detector = NoveltyDetector(config=config)
 
         # Get embeddings and predictions
         embeddings = trained_matcher.model.encode(queries)
@@ -344,19 +344,18 @@ class TestNovelClassDetectionIntegration:
             confidences=confidences,
             embeddings=embeddings,
             predicted_classes=predicted_classes,
-            known_classes=["physics", "cs", "biology", "chemistry"],
             reference_embeddings=trained_matcher.get_reference_corpus()["embeddings"],
             reference_labels=trained_matcher.get_reference_corpus()["labels"],
         )
 
         # Verify confidence strategy was used
-        assert DetectionStrategy.CONFIDENCE in report.detection_strategies
+        assert "confidence" in report.detection_strategies
         assert "confidence" in report.signal_counts
 
     @pytest.mark.asyncio
     async def test_batch_discovery(self, trained_matcher):
         """Test batch discovery with multiple query lists."""
-        detector = NovelClassDetector(
+        detector = NovelEntityMatcher(
             matcher=trained_matcher,
             auto_save=False,
         )
@@ -401,7 +400,7 @@ class TestLLMIntegration:
         matcher.fit(texts=texts, labels=labels)
 
         # Create detector with LLM
-        detector = NovelClassDetector(
+        detector = NovelEntityMatcher(
             matcher=matcher,
             llm_model="gpt-3.5-turbo",  # Use cheaper model for testing
             auto_save=False,

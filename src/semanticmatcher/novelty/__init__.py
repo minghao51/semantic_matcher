@@ -3,50 +3,107 @@ Novel class detection and proposal system.
 
 This module provides functionality for detecting novel classes in text data
 and proposing meaningful new category names using LLMs.
+
+The restructured module provides:
+- Core detection via NoveltyDetector with strategy pattern
+- Pluggable strategies for different detection algorithms
+- Unified evaluation system for benchmarking and research
+- Clean separation of concerns across submodules
 """
 
-from .detector import NoveltyDetector, DetectionStrategy
-from .entity_matcher import (
-    NovelEntityMatcher,
-    NovelEntityMatchResult,
-    NoveltyMatchResult,
-    create_novel_entity_matcher,
+# Core detection
+from .core.detector import NoveltyDetector
+from .core.strategies import StrategyRegistry
+from .strategies.base import NoveltyStrategy
+
+# Configuration
+from .config.base import DetectionConfig
+from .config.strategies import (
+    ConfidenceConfig,
+    KNNConfig,
+    ClusteringConfig,
+    SelfKnowledgeConfig,
+    PatternConfig,
+    OneClassConfig,
+    PrototypicalConfig,
+    SetFitConfig,
 )
-from .detector_api import NovelClassDetector
-from .llm_proposer import LLMClassProposer
+from .config.weights import WeightConfig
+
+# Evaluation
+from .evaluation.evaluator import NoveltyEvaluator
+from .evaluation.metrics import (
+    compute_auroc,
+    compute_auprc,
+    compute_detection_rates,
+    compute_precision_recall_f1,
+)
+from .evaluation.splitters import OODSplitter, GradualNoveltySplitter
+
+# Results and reports
 from .schemas import (
     ClassProposal,
     NovelClassAnalysis,
-    NovelSampleReport,
     NovelClassDiscoveryReport,
     NovelSampleMetadata,
+    NovelSampleReport,
 )
-from .storage import save_proposals, load_proposals, list_proposals
-from .ann_index import ANNIndex, ANNBackend
+from .schemas.results import EvaluationReport
+
+# Storage and indexing
+from .storage.persistence import export_summary, save_proposals, load_proposals, list_proposals
+from .storage.index import ANNBackend, ANNIndex
+
+# Clustering
+from .clustering.scalable import ScalableClusterer
+from .clustering.validation import ClusterValidator
+
+# Proposers
+from .proposal.llm import LLMClassProposer
+from .proposal.retrieval import RetrievalAugmentedProposer
 
 __all__ = [
-    # Detector
+    # Core
     "NoveltyDetector",
-    "DetectionStrategy",
-    "NovelEntityMatcher",
-    "NovelEntityMatchResult",
-    "NoveltyMatchResult",
-    "create_novel_entity_matcher",
-    # Unified API
-    "NovelClassDetector",
-    # LLM Proposer
-    "LLMClassProposer",
-    # Schemas
+    "StrategyRegistry",
+    "NoveltyStrategy",
+    # Configuration
+    "DetectionConfig",
+    "ConfidenceConfig",
+    "KNNConfig",
+    "ClusteringConfig",
+    "SelfKnowledgeConfig",
+    "PatternConfig",
+    "OneClassConfig",
+    "PrototypicalConfig",
+    "SetFitConfig",
+    "WeightConfig",
+    # Evaluation
+    "NoveltyEvaluator",
+    "compute_auroc",
+    "compute_auprc",
+    "compute_detection_rates",
+    "compute_precision_recall_f1",
+    "OODSplitter",
+    "GradualNoveltySplitter",
+    # Results
+    "NovelSampleMetadata",
+    "NovelSampleReport",
     "ClassProposal",
     "NovelClassAnalysis",
-    "NovelSampleReport",
     "NovelClassDiscoveryReport",
-    "NovelSampleMetadata",
+    "EvaluationReport",
     # Storage
     "save_proposals",
     "load_proposals",
     "list_proposals",
-    # ANN Index
-    "ANNIndex",
+    "export_summary",
     "ANNBackend",
+    "ANNIndex",
+    # Clustering
+    "ScalableClusterer",
+    "ClusterValidator",
+    # Proposers
+    "LLMClassProposer",
+    "RetrievalAugmentedProposer",
 ]

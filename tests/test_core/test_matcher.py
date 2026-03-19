@@ -749,40 +749,17 @@ class TestUnifiedMatcher:
         matcher = Matcher(entities=sample_entities, model="bge-base")
         assert matcher.model_name == "BAAI/bge-base-en-v1.5"
 
-    def test_matcher_backward_compatibility_entity_matcher(self, sample_entities):
-        """Test that importing old classes shows deprecation warning."""
-        # Import through the public API - warning happens at import time
-        # The import itself triggers the warning
+    def test_removed_entity_matcher_alias_is_not_exported(self, sample_entities):
         import semanticmatcher
 
-        # Clear any previous warnings
-        semanticmatcher.__dict__.pop("EntityMatcher", None)
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            # Access through __getattr__ which triggers deprecation
+        with pytest.raises(AttributeError):
             _ = semanticmatcher.EntityMatcher
-            # Should see deprecation warning
-            assert len(w) >= 1
-            assert any(
-                issubclass(warning.category, DeprecationWarning) for warning in w
-            )
 
-    def test_matcher_backward_compatibility_embedding_matcher(self, sample_entities):
-        """Test EmbeddingMatcher deprecation warning."""
+    def test_removed_embedding_matcher_alias_is_not_exported(self, sample_entities):
         import semanticmatcher
 
-        # Clear cached import
-        semanticmatcher.__dict__.pop("EmbeddingMatcher", None)
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            # Access through __getattr__ which triggers deprecation
+        with pytest.raises(AttributeError):
             _ = semanticmatcher.EmbeddingMatcher
-            assert len(w) >= 1
-            assert any(
-                issubclass(warning.category, DeprecationWarning) for warning in w
-            )
 
     def test_matcher_no_deprecation_for_new_api(self, sample_entities):
         """Test that new Matcher class doesn't show deprecation warning."""

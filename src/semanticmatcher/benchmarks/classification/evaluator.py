@@ -72,13 +72,14 @@ class ClassificationEvaluator(BaseEvaluator[pd.DataFrame]):
 
         true_labels = [str(label) for label in true_labels_raw]
         pred_labels = [
-            "__no_match__" if label is None else str(label)
-            for label in predictions
+            "__no_match__" if label is None else str(label) for label in predictions
         ]
 
         accuracy = accuracy_score(true_labels, pred_labels)
         macro_f1 = f1_score(true_labels, pred_labels, average="macro", zero_division=0)
-        weighted_f1 = f1_score(true_labels, pred_labels, average="weighted", zero_division=0)
+        weighted_f1 = f1_score(
+            true_labels, pred_labels, average="weighted", zero_division=0
+        )
 
         unique_labels = sorted(set(true_labels + pred_labels))
         per_class_f1 = f1_score(
@@ -89,28 +90,33 @@ class ClassificationEvaluator(BaseEvaluator[pd.DataFrame]):
             zero_division=0,
         )
         per_class_f1_dict = {
-            str(label): f1
-            for label, f1 in zip(unique_labels, per_class_f1)
+            str(label): f1 for label, f1 in zip(unique_labels, per_class_f1)
         }
 
-        class_names = classes if classes and len(classes) == len(unique_labels) else [str(label) for label in unique_labels]
+        class_names = (
+            classes
+            if classes and len(classes) == len(unique_labels)
+            else [str(label) for label in unique_labels]
+        )
         report = classification_report(
             true_labels,
             pred_labels,
             labels=unique_labels,
-            target_names=class_names[:len(unique_labels)],
+            target_names=class_names[: len(unique_labels)],
             output_dict=True,
             zero_division=0,
         )
 
         cm = confusion_matrix(true_labels, pred_labels, labels=unique_labels)
 
-        per_sample_results = pd.DataFrame({
-            "text": data[text_col],
-            "true_label": true_labels,
-            "pred_label": pred_labels,
-            "confidence": confidences,
-        })
+        per_sample_results = pd.DataFrame(
+            {
+                "text": data[text_col],
+                "true_label": true_labels,
+                "pred_label": pred_labels,
+                "confidence": confidences,
+            }
+        )
 
         return EvaluationResult(
             metrics={
@@ -151,9 +157,7 @@ def sweep_num_classes(
         text_col=text_col,
     )
 
-    return {
-        len(unique_classes): result.metrics
-    }
+    return {len(unique_classes): result.metrics}
 
 
 def evaluate_by_class_count(

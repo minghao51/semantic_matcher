@@ -1,19 +1,21 @@
-"""Tests for ANN-backed NoveltyDetector."""
-
-import importlib.util
+"""Tests for the modular NoveltyDetector."""
 
 import numpy as np
 import pytest
 
-from semanticmatcher.novelty.detector import NoveltyDetector
-from semanticmatcher.novelty.schemas import DetectionConfig, DetectionStrategy
-
-HAS_HDBSCAN = importlib.util.find_spec("hdbscan") is not None
+from semanticmatcher.novelty import DetectionConfig
+from semanticmatcher.novelty.config.weights import WeightConfig
+from semanticmatcher.novelty.config.strategies import (
+    ClusteringConfig,
+    ConfidenceConfig,
+    KNNConfig,
+)
+from semanticmatcher.novelty.core.detector import NoveltyDetector
+from semanticmatcher.novelty.strategies.base import NoveltyStrategy
+from semanticmatcher.novelty.core.strategies import StrategyRegistry
 
 
 class TestNoveltyDetector:
-    """Test suite for NoveltyDetector."""
-
     @pytest.fixture
     def sample_texts(self):
         return [
@@ -66,71 +68,58 @@ class TestNoveltyDetector:
         return np.array([0.97, 0.96, 0.95, 0.97, 0.94, 0.93, 0.58, 0.56], dtype=float)
 
     @pytest.fixture
-    def candidate_results(self):
-        return [
-            [{"id": "physics", "score": 0.97}, {"id": "cs", "score": 0.12}],
-            [{"id": "cs", "score": 0.96}, {"id": "biology", "score": 0.08}],
-            [{"id": "cs", "score": 0.95}, {"id": "physics", "score": 0.11}],
-            [{"id": "physics", "score": 0.97}, {"id": "cs", "score": 0.1}],
-            [{"id": "biology", "score": 0.94}, {"id": "cs", "score": 0.07}],
-            [{"id": "biology", "score": 0.93}, {"id": "cs", "score": 0.1}],
-            [{"id": "cs", "score": 0.58}, {"id": "physics", "score": 0.54}],
-            [{"id": "cs", "score": 0.56}, {"id": "physics", "score": 0.53}],
-        ]
-
-    @pytest.fixture
     def sample_predictions(self):
         return ["physics", "cs", "cs", "physics", "biology", "biology", "cs", "cs"]
 
     @pytest.fixture
     def detector(self):
-        config = DetectionConfig(
-            strategies=[
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.KNN_DISTANCE,
-                DetectionStrategy.CLUSTERING,
-            ],
-            uncertainty_threshold=0.4,
-            knn_distance_threshold=0.25,
-            strong_knn_novelty_threshold=0.6,
-            candidate_score_threshold=0.3,
-            novelty_threshold=0.35,
-            min_cluster_size=2,
+        return NoveltyDetector(
+            config=DetectionConfig(
+                strategies=["confidence", "knn_distance", "clustering"],
+                confidence=ConfidenceConfig(threshold=0.6),
+                knn_distance=KNNConfig(distance_threshold=0.25),
+                clustering=ClusteringConfig(min_cluster_size=2),
+            )
         )
-        return NoveltyDetector(config=config, embedding_dim=4)
 
     def test_initialization(self, detector):
         assert detector.config is not None
-        assert detector.embedding_dim == 4
-        assert detector._ann_index is None
+        assert detector.is_initialized is False
 
     def test_default_initialization(self):
-        detector = NoveltyDetector(embedding_dim=4)
+        detector = NoveltyDetector(config=DetectionConfig())
         assert detector.config.combine_method == "weighted"
-
-    def test_detect_by_confidence_legacy(self, detector, sample_confidences):
-        low_confidence_indices = detector._detect_by_confidence(sample_confidences)
-        assert 6 in low_confidence_indices
-        assert 7 in low_confidence_indices
 
     def test_knn_distance_detection(
         self,
         detector,
+        sample_texts,
         sample_embeddings,
+        sample_confidences,
         sample_predictions,
         reference_embeddings,
         reference_labels,
     ):
-        detector._build_reference_index(reference_embeddings, reference_labels)
-        knn_metrics, knn_flags = detector._detect_by_knn_distance(
-            sample_embeddings, sample_predictions
+        detector.detect_novel_samples(
+            texts=sample_texts,
+            confidences=sample_confidences,
+            embeddings=sample_embeddings,
+            predicted_classes=sample_predictions,
+            reference_embeddings=reference_embeddings,
+            reference_labels=reference_labels,
+        )
+        strategy = detector.get_strategy("knn_distance")
+        flags, metrics = strategy.detect(
+            texts=sample_texts,
+            embeddings=sample_embeddings,
+            predicted_classes=sample_predictions,
+            confidences=sample_confidences,
         )
 
-        assert isinstance(knn_metrics, dict)
-        assert 6 in knn_flags
-        assert 7 in knn_flags
-        assert knn_metrics[0]["knn_novelty_score"] < knn_metrics[6]["knn_novelty_score"]
-        assert knn_metrics[6]["neighbor_labels"]
+        assert isinstance(metrics, dict)
+        assert 6 in flags
+        assert 7 in flags
+        assert metrics[6]["knn_novelty_score"] >= detector.config.knn_distance.distance_threshold
 
     def test_missing_reference_embeddings_raises(
         self,
@@ -155,7 +144,6 @@ class TestNoveltyDetector:
         sample_confidences,
         sample_embeddings,
         sample_predictions,
-        candidate_results,
         reference_embeddings,
         reference_labels,
     ):
@@ -164,10 +152,8 @@ class TestNoveltyDetector:
             confidences=sample_confidences,
             embeddings=sample_embeddings,
             predicted_classes=sample_predictions,
-            candidate_results=candidate_results,
             reference_embeddings=reference_embeddings,
             reference_labels=reference_labels,
-            known_classes=["physics", "cs", "biology"],
         )
 
         assert len(report.novel_samples) >= 2
@@ -175,30 +161,26 @@ class TestNoveltyDetector:
         assert {6, 7}.issubset(novel_indices)
 
         sample = next(item for item in report.novel_samples if item.index == 6)
-        assert sample.uncertainty_score is not None
         assert sample.knn_novelty_score is not None
         assert sample.novelty_score is not None
-        assert sample.neighbor_labels
+        assert sample.signals["knn_distance"] is True
 
-    def test_legacy_combine_modes_still_work(self):
-        config = DetectionConfig(
-            strategies=[
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.KNN_DISTANCE,
-            ],
-            combine_method="intersection",
+    def test_intersection_combine_mode_still_works(self):
+        detector = NoveltyDetector(
+            config=DetectionConfig(
+                strategies=["confidence", "knn_distance"],
+                combine_method="intersection",
+                confidence=ConfidenceConfig(threshold=0.6),
+                knn_distance=KNNConfig(distance_threshold=0.25),
+            )
         )
-        detector = NoveltyDetector(config=config, embedding_dim=4)
-        all_signals = {
-            0: {DetectionStrategy.CONFIDENCE: True},
-            1: {DetectionStrategy.KNN_DISTANCE: True},
-            2: {
-                DetectionStrategy.CONFIDENCE: True,
-                DetectionStrategy.KNN_DISTANCE: True,
+        combined, _ = detector._combiner.combine(
+            {
+                "confidence": ({0, 2}, {}),
+                "knn_distance": ({1, 2}, {}),
             },
-        }
-
-        combined = detector._combine_signals_legacy(all_signals)
+            {},
+        )
         assert combined == {2}
 
     def test_empty_samples(self, detector):
@@ -207,57 +189,162 @@ class TestNoveltyDetector:
             confidences=np.array([]),
             embeddings=np.array([]).reshape(0, 4),
             predicted_classes=[],
+            reference_embeddings=np.array([[1.0, 0.0, 0.0, 0.0]], dtype=np.float32),
+            reference_labels=["physics"],
         )
 
         assert len(report.novel_samples) == 0
 
+    def test_detector_reinitializes_when_reference_changes(self):
+        unique_strategy_id = "test_probe_reinitialize"
 
-@pytest.mark.skipif(not HAS_HDBSCAN, reason="hdbscan not available")
-class TestNoveltyDetectorWithClustering:
-    """Cluster-validation tests."""
+        class ProbeStrategy(NoveltyStrategy):
+            strategy_id = unique_strategy_id
 
-    def test_validated_cluster_adds_support(self):
-        config = DetectionConfig(
-            strategies=[
-                DetectionStrategy.CONFIDENCE,
-                DetectionStrategy.KNN_DISTANCE,
-                DetectionStrategy.CLUSTERING,
-            ],
-            uncertainty_threshold=0.4,
-            knn_distance_threshold=0.2,
-            novelty_threshold=0.3,
-            candidate_score_threshold=0.2,
-            min_cluster_size=2,
-        )
-        detector = NoveltyDetector(config=config, embedding_dim=4)
-        reference_embeddings = np.array(
-            [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-            ],
-            dtype=np.float32,
-        )
-        reference_labels = ["physics", "cs", "biology"]
-        query_embeddings = np.array(
-            [
-                [0.55, 0.55, 0.0, 0.62],
-                [0.56, 0.54, 0.02, 0.61],
-            ],
-            dtype=np.float32,
-        )
-        report = detector.detect_novel_samples(
-            texts=["novel 1", "novel 2"],
-            confidences=np.array([0.55, 0.54]),
-            embeddings=query_embeddings,
-            predicted_classes=["cs", "cs"],
-            candidate_results=[
-                [{"id": "cs", "score": 0.55}, {"id": "physics", "score": 0.54}],
-                [{"id": "cs", "score": 0.54}, {"id": "physics", "score": 0.53}],
-            ],
-            reference_embeddings=reference_embeddings,
-            reference_labels=reference_labels,
+            def __init__(self):
+                self.reference_sum = None
+
+            def initialize(self, reference_embeddings, reference_labels, config):
+                self.reference_sum = float(np.sum(reference_embeddings))
+
+            def detect(
+                self,
+                texts,
+                embeddings,
+                predicted_classes,
+                confidences,
+                **kwargs,
+            ):
+                return set(), {
+                    idx: {"probe_reference_sum": self.reference_sum}
+                    for idx in range(len(texts))
+                }
+
+            @property
+            def config_schema(self):
+                return object
+
+            def get_weight(self) -> float:
+                return 1.0
+
+        if StrategyRegistry.is_registered(unique_strategy_id):
+            StrategyRegistry.unregister(unique_strategy_id)
+        StrategyRegistry.register(ProbeStrategy)
+        try:
+            detector = NoveltyDetector(
+                config=DetectionConfig(
+                    strategies=[unique_strategy_id],
+                    combine_method="union",
+                )
+            )
+            common = {
+                "texts": ["sample"],
+                "confidences": np.array([0.1], dtype=float),
+                "embeddings": np.array([[0.0]], dtype=np.float32),
+                "predicted_classes": ["physics"],
+            }
+
+            detector.detect_novel_samples(
+                reference_embeddings=np.array([[1.0]], dtype=np.float32),
+                reference_labels=["physics"],
+                **common,
+            )
+            first_reference_sum = detector.get_strategy(
+                unique_strategy_id
+            ).reference_sum
+
+            detector.detect_novel_samples(
+                reference_embeddings=np.array([[5.0]], dtype=np.float32),
+                reference_labels=["biology"],
+                **common,
+            )
+            second_reference_sum = detector.get_strategy(
+                unique_strategy_id
+            ).reference_sum
+        finally:
+            StrategyRegistry.unregister(unique_strategy_id)
+
+        assert first_reference_sum == 1.0
+        assert second_reference_sum == 5.0
+
+
+class TestSignalCombinerRegression:
+    @staticmethod
+    def _make_detector(weights: WeightConfig) -> NoveltyDetector:
+        return NoveltyDetector(
+            config=DetectionConfig(
+                strategies=["confidence", "knn_distance", "clustering"],
+                combine_method="weighted",
+                weights=weights,
+            )
         )
 
-        assert len(report.novel_samples) == 2
-        assert any(sample.cluster_support_score for sample in report.novel_samples)
+    def test_weighted_combination_normalizes_knn_distance_scores(self):
+        detector = self._make_detector(
+            WeightConfig(
+                confidence=0.35,
+                knn=0.45,
+                cluster=0.2,
+                novelty_threshold=0.6,
+                knn_gate_threshold=1.0,
+                strong_knn_threshold=1.0,
+            )
+        )
+
+        novel, scores = detector._combiner.combine(
+            {"knn_distance": ({0}, {0: {"knn_novelty_score": 0.7}})},
+            {0: {"knn_novelty_score": 0.7}},
+        )
+
+        assert scores[0] == pytest.approx(0.7)
+        assert novel == {0}
+
+    def test_weighted_combination_normalizes_clustering_scores(self):
+        detector = self._make_detector(
+            WeightConfig(
+                confidence=0.35,
+                knn=0.45,
+                cluster=0.2,
+                novelty_threshold=0.6,
+            )
+        )
+
+        novel, scores = detector._combiner.combine(
+            {"clustering": ({0}, {0: {"cluster_support_score": 0.9}})},
+            {0: {"cluster_support_score": 0.9}},
+        )
+
+        assert scores[0] == pytest.approx(0.9)
+        assert novel == {0}
+
+    def test_weighted_combination_uses_sum_of_active_strategy_weights(self):
+        detector = self._make_detector(
+            WeightConfig(
+                confidence=0.35,
+                knn=0.45,
+                cluster=0.2,
+                novelty_threshold=0.6,
+                knn_gate_threshold=1.0,
+                strong_knn_threshold=1.0,
+            )
+        )
+        metrics = {
+            0: {
+                "confidence_is_novel": True,
+                "knn_novelty_score": 0.7,
+                "cluster_support_score": 0.9,
+            }
+        }
+
+        novel, scores = detector._combiner.combine(
+            {
+                "confidence": ({0}, metrics),
+                "knn_distance": ({0}, metrics),
+                "clustering": ({0}, metrics),
+            },
+            metrics,
+        )
+
+        expected = (0.35 * 1.0 + 0.45 * 0.7 + 0.2 * 0.9) / (0.35 + 0.45 + 0.2)
+        assert scores[0] == pytest.approx(expected)
+        assert novel == {0}

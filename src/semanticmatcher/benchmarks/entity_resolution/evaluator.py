@@ -74,17 +74,20 @@ class EntityResolutionEvaluator(BaseEvaluator[pd.DataFrame]):
         pr_auc = -1.0
         if len(pr_curve[0]) > 1:
             pr_auc = 0.5 * sum(
-                (pr_curve[0][i] + pr_curve[0][i + 1]) * (pr_curve[1][i] - pr_curve[1][i + 1])
+                (pr_curve[0][i] + pr_curve[0][i + 1])
+                * (pr_curve[1][i] - pr_curve[1][i + 1])
                 for i in range(len(pr_curve[0]) - 1)
             )
 
-        per_pair_results = pd.DataFrame({
-            "left": data[left_col],
-            "right": data[right_col],
-            "true_label": labels,
-            "pred_label": predictions,
-            "score": scores,
-        })
+        per_pair_results = pd.DataFrame(
+            {
+                "left": data[left_col],
+                "right": data[right_col],
+                "true_label": labels,
+                "pred_label": predictions,
+                "score": scores,
+            }
+        )
 
         return EvaluationResult(
             metrics={
@@ -114,10 +117,9 @@ def sweep_threshold(
         thresholds = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
     evaluator = EntityResolutionEvaluator()
-    df = pd.DataFrame([
-        {"left": left, "right": right, "label": label}
-        for left, right, label in pairs
-    ])
+    df = pd.DataFrame(
+        [{"left": left, "right": right, "label": label} for left, right, label in pairs]
+    )
 
     results = {}
     for thresh in thresholds:
