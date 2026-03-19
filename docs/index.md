@@ -33,6 +33,7 @@ This folder is split into stable user guides, experiment docs, and archived proj
 
 - [`roadmap.md`](./roadmap.md): project roadmap from v0.4.0 to v1.0.0 with milestones and deliverables
 - [`related-work.md`](./related-work.md): research landscape and comparative analysis of semantic matching systems
+- [`novelty-methods-research.md`](./novelty-methods-research.md): forward-looking research notes and implementation proposals for additional novelty detection methods
 
 ## Archive
 
@@ -60,8 +61,9 @@ This folder is split into stable user guides, experiment docs, and archived proj
 
 1. Read [`roadmap.md`](./roadmap.md) for planned milestones
 2. Review [`related-work.md`](./related-work.md) for context on similar systems
-3. Check [`architecture.md`](./architecture.md) for implementation details
-4. See GitHub issues for specific tasks and discussions
+3. Review [`novelty-methods-research.md`](./novelty-methods-research.md) for proposed novelty-detection extensions
+4. Check [`architecture.md`](./architecture.md) for implementation details
+5. See GitHub issues for specific tasks and discussions
 
 ## Notes
 
