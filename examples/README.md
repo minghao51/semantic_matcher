@@ -1,8 +1,9 @@
 # Examples
 
-This folder is organized by maintenance status:
+This folder contains the maintained runnable examples for the supported APIs.
 
-- `current/` contains maintained examples for the unified `Matcher` API.
-- `current/basic_matcher.py` is the async-first starter example.
-- `legacy/` contains deprecated examples kept only for migration/reference.
-- `raw/` contains lower-level library experiments using `setfit` or `sentence-transformers` directly.
+- `current/basic_matcher.py` is the async-first starter for `Matcher`.
+- `current/trained_matcher.py` adds supervised fitting.
+- `current/hierarchical_matching.py` covers hierarchy-aware matching.
+- `novel_discovery_example.py` is the main novelty detection example.
+- `raw/` is for lower-level experiments outside the main API surface.

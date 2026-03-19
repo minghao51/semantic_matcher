@@ -1,6 +1,6 @@
 # Matcher Modes
 
-Related docs: [`index.md`](./index.md) | [`quickstart.md`](./quickstart.md) | [`migration-guide.md`](./migration-guide.md) | [`architecture.md`](./architecture.md)
+Related docs: [`index.md`](./index.md) | [`quickstart.md`](./quickstart.md) | [`architecture.md`](./architecture.md)
 
 ## Overview
 
@@ -461,7 +461,6 @@ matcher = Matcher(entities=entities, mode="full")
 matcher.fit(training_data)
 ```
 
-**See:** [`migration-guide.md`](./migration-guide.md) for complete migration guide.
 
 ## Choosing the Right Mode
 
@@ -548,4 +547,3 @@ print(diagnosis["suggestion"])  # How to fix it
 - See [`quickstart.md`](./quickstart.md) for basic usage
 - See [`models.md`](./models.md) for model selection
 - See [`static-embeddings.md`](./static-embeddings.md) for static embeddings
-- See [`migration-guide.md`](./migration-guide.md) for migrating from deprecated classes

@@ -171,7 +171,7 @@ asyncio.run(main())
 - Progress tracking via `on_progress` callback
 - Cancellation support for long-running operations
 - Thread-safe concurrent matching
-- Full backward compatibility with sync API
+- Sync and async APIs are both supported
 
 See [Async API Guide](docs/async-guide.md) for comprehensive documentation.
 
@@ -252,7 +252,7 @@ uv run python scripts/benchmark_async.py --multiplier 20 --concurrency 8
 
 - [Documentation Index](docs/index.md) - Organized entry point for guides, experiments, and archive material
 - [Quick Start Guide](docs/quickstart.md) - Complete getting started guide
-- [Examples Catalog](docs/examples.md) - Current, legacy, and raw examples
+- [Examples Catalog](docs/examples.md) - Maintained runnable examples
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and fixes
 - [Architecture](docs/architecture.md) - Module layout and design
 
@@ -267,7 +267,7 @@ uv run python scripts/benchmark_async.py --multiplier 20 --concurrency 8
 ```text
 semantic_matcher/              # Repository root
 ├── src/semanticmatcher/       # Python package
-├── examples/                  # Current, legacy, and raw runnable examples
+├── examples/                  # Maintained runnable examples
 ├── experiments/               # Exploratory scripts
 ├── artifacts/                 # Local generated benchmark outputs
 ├── tests/                     # Automated tests

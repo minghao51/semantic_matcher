@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Related docs: [`index.md`](./index.md) | [`migration-guide.md`](./migration-guide.md) | [`examples.md`](./examples.md) | [`troubleshooting.md`](./troubleshooting.md)
+Related docs: [`index.md`](./index.md) | [`examples.md`](./examples.md) | [`troubleshooting.md`](./troubleshooting.md)
 
 This guide covers the main `semanticmatcher.Matcher` workflow. Use it when you want to map messy input text to canonical entity IDs.
 
@@ -305,5 +305,4 @@ uv run python examples/current/trained_matcher.py
 ## Next Steps
 
 - See [`examples.md`](./examples.md) for the organized example catalog.
-- See [`migration-guide.md`](./migration-guide.md) if you are moving off deprecated matcher classes.
 - See [`troubleshooting.md`](./troubleshooting.md) if model downloads or imports fail.
