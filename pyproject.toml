@@ -38,18 +38,37 @@ dependencies = [
     "rapidfuzz>=3.0.0",
     "pyyaml>=6.0.0",
     "model2vec>=0.1.0",
-    "matplotlib>=3.9.4",
-    "seaborn>=0.13.2",
 ]
 
 [project.scripts]
 semanticmatcher-ingest = "semanticmatcher.ingestion.cli:main"
+semanticmatcher-bench = "semanticmatcher.benchmarks.cli:main"
 
 [project.optional-dependencies]
 # Progress bars for notebooks and terminals
 jupyter = [
     "tqdm>=4.66.0",
     "ipywidgets>=8.0.0",
+]
+
+# Novel class detection and ANN-backed discovery
+novelty = [
+    "pydantic>=2.0.0",
+    "hnswlib>=0.8.0",
+    "hdbscan>=0.8.33",
+    "faiss-cpu>=1.7.4",
+]
+
+# LLM-backed embedding, reranking, and class proposal features
+llm = [
+    "litellm>=1.50.0",
+    "pydantic>=2.0.0",
+]
+
+# Plotting helpers for benchmark visualization scripts
+viz = [
+    "matplotlib>=3.9.4",
+    "seaborn>=0.13.2",
 ]
 
 # Development tools
@@ -72,10 +91,17 @@ all = [
     "black>=23.0.0",
     "build>=1.2.2",
     "html-to-markdown>=1.8.0",
+    "hdbscan>=0.8.33",
+    "hnswlib>=0.8.0",
     "ipywidgets>=8.0.0",
+    "faiss-cpu>=1.7.4",
+    "litellm>=1.50.0",
+    "matplotlib>=3.9.4",
     "patchright>=1.58.0",
+    "pydantic>=2.0.0",
     "pytest>=8.4.2",
     "ruff>=0.1.0",
+    "seaborn>=0.13.2",
     "tqdm>=4.66.0",
     "twine>=5.1.1",
 ]
@@ -86,11 +112,15 @@ dev = [
     "black>=23.0.0",
     "build>=1.2.2",
     "html-to-markdown>=1.8.0",
+    "mypy>=1.19.1",
     "patchright>=1.58.0",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "ruff>=0.1.0",
     "twine>=5.1.1",
+    "types-pyyaml>=6.0.12.20250915",
+    "types-requests>=2.32.4.20260107",
+    "types-tqdm>=4.67.3.20260205",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -113,3 +143,45 @@ markers = [
     "hf: Hugging Face model-backed tests",
 ]
 asyncio_mode = "auto"
+
+[tool.mypy]
+# Python version to target
+python_version = "3.13"
+
+# Warn about various issues
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# Disallow unsafe code (gradually enable these)
+disallow_untyped_defs = false  # Start with false, enable later
+disallow_any_generics = false
+check_untyped_defs = true
+
+# Type checking mode
+strict_optional = true
+
+# Output settings
+show_column_numbers = true
+show_error_context = true
+pretty = true
+
+# Search paths
+mypy_path = "src"
+
+# Per-module options (relax checks for external packages)
+[[tool.mypy.overrides]]
+module = [
+    "setfit.*",
+    "sentence_transformers.*",
+    "transformers.*",
+    "torch.*",
+    "datasets.*",
+    "hdbscan.*",
+    "hnswlib.*",
+    "faiss.*",
+    "litellm.*",
+    "model2vec.*",
+]
+ignore_missing_imports = true

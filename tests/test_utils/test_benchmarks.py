@@ -1,7 +1,10 @@
 import json
+from types import SimpleNamespace
 
 import pandas as pd
 
+from semanticmatcher.benchmarks.runner import BenchmarkRunner
+from semanticmatcher.utils.benchmark_dataset import build_processed_ood_sections
 from semanticmatcher.utils import benchmarks
 
 
@@ -196,3 +199,302 @@ def test_format_benchmark_summary_includes_skip_reason():
     assert "BENCHMARK RESULTS" in summary
     assert "languages/languages" in summary
     assert "unavailable" in summary
+
+
+def test_build_processed_ood_sections_creates_known_and_novel_pairs(tmp_path):
+    section_dir = tmp_path / "languages"
+    section_dir.mkdir()
+    csv_path = section_dir / "languages.csv"
+    csv_path.write_text(
+        "id,name,aliases,type\n"
+        "en,English,anglais|eng,language\n"
+        "fr,French,francais|fra,language\n"
+        "de,German,allemand|deu,language\n"
+        "es,Spanish,espanol|spa,language\n"
+        "it,Italian,italiano|ita,language\n",
+        encoding="utf-8",
+    )
+
+    sections = build_processed_ood_sections(
+        processed_dir=tmp_path,
+        max_entities_per_section=10,
+        max_queries_per_section=5,
+        ood_ratio=0.2,
+    )
+
+    assert len(sections) == 1
+    section = sections[0]
+    assert section["track"] == "ood_novelty"
+    assert len(section["known_entities"]) == 4
+    assert len(section["heldout_class_ids"]) == 1
+    assert section["training_data"]
+    assert section["val_known_pairs"]
+    assert section["val_novel_pairs"]
+    assert section["test_known_pairs"]
+    assert section["test_novel_pairs"]
+    assert all(not pair["is_novel"] for pair in section["test_known_pairs"])
+    assert all(pair["is_novel"] for pair in section["test_novel_pairs"])
+
+
+def test_run_novelty_on_processed_uses_detector_and_writes_artifact(
+    tmp_path,
+    monkeypatch,
+):
+    captured = {}
+
+    monkeypatch.setattr(
+        "semanticmatcher.utils.benchmark_dataset.build_processed_ood_sections",
+        lambda **kwargs: [
+            {
+                "section": "custom/test",
+                "known_entities": [
+                    {"id": "known-a", "name": "Known A"},
+                    {"id": "known-b", "name": "Known B"},
+                    {"id": "known-c", "name": "Known C"},
+                ],
+                "training_data": [
+                    {"text": "Known A", "label": "known-a"},
+                    {"text": "Known B", "label": "known-b"},
+                    {"text": "Known C", "label": "known-c"},
+                ],
+                "known_class_ids": ["known-a", "known-b", "known-c"],
+                "heldout_class_ids": ["novel-z"],
+                "val_known_pairs": [
+                    {
+                        "query": "Known A",
+                        "expected_id": "known-a",
+                        "label": "known-a",
+                        "is_novel": False,
+                        "split": "val_known",
+                    }
+                ],
+                "val_novel_pairs": [
+                    {
+                        "query": "Novel Z",
+                        "expected_id": "novel-z",
+                        "label": "novel-z",
+                        "is_novel": True,
+                        "split": "val_novel",
+                    }
+                ],
+                "test_known_pairs": [
+                    {
+                        "query": "Known B",
+                        "expected_id": "known-b",
+                        "label": "known-b",
+                        "is_novel": False,
+                        "split": "test_known",
+                    }
+                ],
+                "test_novel_pairs": [
+                    {
+                        "query": "Novel Z",
+                        "expected_id": "novel-z",
+                        "label": "novel-z",
+                        "is_novel": True,
+                        "split": "test_novel",
+                    }
+                ],
+            }
+        ],
+    )
+
+    class FakeNovelEntityMatcher:
+        def __init__(self, **kwargs):
+            captured["use_novelty_detector"] = kwargs["use_novelty_detector"]
+
+        def fit(self, training_data=None, mode=None, show_progress=True, **kwargs):
+            captured["training_data"] = training_data
+            captured["mode"] = mode
+            return self
+
+        def match(self, query, existing_classes=None):
+            if query == "Novel Z":
+                return SimpleNamespace(
+                    predicted_id="known-a",
+                    id=None,
+                    is_novel=True,
+                    score=0.2,
+                    novel_score=0.8,
+                    match_method="novelty_detector",
+                    signals={"confidence": True},
+                )
+            return SimpleNamespace(
+                predicted_id="known-b",
+                id="known-b",
+                is_novel=False,
+                score=0.9,
+                novel_score=0.1,
+                match_method="accepted_known",
+                signals={},
+            )
+
+    monkeypatch.setattr(
+        "semanticmatcher.benchmarks.runner.NovelEntityMatcher",
+        FakeNovelEntityMatcher,
+    )
+
+    runner = BenchmarkRunner(output_dir=tmp_path / "bench")
+    results = runner.run_novelty_on_processed(
+        datasets=["custom/test"],
+        model="potion-8m",
+        confidence_thresholds=[0.3],
+        ood_ratio=0.2,
+    )
+
+    assert captured["use_novelty_detector"] is True
+    assert captured["mode"] == "head-only"
+    row = results.iloc[0]
+    assert row["track"] == "ood_novelty"
+    assert row["selected_threshold"] == 0.3
+    assert row["num_threshold_candidates"] == 1
+    assert row["novel_precision"] == 1.0
+    assert row["novel_recall"] == 1.0
+    artifact_path = tmp_path / "bench" / "artifacts" / "processed_ood_novelty" / "custom__test_thr_0_3.json"
+    assert artifact_path.exists()
+
+
+def test_format_benchmark_summary_handles_ood_novelty_track():
+    results = pd.DataFrame(
+        [
+            {
+                "track": "ood_novelty",
+                "section": "languages/languages",
+                "model": "potion-8m",
+                "selected_threshold": 0.3,
+                "num_threshold_candidates": 3,
+                "num_known_classes": 4,
+                "num_heldout_classes": 1,
+                "validation_novel_f1": 0.72,
+                "validation_known_accuracy": 0.88,
+                "validation_false_positive_novel_rate": 0.12,
+                "novel_precision": 0.75,
+                "novel_recall": 0.60,
+                "novel_f1": 0.67,
+                "known_accuracy": 0.90,
+                "false_positive_novel_rate": 0.10,
+                "overall_accuracy": 0.80,
+                "artifact_path": "/tmp/artifact.json",
+            }
+        ]
+    )
+
+    summary = benchmarks.format_benchmark_summary(results)
+
+    assert "ood_novelty" in summary
+    assert "novel_precision" in summary
+    assert "/tmp/artifact.json" in summary
+
+
+def test_run_novelty_on_processed_calibrates_on_validation(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        "semanticmatcher.utils.benchmark_dataset.build_processed_ood_sections",
+        lambda **kwargs: [
+            {
+                "section": "custom/calibrated",
+                "known_entities": [
+                    {"id": "known-a", "name": "Known A"},
+                    {"id": "known-b", "name": "Known B"},
+                    {"id": "known-c", "name": "Known C"},
+                ],
+                "training_data": [
+                    {"text": "Known A", "label": "known-a"},
+                    {"text": "Known B", "label": "known-b"},
+                    {"text": "Known C", "label": "known-c"},
+                ],
+                "known_class_ids": ["known-a", "known-b", "known-c"],
+                "heldout_class_ids": ["novel-z"],
+                "val_known_pairs": [
+                    {
+                        "query": "VAL_KNOWN",
+                        "expected_id": "known-a",
+                        "label": "known-a",
+                        "is_novel": False,
+                        "split": "val_known",
+                    }
+                ],
+                "val_novel_pairs": [
+                    {
+                        "query": "VAL_NOVEL",
+                        "expected_id": "novel-z",
+                        "label": "novel-z",
+                        "is_novel": True,
+                        "split": "val_novel",
+                    }
+                ],
+                "test_known_pairs": [
+                    {
+                        "query": "TEST_KNOWN",
+                        "expected_id": "known-a",
+                        "label": "known-a",
+                        "is_novel": False,
+                        "split": "test_known",
+                    }
+                ],
+                "test_novel_pairs": [
+                    {
+                        "query": "TEST_NOVEL",
+                        "expected_id": "novel-z",
+                        "label": "novel-z",
+                        "is_novel": True,
+                        "split": "test_novel",
+                    }
+                ],
+            }
+        ],
+    )
+
+    class FakeNovelEntityMatcher:
+        def __init__(self, **kwargs):
+            self.threshold = kwargs["confidence_threshold"]
+
+        def fit(self, training_data=None, mode=None, show_progress=True, **kwargs):
+            return self
+
+        def match(self, query, existing_classes=None):
+            if self.threshold == 0.2:
+                predictions = {
+                    "VAL_KNOWN": (True, None, "known-a"),
+                    "VAL_NOVEL": (True, None, "known-a"),
+                    "TEST_KNOWN": (True, None, "known-a"),
+                    "TEST_NOVEL": (True, None, "known-a"),
+                }
+            else:
+                predictions = {
+                    "VAL_KNOWN": (False, "known-a", "known-a"),
+                    "VAL_NOVEL": (True, None, "known-a"),
+                    "TEST_KNOWN": (False, "known-a", "known-a"),
+                    "TEST_NOVEL": (True, None, "known-a"),
+                }
+            is_novel, matched_id, predicted_id = predictions[query]
+            return SimpleNamespace(
+                predicted_id=predicted_id,
+                id=matched_id,
+                is_novel=is_novel,
+                score=0.9 if not is_novel else 0.2,
+                novel_score=0.8 if is_novel else 0.1,
+                match_method="novelty_detector" if is_novel else "accepted_known",
+                signals={"confidence": is_novel},
+            )
+
+    monkeypatch.setattr(
+        "semanticmatcher.benchmarks.runner.NovelEntityMatcher",
+        FakeNovelEntityMatcher,
+    )
+
+    runner = BenchmarkRunner(output_dir=tmp_path / "bench")
+    results = runner.run_novelty_on_processed(
+        datasets=["custom/calibrated"],
+        model="potion-8m",
+        confidence_thresholds=[0.2, 0.4],
+        ood_ratio=0.2,
+        calibrate_thresholds=True,
+    )
+
+    row = results.iloc[0]
+    assert row["selected_threshold"] == 0.4
+    assert row["validation_novel_f1"] == 1.0
+    assert row["validation_known_accuracy"] == 1.0

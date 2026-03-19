@@ -34,6 +34,11 @@ __all__ = [
     "TFIDFBlocking",
     "FuzzyBlocking",
     "NoOpBlocking",
+    # Novelty detection
+    "NovelEntityMatcher",
+    "NovelClassDetector",
+    "NoveltyDetector",
+    "LLMClassProposer",
     # Exceptions
     "SemanticMatcherError",
     "ValidationError",
@@ -56,6 +61,11 @@ _EXPORTS = {
     "TFIDFBlocking": (".core.blocking", "TFIDFBlocking"),
     "FuzzyBlocking": (".core.blocking", "FuzzyBlocking"),
     "NoOpBlocking": (".core.blocking", "NoOpBlocking"),
+    # Novelty detection
+    "NovelEntityMatcher": (".novelty.entity_matcher", "NovelEntityMatcher"),
+    "NovelClassDetector": (".novelty.detector_api", "NovelClassDetector"),
+    "NoveltyDetector": (".novelty.detector", "NoveltyDetector"),
+    "LLMClassProposer": (".novelty.llm_proposer", "LLMClassProposer"),
     # Exceptions
     "SemanticMatcherError": (".exceptions", "SemanticMatcherError"),
     "ValidationError": (".exceptions", "ValidationError"),

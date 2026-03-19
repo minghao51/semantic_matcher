@@ -22,9 +22,10 @@ class AsyncExecutor:
                 capped at 32 for I/O bound workloads.
         """
         if max_workers is None:
-            # Default to CPU count * 2 for I/O bound work
             max_workers = min(32, (os.cpu_count() or 1) * 2)
-        self._executor = ThreadPoolExecutor(max_workers=max_workers)
+        self._executor: Optional[ThreadPoolExecutor] = ThreadPoolExecutor(
+            max_workers=max_workers
+        )
         self._is_shutdown = False
 
     def _require_executor(self) -> ThreadPoolExecutor:

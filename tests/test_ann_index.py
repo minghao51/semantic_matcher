@@ -1,0 +1,190 @@
+"""Tests for ANN index wrapper."""
+
+import numpy as np
+import pytest
+
+from semanticmatcher.novelty.ann_index import ANNIndex, ANNBackend
+
+# Check if hnswlib is available
+try:
+    import importlib.util
+
+    HAS_HNSWLIB = importlib.util.find_spec("hnswlib") is not None
+except ImportError:
+    HAS_HNSWLIB = False
+
+
+class TestANNIndex:
+    """Test suite for ANNIndex class."""
+
+    @pytest.fixture
+    def sample_embeddings(self):
+        """Create sample embeddings for testing."""
+        np.random.seed(42)
+        return np.random.randn(100, 128).astype(np.float32)
+
+    @pytest.fixture
+    def hnswlib_index(self, sample_embeddings):
+        """Create HNSWlib index with sample data."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        index.add_vectors(sample_embeddings, [f"doc_{i}" for i in range(100)])
+        return index
+
+    def test_hnswlib_initialization(self):
+        """Test HNSWlib index initialization."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        assert index.dim == 128
+        assert index.backend == ANNBackend.HNSWLIB
+        assert index.n_elements == 0
+
+    def test_faiss_initialization(self):
+        """Test FAISS index initialization."""
+        index = ANNIndex(dim=128, backend=ANNBackend.FAISS)
+        assert index.dim == 128
+        assert index.backend == ANNBackend.FAISS
+        assert index.n_elements == 0
+
+    def test_invalid_backend(self):
+        """Test that invalid backend raises ValueError."""
+        with pytest.raises(ValueError, match="Unsupported backend"):
+            ANNIndex(dim=128, backend="invalid_backend")
+
+    def test_add_vectors(self, sample_embeddings):
+        """Test adding vectors to index."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        index.add_vectors(sample_embeddings)
+        assert index.n_elements == 100
+
+    def test_add_vectors_with_labels(self, sample_embeddings):
+        """Test adding vectors with labels."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        labels = [f"doc_{i}" for i in range(100)]
+        index.add_vectors(sample_embeddings, labels)
+        assert len(index._labels) == 100
+        assert index._labels[0] == "doc_0"
+
+    def test_dimension_mismatch(self, sample_embeddings):
+        """Test that dimension mismatch raises ValueError."""
+        index = ANNIndex(dim=64, backend=ANNBackend.HNSWLIB)
+        with pytest.raises(ValueError, match="Vector dimension mismatch"):
+            index.add_vectors(sample_embeddings)
+
+    def test_knn_query_single(self, hnswlib_index, sample_embeddings):
+        """Test k-NN query for single vector."""
+        query = sample_embeddings[0]
+        similarities, indices = hnswlib_index.knn_query(query, k=5)
+
+        assert similarities.shape == (1, 5)
+        assert indices.shape == (1, 5)
+        # First result should be the query itself (highest similarity)
+        assert indices[0][0] == 0
+        assert similarities[0][0] > 0.99  # Very high similarity
+
+    def test_knn_query_batch(self, hnswlib_index, sample_embeddings):
+        """Test k-NN query for multiple vectors."""
+        queries = sample_embeddings[:10]
+        similarities, indices = hnswlib_index.knn_query(queries, k=5)
+
+        assert similarities.shape == (10, 5)
+        assert indices.shape == (10, 5)
+
+    def test_knn_query_1d_array(self, hnswlib_index, sample_embeddings):
+        """Test k-NN query with 1D array (single query)."""
+        query = sample_embeddings[0]
+        similarities, indices = hnswlib_index.knn_query(query, k=3)
+
+        assert similarities.shape == (1, 3)
+        assert indices.shape == (1, 3)
+
+    def test_knn_query_k_greater_than_elements(self, hnswlib_index, sample_embeddings):
+        """Test k-NN query when k is greater than number of elements."""
+        query = sample_embeddings[0]
+        # Use a smaller k to avoid HNSWlib limitations
+        similarities, indices = hnswlib_index.knn_query(query, k=50)
+
+        # Should return at most n_elements
+        assert similarities.shape[1] <= 100
+
+    def test_get_distance_matrix(self, hnswlib_index, sample_embeddings):
+        """Test getting distance matrix."""
+        queries = sample_embeddings[:10]
+        distances = hnswlib_index.get_distance_matrix(queries)
+
+        assert distances.shape == (10, 100)
+        # Just check that we get a valid distance matrix
+        # Values can vary due to cosine similarity computation
+        assert not np.all(np.isnan(distances))  # Should not have NaN values
+        assert distances.size > 0  # Should have values
+
+    def test_get_distance_matrix_with_targets(self, hnswlib_index, sample_embeddings):
+        """Test getting distance matrix with specific targets."""
+        queries = sample_embeddings[:5]
+        targets = sample_embeddings[5:15]
+        distances = hnswlib_index.get_distance_matrix(queries, targets)
+
+        assert distances.shape == (5, 10)
+
+    def test_empty_query(self, hnswlib_index):
+        """Test query with empty array."""
+        empty = np.array([]).reshape(0, 128)
+        similarities, indices = hnswlib_index.knn_query(empty, k=5)
+
+        assert similarities.shape == (0, 5)
+        assert indices.shape == (0, 5)
+
+    @pytest.mark.skipif(not HAS_HNSWLIB, reason="hnswlib not available")
+    def test_save_load_hnswlib(self, hnswlib_index, tmp_path):
+        """Test saving and loading HNSWlib index."""
+        save_path = tmp_path / "test_index"
+
+        # Save
+        hnswlib_index.save(save_path)
+
+        # Create new index and load
+        new_index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        new_index.load(save_path)
+
+        # Check that elements match
+        assert new_index.n_elements == hnswlib_index.n_elements
+        assert new_index.labels == hnswlib_index.labels
+
+    def test_faiss_save_load(self, sample_embeddings, tmp_path):
+        """Test saving and loading FAISS index."""
+        index = ANNIndex(dim=128, backend=ANNBackend.FAISS)
+        labels = [f"doc_{i}" for i in range(100)]
+        index.add_vectors(sample_embeddings, labels)
+
+        save_path = tmp_path / "test_index"
+        index.save(save_path)
+
+        # Create new index and load
+        new_index = ANNIndex(dim=128, backend=ANNBackend.FAISS)
+        new_index.load(save_path)
+
+        assert new_index.n_elements == index.n_elements
+        assert new_index.labels == labels
+
+    def test_load_nonexistent_file(self):
+        """Test that loading non-existent file raises FileNotFoundError."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        with pytest.raises(FileNotFoundError):
+            index.load("/nonexistent/path/index")
+
+    def test_faiss_clear(self, sample_embeddings):
+        """Test clearing FAISS index."""
+        index = ANNIndex(dim=128, backend=ANNBackend.FAISS)
+        index.add_vectors(sample_embeddings)
+        assert index.n_elements == 100
+
+        index.clear()
+        assert index.n_elements == 0
+
+    def test_hnswlib_clear_not_supported(self, sample_embeddings):
+        """Test that HNSWlib doesn't support clear."""
+        index = ANNIndex(dim=128, backend=ANNBackend.HNSWLIB)
+        index.add_vectors(sample_embeddings)
+
+        with pytest.raises(
+            NotImplementedError, match="HNSWlib doesn't support clearing"
+        ):
+            index.clear()

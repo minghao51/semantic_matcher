@@ -79,13 +79,14 @@ class PerformanceMonitor:
             def __init__(self, monitor: PerformanceMonitor, op: str):
                 self.monitor = monitor
                 self.op = op
-                self.start = None
+                self.start: Optional[float] = None
 
             def __enter__(self):
                 self.start = time.time()
                 return self
 
             def __exit__(self, *args):
+                assert self.start is not None
                 duration = time.time() - self.start
                 self.monitor.record(self.op, duration)
 

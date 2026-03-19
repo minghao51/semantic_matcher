@@ -1,7 +1,7 @@
 """Blocking strategies for efficient candidate filtering."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from rank_bm25 import BM25Okapi
@@ -64,9 +64,9 @@ class BM25Blocking(BlockingStrategy):
         """
         self.k1 = k1
         self.b = b
-        self.bm25 = None
-        self.cached_entities = None
-        self._entity_hash = None
+        self.bm25: Optional[BM25Okapi] = None
+        self.cached_entities: Optional[List[Dict[str, Any]]] = None
+        self._entity_hash: Optional[int] = None
 
     def build_index(self, entities: List[Dict[str, Any]]):
         """Build BM25 index from entities."""
@@ -98,6 +98,7 @@ class BM25Blocking(BlockingStrategy):
             self.build_index(entities)
 
         tokenized_query = self._tokenize(query)
+        assert self.bm25 is not None
         scores = self.bm25.get_scores(tokenized_query)
 
         # Get top_k indices
@@ -122,10 +123,10 @@ class TFIDFBlocking(BlockingStrategy):
 
     def __init__(self):
         """Initialize TF-IDF blocking."""
-        self.vectorizer = None
-        self.matrix = None
-        self.cached_entities = None
-        self._entity_hash = None
+        self.vectorizer: Optional[TfidfVectorizer] = None
+        self.matrix: Optional[Any] = None
+        self.cached_entities: Optional[List[Dict[str, Any]]] = None
+        self._entity_hash: Optional[int] = None
 
     def build_index(self, entities: List[Dict[str, Any]]):
         """Build TF-IDF index from entities."""
@@ -155,7 +156,9 @@ class TFIDFBlocking(BlockingStrategy):
         if self.vectorizer is None or self._entity_hash != current_hash:
             self.build_index(entities)
 
+        assert self.vectorizer is not None
         query_vec = self.vectorizer.transform([query])
+        assert self.matrix is not None
         scores = (self.matrix @ query_vec.T).toarray().flatten()
 
         # Get top_k indices
