@@ -1,6 +1,6 @@
-# SemanticMatcher
+# Novel Entity Matcher
 
-Map messy text to canonical entities using semantic matching.
+Map messy text to canonical entities with automatic novel entity detection and classification.
 
 **New:** Unified `Matcher` class with smart auto-selection - no need to choose between different matchers!
 

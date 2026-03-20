@@ -1,4 +1,4 @@
-# SemanticMatcher Documentation & Examples Verification Report
+# Novel Entity Matcher Documentation & Examples Verification Report
 
 **Date**: 2026-02-28
 **Scope**: Wrapper API (EntityMatcher, EmbeddingMatcher, HybridMatcher)
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This document reports on the comprehensive review and improvement of SemanticMatcher's documentation and examples. The project focused on the official wrapper API to ensure users have clear, working examples and complete documentation for all core features.
+This document reports on the comprehensive review and improvement of Novel Entity Matcher's documentation and examples. The project focused on the official wrapper API to ensure users have clear, working examples and complete documentation for all core features.
 
 **Key Achievements**:
 - ✅ Created 6 new wrapper API examples (filling critical gaps)

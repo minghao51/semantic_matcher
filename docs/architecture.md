@@ -4,7 +4,7 @@ Related docs: [`index.md`](./index.md) | [`quickstart.md`](./quickstart.md)
 
 ## Overview
 
-SemanticMatcher is a text-to-entity matching library built on SetFit few-shot learning with Sentence Transformers.
+Novel Entity Matcher is a text-to-entity matching library built on SetFit few-shot learning with Sentence Transformers, with automatic novel entity detection and classification.
 Use this page for internals and module boundaries rather than first-run usage.
 
 ## Module Structure

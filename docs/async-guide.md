@@ -1,6 +1,6 @@
 # Async API Guide
 
-The SemanticMatcher now supports async/await operations for high-concurrency scenarios. This guide covers when and how to use the async API.
+The Novel Entity Matcher now supports async/await operations for high-concurrency scenarios. This guide covers when and how to use the async API.
 
 ## When to Use Async
 

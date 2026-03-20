@@ -18,7 +18,7 @@ The landscape of **Semantic Entity Matching (SEM)** in 2026 has evolved signific
 
 ### Current Library Position
 
-**SemanticMatcher** currently offers:
+**Novel Entity Matcher** currently offers:
 - ✅ `EntityMatcher`: SetFit-based few-shot learning
 - ✅ `EmbeddingMatcher`: Bi-encoder similarity matching with cosine similarity
 - ✅ Text normalization (lowercase, accent removal, punctuation)
@@ -1018,7 +1018,7 @@ class EnsembleMatcher:
 
 ---
 
-## Integration Opportunities for SemanticMatcher
+## Integration Opportunities for Novel Entity Matcher
 
 ### Phase 1: Low-Hanging Fruit (1-2 months)
 
