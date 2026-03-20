@@ -38,20 +38,25 @@ Importing Strategies:
 from .base import NoveltyStrategy
 
 # Import low-level strategy helpers that are still useful directly.
-from .pattern_strategy import PatternBasedNoveltyStrategy, score_batch_novelty
-from .oneclass_strategy import OneClassNoveltyDetector
-from .prototypical_strategy import PrototypicalNoveltyDetector
-from .setfit_novelty import SetFitNoveltyDetector
+# Note: Wrapper classes (PatternStrategy, OneClassStrategy, etc.) are NOT imported
+# here to avoid circular imports. They are imported lazily in config/base.py.
+from .pattern_impl import PatternScorer, score_batch_novelty
+from .oneclass_impl import OneClassSVMDetector
+from .prototypical_impl import PrototypicalDetector
+from .setfit_impl import SetFitDetector
+from .self_knowledge_impl import SelfKnowledgeDetector, SparseAutoencoder
 
 __all__ = [
     # Base
     "NoveltyStrategy",
     # Low-level strategy helpers
-    "PatternBasedNoveltyStrategy",
+    "PatternScorer",
     "score_batch_novelty",
-    "OneClassNoveltyDetector",
-    "PrototypicalNoveltyDetector",
-    "SetFitNoveltyDetector",
+    "OneClassSVMDetector",
+    "PrototypicalDetector",
+    "SetFitDetector",
+    "SelfKnowledgeDetector",
+    "SparseAutoencoder",
 ]
 
 # Note: New strategies (ConfidenceStrategy, KNNDistanceStrategy, etc.)

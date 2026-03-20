@@ -161,9 +161,9 @@ class DetectionConfig(BaseModel):
         from ..strategies.clustering import ClusteringStrategy
         from ..strategies.pattern import PatternStrategy
         from ..strategies.oneclass import OneClassStrategy
-        from ..strategies.prototypical_novelty import PrototypicalStrategy
+        from ..strategies.prototypical import PrototypicalStrategy
         from ..strategies.setfit import SetFitStrategy
-        from ..strategies.self_knowledge_novelty import SelfKnowledgeStrategy
+        from ..strategies.self_knowledge import SelfKnowledgeStrategy
 
         for strategy_id in self.strategies:
             if not StrategyRegistry.is_registered(strategy_id):
