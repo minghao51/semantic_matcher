@@ -10,7 +10,7 @@ Successfully implemented a comprehensive novel class detection and proposal syst
 
 #### 1. Core Infrastructure
 - **Dependencies Added**: litellm>=1.50.0, hnswlib>=0.8.0, hdbscan>=0.8.33, pydantic>=2.0.0, faiss-cpu>=1.7.4
-- **Module Structure**: Created `src/semanticmatcher/novelty/` with complete implementation
+- **Module Structure**: Created `src/novelentitymatcher/novelty/` with complete implementation
 
 #### 2. Pydantic Schemas (`schemas.py`)
 - `NovelSampleMetadata`: Metadata for detected novel samples
@@ -135,8 +135,8 @@ File Storage: proposals/{timestamp}.yaml
 ## Usage Example
 
 ```python
-from semanticmatcher import Matcher
-from semanticmatcher.novelty.detector_api import NovelClassDetector
+from novelentitymatcher import Matcher
+from novelentitymatcher.novelty.detector_api import NovelClassDetector
 
 # Train matcher on known classes
 matcher = Matcher(entities=entities, model="minilm")
@@ -171,14 +171,14 @@ for proposal in report.class_proposals.proposed_classes:
 ## Files Created
 
 ### New Module Files
-- `src/semanticmatcher/novelty/__init__.py`
-- `src/semanticmatcher/novelty/schemas.py`
-- `src/semanticmatcher/novelty/ann_index.py`
-- `src/semanticmatcher/novelty/detector.py`
-- `src/semanticmatcher/novelty/llm_proposer.py`
-- `src/semanticmatcher/novelty/storage.py`
-- `src/semanticmatcher/novelty/detector_api.py`
-- `src/semanticmatcher/novelty/match_result.py`
+- `src/novelentitymatcher/novelty/__init__.py`
+- `src/novelentitymatcher/novelty/schemas.py`
+- `src/novelentitymatcher/novelty/ann_index.py`
+- `src/novelentitymatcher/novelty/detector.py`
+- `src/novelentitymatcher/novelty/llm_proposer.py`
+- `src/novelentitymatcher/novelty/storage.py`
+- `src/novelentitymatcher/novelty/detector_api.py`
+- `src/novelentitymatcher/novelty/match_result.py`
 
 ### Test Files
 - `tests/test_ann_index.py` (18 tests)
@@ -192,9 +192,9 @@ for proposal in report.class_proposals.proposed_classes:
 
 ### Modified Files
 - `pyproject.toml`: Added new dependencies
-- `src/semanticmatcher/config.py`: Added NOVEL_DETECTION_CONFIG and LLM_PROVIDERS
-- `src/semanticmatcher/core/matcher.py`: Added return_metadata parameter and methods
-- `src/semanticmatcher/__init__.py`: Exported novelty classes
+- `src/novelentitymatcher/config.py`: Added NOVEL_DETECTION_CONFIG and LLM_PROVIDERS
+- `src/novelentitymatcher/core/matcher.py`: Added return_metadata parameter and methods
+- `src/novelentitymatcher/__init__.py`: Exported novelty classes
 
 ## Success Criteria
 

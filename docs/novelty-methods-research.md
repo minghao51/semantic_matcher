@@ -2,13 +2,13 @@
 
 ## Overview
 
-This document provides a comprehensive overview of novel entity discovery methods researched for integration into semantic_matcher's existing `NovelEntityMatcher` and `NoveltyDetector` system.
+This document provides a comprehensive overview of novel entity discovery methods researched for integration into novel_entity_matcher's existing `NovelEntityMatcher` and `NoveltyDetector` system.
 
 **Date**: 2026-03-19
 **Status**: Research Complete, Proposal Only
 **Scope**: Low and Medium Complexity Methods
 
-This page is intentionally forward-looking. Unless a section explicitly says a method is already present in `semantic_matcher`, treat the implementation snippets and file layouts below as proposed work rather than current repository state.
+This page is intentionally forward-looking. Unless a section explicitly says a method is already present in `novel_entity_matcher`, treat the implementation snippets and file layouts below as proposed work rather than current repository state.
 
 ---
 
@@ -27,10 +27,10 @@ This page is intentionally forward-looking. Unless a section explicitly says a m
 
 ### Existing Components ✅
 
-The semantic_matcher project already has a robust novelty detection system:
+The novel_entity_matcher project already has a robust novelty detection system:
 
 #### NovelEntityMatcher
-- **Location**: `src/semanticmatcher/novelty/entity_matcher.py`
+- **Location**: `src/novelentitymatcher/novelty/entity_matcher.py`
 - **Purpose**: Primary orchestration API for novelty-aware matching
 - **Features**:
   - Multi-stage pipeline: matcher → detector → LLM proposer
@@ -38,7 +38,7 @@ The semantic_matcher project already has a robust novelty detection system:
   - Configurable detection strategies
 
 #### NoveltyDetector
-- **Location**: `src/semanticmatcher/novelty/detector.py`
+- **Location**: `src/novelentitymatcher/novelty/detector.py`
 - **Purpose**: Multi-signal novelty detection
 - **Current Strategies**:
   1. **CONFIDENCE**: Top-k uncertainty scoring (margin, entropy)
@@ -47,7 +47,7 @@ The semantic_matcher project already has a robust novelty detection system:
 - **Signal Fusion**: Weighted combination with configurable thresholds
 
 #### Detection Strategies
-- **Location**: `src/semanticmatcher/novelty/schemas.py`
+- **Location**: `src/novelentitymatcher/novelty/schemas.py`
 - **Available**:
   - `CONFIDENCE`: Low confidence detection
   - `KNN_DISTANCE`: Distance to known ANN neighbors
@@ -368,7 +368,7 @@ Medium Accuracy, Fast:   Pattern-Based
 ### File Structure
 
 ```
-src/semanticmatcher/novelty/
+src/novelentitymatcher/novelty/
 ├── strategies/
 │   ├── __init__.py
 │   ├── base.py                    # Base strategy class
@@ -398,7 +398,7 @@ examples/
 
 #### 1. Update DetectionStrategy Enum
 
-**File**: `src/semanticmatcher/novelty/schemas.py`
+**File**: `src/novelentitymatcher/novelty/schemas.py`
 
 ```python
 class DetectionStrategy(str, Enum):
@@ -415,7 +415,7 @@ class DetectionStrategy(str, Enum):
 
 #### 2. Extend NoveltyDetector
 
-**File**: `src/semanticmatcher/novelty/detector.py`
+**File**: `src/novelentitymatcher/novelty/detector.py`
 
 ```python
 class NoveltyDetector:
@@ -453,7 +453,7 @@ class NoveltyDetector:
 
 #### 3. Unified Training Interface
 
-**File**: `src/semanticmatcher/novelty/training.py`
+**File**: `src/novelentitymatcher/novelty/training.py`
 
 ```python
 class UnifiedNoveltyTrainer:
@@ -572,10 +572,10 @@ class UnifiedNoveltyTrainer:
 - **sentence-transformers**: https://www.sbert.net
 - **HuggingFace Transformers**: https://huggingface.co/docs/transformers
 
-### Related Work in semantic_matcher
+### Related Work in novel_entity_matcher
 
 - `docs/novel-class-detection.md` - Current novelty detection system
-- `src/semanticmatcher/novelty/` - Existing implementation
+- `src/novelentitymatcher/novelty/` - Existing implementation
 - `examples/novel_discovery_example.py` - Usage examples
 
 ---
@@ -654,5 +654,5 @@ Potential future additions if needed:
 ---
 
 *Last Updated: 2026-03-19*
-*Author: Semantic Matcher Research Notes*
+*Author: Novel Entity Matcher Research Notes*
 *Version: 1.0*

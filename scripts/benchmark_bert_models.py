@@ -149,7 +149,7 @@ def run_benchmark(
     Returns:
         Dict with benchmark results for each model
     """
-    from semanticmatcher.core.bert_classifier import BERTClassifier
+    from novelentitymatcher.core.bert_classifier import BERTClassifier
 
     # Generate data
     training_data, test_data = generate_synthetic_data(num_entities, samples_per_entity)

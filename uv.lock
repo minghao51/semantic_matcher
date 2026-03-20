@@ -3145,6 +3145,190 @@ wheels = [
 ]
 
 [[package]]
+name = "novel-entity-matcher"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "datasets" },
+    { name = "model2vec" },
+    { name = "networkx", version = "3.2.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "networkx", version = "3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "nltk" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pandas" },
+    { name = "pyyaml" },
+    { name = "rank-bm25" },
+    { name = "rapidfuzz", version = "3.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "rapidfuzz", version = "3.14.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "requests" },
+    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "scikit-learn", version = "1.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "sentence-transformers" },
+    { name = "setfit" },
+    { name = "torch" },
+    { name = "transformers" },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "beautifulsoup4" },
+    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "build" },
+    { name = "faiss-cpu", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "faiss-cpu", version = "1.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "hdbscan" },
+    { name = "hnswlib" },
+    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ipywidgets" },
+    { name = "litellm" },
+    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "patchright" },
+    { name = "pydantic" },
+    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ruff" },
+    { name = "seaborn" },
+    { name = "tqdm" },
+    { name = "twine" },
+]
+dev = [
+    { name = "beautifulsoup4" },
+    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "build" },
+    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ipywidgets" },
+    { name = "patchright" },
+    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ruff" },
+    { name = "tqdm" },
+    { name = "twine" },
+]
+jupyter = [
+    { name = "ipywidgets" },
+    { name = "tqdm" },
+]
+llm = [
+    { name = "litellm" },
+    { name = "pydantic" },
+]
+novelty = [
+    { name = "faiss-cpu", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "faiss-cpu", version = "1.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "hdbscan" },
+    { name = "hnswlib" },
+    { name = "pydantic" },
+]
+viz = [
+    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "seaborn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "beautifulsoup4" },
+    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "build" },
+    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "mypy" },
+    { name = "patchright" },
+    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytest-asyncio", version = "1.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest-asyncio", version = "1.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ruff" },
+    { name = "twine" },
+    { name = "types-pyyaml" },
+    { name = "types-requests" },
+    { name = "types-tqdm", version = "4.67.3.20260205", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "types-tqdm", version = "4.67.3.20260303", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", marker = "extra == 'all'", specifier = ">=4.14.3" },
+    { name = "beautifulsoup4", marker = "extra == 'dev'", specifier = ">=4.14.3" },
+    { name = "black", marker = "extra == 'all'", specifier = ">=23.0.0" },
+    { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
+    { name = "build", marker = "extra == 'all'", specifier = ">=1.2.2" },
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2" },
+    { name = "datasets", specifier = ">=2.14.0" },
+    { name = "faiss-cpu", marker = "extra == 'all'", specifier = ">=1.7.4" },
+    { name = "faiss-cpu", marker = "extra == 'novelty'", specifier = ">=1.7.4" },
+    { name = "hdbscan", marker = "extra == 'all'", specifier = ">=0.8.33" },
+    { name = "hdbscan", marker = "extra == 'novelty'", specifier = ">=0.8.33" },
+    { name = "hnswlib", marker = "extra == 'all'", specifier = ">=0.8.0" },
+    { name = "hnswlib", marker = "extra == 'novelty'", specifier = ">=0.8.0" },
+    { name = "html-to-markdown", marker = "extra == 'all'", specifier = ">=1.8.0" },
+    { name = "html-to-markdown", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "ipywidgets", marker = "extra == 'all'", specifier = ">=8.0.0" },
+    { name = "ipywidgets", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "ipywidgets", marker = "extra == 'jupyter'", specifier = ">=8.0.0" },
+    { name = "litellm", marker = "extra == 'all'", specifier = ">=1.50.0" },
+    { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.50.0" },
+    { name = "matplotlib", marker = "extra == 'all'", specifier = ">=3.9.4" },
+    { name = "matplotlib", marker = "extra == 'viz'", specifier = ">=3.9.4" },
+    { name = "model2vec", specifier = ">=0.1.0" },
+    { name = "networkx", specifier = ">=3.0,<4.0" },
+    { name = "nltk", specifier = ">=3.9.2" },
+    { name = "numpy", specifier = ">=2.0.0" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "patchright", marker = "extra == 'all'", specifier = ">=1.58.0" },
+    { name = "patchright", marker = "extra == 'dev'", specifier = ">=1.58.0" },
+    { name = "pydantic", marker = "extra == 'all'", specifier = ">=2.0.0" },
+    { name = "pydantic", marker = "extra == 'llm'", specifier = ">=2.0.0" },
+    { name = "pydantic", marker = "extra == 'novelty'", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'all'", specifier = ">=8.4.2" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "rank-bm25", specifier = ">=0.2.2" },
+    { name = "rapidfuzz", specifier = ">=3.0.0" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "ruff", marker = "extra == 'all'", specifier = ">=0.1.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "scikit-learn", specifier = ">=1.3.0" },
+    { name = "seaborn", marker = "extra == 'all'", specifier = ">=0.13.2" },
+    { name = "seaborn", marker = "extra == 'viz'", specifier = ">=0.13.2" },
+    { name = "sentence-transformers", specifier = ">=3.0.0" },
+    { name = "setfit", specifier = ">=1.0.0" },
+    { name = "torch", specifier = ">=2.0.0" },
+    { name = "tqdm", marker = "extra == 'all'", specifier = ">=4.66.0" },
+    { name = "tqdm", marker = "extra == 'dev'", specifier = ">=4.66.0" },
+    { name = "tqdm", marker = "extra == 'jupyter'", specifier = ">=4.66.0" },
+    { name = "transformers", specifier = ">=4.45.0" },
+    { name = "twine", marker = "extra == 'all'", specifier = ">=5.1.1" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=5.1.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "beautifulsoup4", specifier = ">=4.14.3" },
+    { name = "black", specifier = ">=23.0.0" },
+    { name = "build", specifier = ">=1.2.2" },
+    { name = "html-to-markdown", specifier = ">=1.8.0" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "patchright", specifier = ">=1.58.0" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-asyncio", specifier = ">=1.2.0" },
+    { name = "ruff", specifier = ">=0.1.0" },
+    { name = "twine", specifier = ">=5.1.1" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
+    { name = "types-requests", specifier = ">=2.32.4.20260107" },
+    { name = "types-tqdm", specifier = ">=4.67.3.20260205" },
+]
+
+[[package]]
 name = "numpy"
 version = "2.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -5555,190 +5739,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be", size = 19884 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/46/f5af3402b579fd5e11573ce652019a67074317e18c1935cc0b4ba9b35552/secretstorage-3.5.0-py3-none-any.whl", hash = "sha256:0ce65888c0725fcb2c5bc0fdb8e5438eece02c523557ea40ce0703c266248137", size = 15554 },
-]
-
-[[package]]
-name = "semantic-matcher"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "datasets" },
-    { name = "model2vec" },
-    { name = "networkx", version = "3.2.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
-    { name = "networkx", version = "3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "nltk" },
-    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
-    { name = "numpy", version = "2.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pandas" },
-    { name = "pyyaml" },
-    { name = "rank-bm25" },
-    { name = "rapidfuzz", version = "3.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "rapidfuzz", version = "3.14.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "requests" },
-    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "scikit-learn", version = "1.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "sentence-transformers" },
-    { name = "setfit" },
-    { name = "torch" },
-    { name = "transformers" },
-]
-
-[package.optional-dependencies]
-all = [
-    { name = "beautifulsoup4" },
-    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "build" },
-    { name = "faiss-cpu", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "faiss-cpu", version = "1.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "hdbscan" },
-    { name = "hnswlib" },
-    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ipywidgets" },
-    { name = "litellm" },
-    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "patchright" },
-    { name = "pydantic" },
-    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ruff" },
-    { name = "seaborn" },
-    { name = "tqdm" },
-    { name = "twine" },
-]
-dev = [
-    { name = "beautifulsoup4" },
-    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "build" },
-    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ipywidgets" },
-    { name = "patchright" },
-    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ruff" },
-    { name = "tqdm" },
-    { name = "twine" },
-]
-jupyter = [
-    { name = "ipywidgets" },
-    { name = "tqdm" },
-]
-llm = [
-    { name = "litellm" },
-    { name = "pydantic" },
-]
-novelty = [
-    { name = "faiss-cpu", version = "1.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "faiss-cpu", version = "1.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "hdbscan" },
-    { name = "hnswlib" },
-    { name = "pydantic" },
-]
-viz = [
-    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "seaborn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "beautifulsoup4" },
-    { name = "black", version = "25.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "black", version = "26.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "build" },
-    { name = "html-to-markdown", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "html-to-markdown", version = "2.25.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "mypy" },
-    { name = "patchright" },
-    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "pytest-asyncio", version = "1.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pytest-asyncio", version = "1.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ruff" },
-    { name = "twine" },
-    { name = "types-pyyaml" },
-    { name = "types-requests" },
-    { name = "types-tqdm", version = "4.67.3.20260205", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "types-tqdm", version = "4.67.3.20260303", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", marker = "extra == 'all'", specifier = ">=4.14.3" },
-    { name = "beautifulsoup4", marker = "extra == 'dev'", specifier = ">=4.14.3" },
-    { name = "black", marker = "extra == 'all'", specifier = ">=23.0.0" },
-    { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
-    { name = "build", marker = "extra == 'all'", specifier = ">=1.2.2" },
-    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2" },
-    { name = "datasets", specifier = ">=2.14.0" },
-    { name = "faiss-cpu", marker = "extra == 'all'", specifier = ">=1.7.4" },
-    { name = "faiss-cpu", marker = "extra == 'novelty'", specifier = ">=1.7.4" },
-    { name = "hdbscan", marker = "extra == 'all'", specifier = ">=0.8.33" },
-    { name = "hdbscan", marker = "extra == 'novelty'", specifier = ">=0.8.33" },
-    { name = "hnswlib", marker = "extra == 'all'", specifier = ">=0.8.0" },
-    { name = "hnswlib", marker = "extra == 'novelty'", specifier = ">=0.8.0" },
-    { name = "html-to-markdown", marker = "extra == 'all'", specifier = ">=1.8.0" },
-    { name = "html-to-markdown", marker = "extra == 'dev'", specifier = ">=1.8.0" },
-    { name = "ipywidgets", marker = "extra == 'all'", specifier = ">=8.0.0" },
-    { name = "ipywidgets", marker = "extra == 'dev'", specifier = ">=8.0.0" },
-    { name = "ipywidgets", marker = "extra == 'jupyter'", specifier = ">=8.0.0" },
-    { name = "litellm", marker = "extra == 'all'", specifier = ">=1.50.0" },
-    { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.50.0" },
-    { name = "matplotlib", marker = "extra == 'all'", specifier = ">=3.9.4" },
-    { name = "matplotlib", marker = "extra == 'viz'", specifier = ">=3.9.4" },
-    { name = "model2vec", specifier = ">=0.1.0" },
-    { name = "networkx", specifier = ">=3.0,<4.0" },
-    { name = "nltk", specifier = ">=3.9.2" },
-    { name = "numpy", specifier = ">=2.0.0" },
-    { name = "pandas", specifier = ">=2.0.0" },
-    { name = "patchright", marker = "extra == 'all'", specifier = ">=1.58.0" },
-    { name = "patchright", marker = "extra == 'dev'", specifier = ">=1.58.0" },
-    { name = "pydantic", marker = "extra == 'all'", specifier = ">=2.0.0" },
-    { name = "pydantic", marker = "extra == 'llm'", specifier = ">=2.0.0" },
-    { name = "pydantic", marker = "extra == 'novelty'", specifier = ">=2.0.0" },
-    { name = "pytest", marker = "extra == 'all'", specifier = ">=8.4.2" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
-    { name = "rank-bm25", specifier = ">=0.2.2" },
-    { name = "rapidfuzz", specifier = ">=3.0.0" },
-    { name = "requests", specifier = ">=2.31.0" },
-    { name = "ruff", marker = "extra == 'all'", specifier = ">=0.1.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "scikit-learn", specifier = ">=1.3.0" },
-    { name = "seaborn", marker = "extra == 'all'", specifier = ">=0.13.2" },
-    { name = "seaborn", marker = "extra == 'viz'", specifier = ">=0.13.2" },
-    { name = "sentence-transformers", specifier = ">=3.0.0" },
-    { name = "setfit", specifier = ">=1.0.0" },
-    { name = "torch", specifier = ">=2.0.0" },
-    { name = "tqdm", marker = "extra == 'all'", specifier = ">=4.66.0" },
-    { name = "tqdm", marker = "extra == 'dev'", specifier = ">=4.66.0" },
-    { name = "tqdm", marker = "extra == 'jupyter'", specifier = ">=4.66.0" },
-    { name = "transformers", specifier = ">=4.45.0" },
-    { name = "twine", marker = "extra == 'all'", specifier = ">=5.1.1" },
-    { name = "twine", marker = "extra == 'dev'", specifier = ">=5.1.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "beautifulsoup4", specifier = ">=4.14.3" },
-    { name = "black", specifier = ">=23.0.0" },
-    { name = "build", specifier = ">=1.2.2" },
-    { name = "html-to-markdown", specifier = ">=1.8.0" },
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "patchright", specifier = ">=1.58.0" },
-    { name = "pytest", specifier = ">=8.4.2" },
-    { name = "pytest-asyncio", specifier = ">=1.2.0" },
-    { name = "ruff", specifier = ">=0.1.0" },
-    { name = "twine", specifier = ">=5.1.1" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
-    { name = "types-requests", specifier = ">=2.32.4.20260107" },
-    { name = "types-tqdm", specifier = ">=4.67.3.20260205" },
 ]
 
 [[package]]

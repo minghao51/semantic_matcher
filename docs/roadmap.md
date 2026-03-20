@@ -1,4 +1,4 @@
-# semantic_matcher Project Roadmap
+# novel_entity_matcher Project Roadmap
 
 **Last Updated:** 2026-03-18
 **Status:** Active Development
@@ -8,10 +8,10 @@
 
 ## Executive Summary
 
-This roadmap outlines the strategic direction for `semantic_matcher` based on comprehensive research of the 2026 semantic matching landscape. The project is well-positioned with unique strengths (async API, novelty detection, benchmarking) and has opportunities to become a leading open-source framework.
+This roadmap outlines the strategic direction for `novel_entity_matcher` based on comprehensive research of the 2026 semantic matching landscape. The project is well-positioned with unique strengths (async API, novelty detection, benchmarking) and has opportunities to become a leading open-source framework.
 
 ### Vision
-Make `semantic_matcher` the **go-to Python framework** for semantic matching and entity resolution, combining production-ready performance with state-of-the-art novelty detection.
+Make `novel_entity_matcher` the **go-to Python framework** for semantic matching and entity resolution, combining production-ready performance with state-of-the-art novelty detection.
 
 ### Current Status
 - ✅ Async API architecture (unique differentiator)
@@ -28,7 +28,7 @@ Make `semantic_matcher` the **go-to Python framework** for semantic matching and
 ## Target Milestones
 
 ### **v0.4.0 - Performance & Scalability** (Q2 2026)
-Focus: Make semantic_matcher production-ready for large-scale deployments
+Focus: Make novel_entity_matcher production-ready for large-scale deployments
 
 ### **v0.5.0 - Learning & Adaptation** (Q3 2026)
 Focus: Add human-in-the-loop capabilities and adaptive thresholds
@@ -67,7 +67,7 @@ Focus: Stability, documentation, and ecosystem integration
   - Implement strategy selection heuristics
 
 #### Deliverables
-- `src/semanticmatcher/blocking/` module
+- `src/novelentitymatcher/blocking/` module
 - Performance benchmarks showing 10x+ speedup on large datasets
 - Documentation on blocking strategy selection
 
@@ -151,7 +151,7 @@ Focus: Stability, documentation, and ecosystem integration
   - Implement stopping criteria
 
 #### Deliverables
-- `src/semanticmatcher/active_learning/` module
+- `src/novelentitymatcher/active_learning/` module
 - Active learning CLI tool
 - Documentation on active learning workflows
 
@@ -224,7 +224,7 @@ Focus: Stability, documentation, and ecosystem integration
   - Ablation studies on components
 
 #### Deliverables
-- `src/semanticmatcher/contrastive/` module
+- `src/novelentitymatcher/contrastive/` module
 - Pre-trained contrastive models
 - Research paper/blog post on results
 
@@ -248,7 +248,7 @@ Focus: Stability, documentation, and ecosystem integration
   - Create novelty report templates
 
 #### Deliverables
-- `src/semanticmatcher/agentic/` module
+- `src/novelentitymatcher/agentic/` module
 - Novelty analysis API
 - Example notebooks and documentation
 
@@ -503,6 +503,6 @@ We welcome contributions! See areas where we need help:
 
 ---
 
-**Document Maintainers:** semantic_matcher core team
+**Document Maintainers:** novel_entity_matcher core team
 **Review Cycle:** Quarterly
 **Feedback:** Open an issue on GitHub for suggestions or questions

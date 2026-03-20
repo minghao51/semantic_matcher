@@ -322,7 +322,7 @@ Measured on Apple M1 (8GB RAM):
 
 ## 8. Conclusion
 
-The semantic_matcher library now has comprehensive wrapper API examples covering all three core matchers (Entity, Embedding, Hybrid) plus model persistence, batch processing, threshold tuning, and matcher comparison.
+The novel_entity_matcher library now has comprehensive wrapper API examples covering all three core matchers (Entity, Embedding, Hybrid) plus model persistence, batch processing, threshold tuning, and matcher comparison.
 
 **Users can now effectively learn the wrapper API through clear, working examples** with:
 - Progressive difficulty (Beginner → Intermediate → Advanced)

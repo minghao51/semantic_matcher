@@ -1,4 +1,4 @@
-from semanticmatcher.ingestion.timezones import WorldTimeAPIFetcher
+from novelentitymatcher.ingestion.timezones import WorldTimeAPIFetcher
 
 
 def test_worldtimeapi_uses_https():

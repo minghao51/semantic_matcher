@@ -3,7 +3,7 @@ import asyncio
 import threading
 import time
 from types import MethodType
-from semanticmatcher.core.matcher import Matcher
+from novelentitymatcher.core.matcher import Matcher
 
 
 class TestMatcherAsyncLifecycle:
@@ -251,7 +251,7 @@ class TestEntityMatcherAsync:
     @pytest.mark.asyncio
     async def test_entity_matcher_train_async(self, sample_entities, training_data):
         """Test EntityMatcher.train_async"""
-        from semanticmatcher.core.matcher import EntityMatcher
+        from novelentitymatcher.core.matcher import EntityMatcher
 
         matcher = EntityMatcher(entities=sample_entities)
         await matcher.train_async(training_data, num_epochs=1)
@@ -260,7 +260,7 @@ class TestEntityMatcherAsync:
     @pytest.mark.asyncio
     async def test_entity_matcher_match_async(self, sample_entities, training_data):
         """Test EntityMatcher.match_async"""
-        from semanticmatcher.core.matcher import EntityMatcher
+        from novelentitymatcher.core.matcher import EntityMatcher
 
         matcher = EntityMatcher(entities=sample_entities)
         await matcher.train_async(training_data, num_epochs=1)
@@ -270,7 +270,7 @@ class TestEntityMatcherAsync:
     @pytest.mark.asyncio
     async def test_entity_matcher_predict_async(self, sample_entities, training_data):
         """Test EntityMatcher.predict_async"""
-        from semanticmatcher.core.matcher import EntityMatcher
+        from novelentitymatcher.core.matcher import EntityMatcher
 
         matcher = EntityMatcher(entities=sample_entities)
         await matcher.train_async(training_data, num_epochs=1)
@@ -289,7 +289,7 @@ class TestEmbeddingMatcherAsync:
     @pytest.mark.asyncio
     async def test_embedding_matcher_build_index_async(self, sample_entities):
         """Test EmbeddingMatcher.build_index_async"""
-        from semanticmatcher.core.matcher import EmbeddingMatcher
+        from novelentitymatcher.core.matcher import EmbeddingMatcher
 
         matcher = EmbeddingMatcher(entities=sample_entities)
         await matcher.build_index_async()
@@ -298,7 +298,7 @@ class TestEmbeddingMatcherAsync:
     @pytest.mark.asyncio
     async def test_embedding_matcher_match_async(self, sample_entities):
         """Test EmbeddingMatcher.match_async"""
-        from semanticmatcher.core.matcher import EmbeddingMatcher
+        from novelentitymatcher.core.matcher import EmbeddingMatcher
 
         matcher = EmbeddingMatcher(entities=sample_entities)
         await matcher.build_index_async()
@@ -314,7 +314,7 @@ class TestAsyncCancellation:
     @pytest.mark.asyncio
     async def test_match_batch_async_cancellation(self, sample_entities):
         """Test that batch matching can be cancelled"""
-        from semanticmatcher.core.matcher import Matcher
+        from novelentitymatcher.core.matcher import Matcher
 
         async with Matcher(entities=sample_entities) as matcher:
             await matcher.fit_async()

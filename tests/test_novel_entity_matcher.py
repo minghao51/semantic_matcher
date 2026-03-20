@@ -1,12 +1,12 @@
 """Tests for the promoted NovelEntityMatcher orchestration API."""
 
-import semanticmatcher
+import novelentitymatcher
 import pytest
 from types import SimpleNamespace
 
-from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty import DetectionConfig
-from semanticmatcher.novelty.config.strategies import ConfidenceConfig
+from novelentitymatcher import Matcher, NovelEntityMatcher
+from novelentitymatcher.novelty import DetectionConfig
+from novelentitymatcher.novelty.config.strategies import ConfidenceConfig
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ class TestNovelEntityMatcher:
             "EmbeddingMatcher",
             "HybridMatcher",
         ]:
-            assert not hasattr(semanticmatcher, attr)
+            assert not hasattr(novelentitymatcher, attr)
 
     def test_below_threshold_known_prediction_is_not_novel_when_detector_disabled(
         self, trained_matcher

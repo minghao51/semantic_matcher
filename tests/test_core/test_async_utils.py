@@ -1,5 +1,5 @@
 import pytest
-from semanticmatcher.core.async_utils import AsyncExecutor
+from novelentitymatcher.core.async_utils import AsyncExecutor
 
 
 class TestAsyncExecutor:

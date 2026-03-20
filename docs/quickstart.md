@@ -2,14 +2,14 @@
 
 Related docs: [`index.md`](./index.md) | [`examples.md`](./examples.md) | [`troubleshooting.md`](./troubleshooting.md)
 
-This guide covers the main `semanticmatcher.Matcher` workflow. Use it when you want to map messy input text to canonical entity IDs.
+This guide covers the main `novelentitymatcher.Matcher` workflow. Use it when you want to map messy input text to canonical entity IDs.
 
 ## Install
 
 ### From PyPI
 
 ```bash
-uv add semantic-matcher
+uv add novel-entity-matcher
 ```
 
 ### For local development
@@ -18,7 +18,7 @@ uv add semantic-matcher
 uv sync --group dev
 ```
 
-If you are not using `uv`, `pip install semantic-matcher` also works.
+If you are not using `uv`, `pip install novel-entity-matcher` also works.
 
 ## Basic Zero-Shot Matching
 
@@ -26,7 +26,7 @@ Use zero-shot mode when you do not have labeled training data yet. The async rou
 
 ```python
 import asyncio
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 async def main():
     entities = [
@@ -90,7 +90,7 @@ entities = [
 If you have labeled examples, pass them to `fit(training_data=...)`.
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 entities = [
     {"id": "DE", "name": "Germany"},

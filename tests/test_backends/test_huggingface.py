@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from semanticmatcher.backends.sentencetransformer import HFEmbedding, HFReranker
+from novelentitymatcher.backends.sentencetransformer import HFEmbedding, HFReranker
 
 pytestmark = [pytest.mark.hf, pytest.mark.integration, pytest.mark.slow]
 
@@ -46,7 +46,7 @@ class TestHFEmbedding:
             return [[{"corpus_id": 0, "score": 1.0}]]
 
         monkeypatch.setattr(
-            "semanticmatcher.backends.sentencetransformer.semantic_search",
+            "novelentitymatcher.backends.sentencetransformer.semantic_search",
             fake_semantic_search,
         )
 

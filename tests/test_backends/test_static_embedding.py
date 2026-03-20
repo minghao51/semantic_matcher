@@ -3,7 +3,7 @@ import pytest
 # Skip RikkaBotan tests if dependencies are not available
 pytest.importorskip("model2vec", reason="model2vec not installed")
 
-from semanticmatcher.backends.static_embedding import StaticEmbeddingBackend
+from novelentitymatcher.backends.static_embedding import StaticEmbeddingBackend
 
 
 @pytest.mark.hf
@@ -55,7 +55,7 @@ def test_static_backend_dimension_reduction():
 @pytest.mark.hf
 def test_static_vs_dynamic_comparison():
     """Compare static vs dynamic embedding quality."""
-    from semanticmatcher.backends.sentencetransformer import HFEmbedding
+    from novelentitymatcher.backends.sentencetransformer import HFEmbedding
 
     static_backend = StaticEmbeddingBackend("minishlab/potion-base-8M")
     dynamic_backend = HFEmbedding("sentence-transformers/all-MiniLM-L6-v2")

@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from semanticmatcher.novelty.storage.index import ANNIndex, ANNBackend
+from novelentitymatcher.novelty.storage.index import ANNIndex, ANNBackend
 
 # Check if hnswlib is available
 try:

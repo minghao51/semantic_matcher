@@ -4,7 +4,7 @@ Example: Hierarchical Entity Matching
 Demonstrates how to use HierarchicalMatcher for multi-level entity matching.
 """
 
-from semanticmatcher import HierarchicalMatcher
+from novelentitymatcher import HierarchicalMatcher
 
 # Define hierarchical entities
 entities = [

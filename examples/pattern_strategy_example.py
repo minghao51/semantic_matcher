@@ -5,7 +5,7 @@ Demonstrates how to use the PatternBasedNoveltyStrategy to detect
 novel entities based on orthographic and linguistic patterns.
 """
 
-from semanticmatcher.novelty.strategies.pattern_strategy import (
+from novelentitymatcher.novelty.strategies.pattern_strategy import (
     PatternBasedNoveltyStrategy,
     score_batch_novelty,
 )

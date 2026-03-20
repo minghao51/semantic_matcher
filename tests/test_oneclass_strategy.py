@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from semanticmatcher.novelty.strategies.oneclass_impl import OneClassSVMDetector
+from novelentitymatcher.novelty.strategies.oneclass_impl import OneClassSVMDetector
 
 
 class TestOneClassSVMDetector:

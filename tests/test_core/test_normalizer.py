@@ -1,4 +1,4 @@
-from semanticmatcher.core.normalizer import TextNormalizer
+from novelentitymatcher.core.normalizer import TextNormalizer
 
 
 class TestTextNormalizer:

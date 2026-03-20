@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from semanticmatcher.ingestion import cli
+from novelentitymatcher.ingestion import cli
 
 
 def test_cli_lists_datasets(capsys):

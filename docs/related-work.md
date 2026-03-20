@@ -14,7 +14,7 @@ As of early 2026, the semantic matching and entity resolution landscape has sign
 4. **Active Learning** - Human-in-the-loop refinement for enterprise workflows
 5. **Novelty Detection** - Identifying when records represent new entities
 
-This document summarizes key open-source projects, research findings, and proposes enhancements for the `semantic_matcher` project.
+This document summarizes key open-source projects, research findings, and proposes enhancements for the `novel_entity_matcher` project.
 
 ---
 
@@ -65,7 +65,7 @@ This document summarizes key open-source projects, research findings, and propos
 - **Semantic Matching:** High (deep learning)
 - **Novelty Detection:** Vector space distance
 
-**Key Insight:** Most similar to `semantic_matcher`'s embedding-based approach.
+**Key Insight:** Most similar to `novel_entity_matcher`'s embedding-based approach.
 
 ### 6. **EntityMatchingModel (EMM)**
 - **Repository:** https://github.com/ing-bank/EntityMatchingModel
@@ -220,7 +220,7 @@ print(identify_entity("Interstellar Mining")) # NIL: Novel entity
 
 ## Comparison: Top ER Frameworks (2026)
 
-| Feature | **Splink** | **Zingg** | **Entity-Embed** | **ComEM** | **semantic_matcher** |
+| Feature | **Splink** | **Zingg** | **Entity-Embed** | **ComEM** | **novel_entity_matcher** |
 |---------|-----------|-----------|------------------|-----------|---------------------|
 | **Primary Approach** | Probabilistic | Active Learning | Semantic Embeddings | LLM Reasoning | Embedding + Rules |
 | **Scaling Backend** | DuckDB, Spark | Spark | PyTorch (GPU/ANN) | API/Local LLM | In-memory |
@@ -233,11 +233,11 @@ print(identify_entity("Interstellar Mining")) # NIL: Novel entity
 
 ---
 
-## Relationship to semantic_matcher Project
+## Relationship to novel_entity_matcher Project
 
 ### Current Strengths ✅
 
-The `semantic_matcher` project is **well-positioned** within the 2026 landscape:
+The `novel_entity_matcher` project is **well-positioned** within the 2026 landscape:
 
 1. **Embedding-Based Matching** - Similar to Entity-Embed's approach
 2. **Novelty Detection** - Built-in capabilities like OpenNovelty/EDIN
@@ -256,7 +256,7 @@ The `semantic_matcher` project is **well-positioned** within the 2026 landscape:
 
 ## Proposed Enhancements
 
-Based on the research landscape, here are proposed enhancements for `semantic_matcher`:
+Based on the research landscape, here are proposed enhancements for `novel_entity_matcher`:
 
 ### Priority 1: NIL Prediction Enhancement 🔥
 
@@ -474,7 +474,7 @@ class AgenticNoveltyAnalyzer:
 
 ## Conclusion
 
-The `semantic_matcher` project is **well-positioned** within the 2026 semantic matching landscape. Its current strengths (async API, embedding-based matching, novelty detection, benchmarking) align with state-of-the-art approaches.
+The `novel_entity_matcher` project is **well-positioned** within the 2026 semantic matching landscape. Its current strengths (async API, embedding-based matching, novelty detection, benchmarking) align with state-of-the-art approaches.
 
 The proposed enhancements focus on:
 1. **Improved NIL prediction** - Better novelty detection accuracy
@@ -483,7 +483,7 @@ The proposed enhancements focus on:
 4. **Contrastive learning** - Better entity separation
 5. **Agentic analysis** - Explainable novelty assessment
 
-By implementing these enhancements, `semantic_matcher` can become a **leading open-source framework** for semantic matching and novelty detection, combining the best aspects of Splink (production-ready), Entity-Embed (semantic), ComEM (LLM-powered), and OpenNovelty (agentic).
+By implementing these enhancements, `novel_entity_matcher` can become a **leading open-source framework** for semantic matching and novelty detection, combining the best aspects of Splink (production-ready), Entity-Embed (semantic), ComEM (LLM-powered), and OpenNovelty (agentic).
 
 ---
 
@@ -515,4 +515,4 @@ By implementing these enhancements, `semantic_matcher` can become a **leading op
 
 **Document Version:** 1.0
 **Last Updated:** 2026-03-18
-**Maintainer:** semantic_matcher project
+**Maintainer:** novel_entity_matcher project

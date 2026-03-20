@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from semanticmatcher.utils.embeddings import (
+from novelentitymatcher.utils.embeddings import (
     compute_embeddings,
     cosine_sim,
     batch_encode,

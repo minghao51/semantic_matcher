@@ -289,7 +289,7 @@ class HierarchicalMatcher:
 **Basic Hierarchical Matching:**
 
 ```python
-from semanticmatcher import HierarchicalMatcher
+from novelentitymatcher import HierarchicalMatcher
 
 # Define entities with hierarchy
 entities = [
@@ -387,7 +387,7 @@ results = matcher.match("gaming computer")
 ### File Structure
 
 ```
-src/semanticmatcher/core/
+src/novelentitymatcher/core/
 ├── hierarchy.py (NEW - ~600 LOC)
 │   ├── HierarchyIndex
 │   ├── HierarchicalScoring
@@ -396,7 +396,7 @@ src/semanticmatcher/core/
 ├── hybrid.py (EXISTING - optional enhancement)
 └── ...
 
-src/semanticmatcher/
+src/novelentitymatcher/
 ├── __init__.py (UPDATE - export HierarchicalMatcher)
 └── ...
 ```

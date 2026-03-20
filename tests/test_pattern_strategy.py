@@ -2,7 +2,7 @@
 
 import pytest
 
-from semanticmatcher.novelty.strategies.pattern_impl import (
+from novelentitymatcher.novelty.strategies.pattern_impl import (
     PatternScorer,
     score_batch_novelty,
 )

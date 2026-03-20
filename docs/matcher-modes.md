@@ -39,7 +39,7 @@ The unified `Matcher` class supports multiple matching strategies through **mode
 
 **Example:**
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 matcher = Matcher(entities=entities, mode="zero-shot")
 matcher.fit()
@@ -325,7 +325,7 @@ Accuracy on typical dataset (higher is better):
 ### Blocking Strategies
 
 ```python
-from semanticmatcher.core.blocking import BM25Blocking
+from novelentitymatcher.core.blocking import BM25Blocking
 
 matcher = Matcher(
     entities=entities,
@@ -436,7 +436,7 @@ results = matcher.match(
 ### Old Way
 
 ```python
-from semanticmatcher import EmbeddingMatcher, EntityMatcher
+from novelentitymatcher import EmbeddingMatcher, EntityMatcher
 
 # Zero-shot
 matcher = EmbeddingMatcher(entities=entities)
@@ -450,7 +450,7 @@ matcher.train(training_data)
 ### New Way
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 # Zero-shot
 matcher = Matcher(entities=entities, mode="zero-shot")

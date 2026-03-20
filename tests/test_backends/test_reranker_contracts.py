@@ -1,5 +1,5 @@
-import semanticmatcher.backends.reranker_st as reranker_st_module
-import semanticmatcher.backends.sentencetransformer as st_backend_module
+import novelentitymatcher.backends.reranker_st as reranker_st_module
+import novelentitymatcher.backends.sentencetransformer as st_backend_module
 
 
 def test_hf_reranker_score_returns_numeric_list(monkeypatch):

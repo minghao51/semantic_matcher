@@ -6,11 +6,11 @@ from pathlib import Path
 import tempfile
 from datetime import datetime
 
-from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty import DetectionConfig
-from semanticmatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
-from semanticmatcher.novelty.core.detector import NoveltyDetector
-from semanticmatcher.novelty.storage import load_proposals, save_proposals
+from novelentitymatcher import Matcher, NovelEntityMatcher
+from novelentitymatcher.novelty import DetectionConfig
+from novelentitymatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
+from novelentitymatcher.novelty.core.detector import NoveltyDetector
+from novelentitymatcher.novelty.storage import load_proposals, save_proposals
 
 
 class TestNovelClassDetectionIntegration:
@@ -266,7 +266,7 @@ class TestNovelClassDetectionIntegration:
 
     def test_save_proposals_uses_unique_filenames_per_discovery(self):
         """Reports saved in the same second should not overwrite each other."""
-        from semanticmatcher.novelty.schemas import (
+        from novelentitymatcher.novelty.schemas import (
             NovelClassDiscoveryReport,
             NovelSampleReport,
         )

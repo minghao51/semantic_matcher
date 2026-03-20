@@ -1,6 +1,6 @@
-"""CLI wrapper for semanticmatcher benchmark utilities."""
+"""CLI wrapper for novelentitymatcher benchmark utilities."""
 
-from semanticmatcher.utils.benchmarks import main
+from novelentitymatcher.utils.benchmarks import main
 
 
 if __name__ == "__main__":

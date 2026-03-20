@@ -5,9 +5,9 @@
 ## Main Flow
 
 ```python
-from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty import DetectionConfig
-from semanticmatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
+from novelentitymatcher import Matcher, NovelEntityMatcher
+from novelentitymatcher.novelty import DetectionConfig
+from novelentitymatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
 
 entities = [
     {"id": "physics", "name": "Physics"},
@@ -41,10 +41,10 @@ report = await novel_matcher.discover_novel_classes(
 
 ## Lower-Level Components
 
-- `semanticmatcher.novelty.core.detector.NoveltyDetector`: modular detector used by `NovelEntityMatcher`
-- `semanticmatcher.novelty.proposal.llm.LLMClassProposer`: LLM-backed naming and summarization
-- `semanticmatcher.novelty.storage.ANNIndex`: ANN search index used by distance-based strategies
-- `semanticmatcher.novelty.storage.save_proposals` / `load_proposals`: persistence helpers for discovery reports
+- `novelentitymatcher.novelty.core.detector.NoveltyDetector`: modular detector used by `NovelEntityMatcher`
+- `novelentitymatcher.novelty.proposal.llm.LLMClassProposer`: LLM-backed naming and summarization
+- `novelentitymatcher.novelty.storage.ANNIndex`: ANN search index used by distance-based strategies
+- `novelentitymatcher.novelty.storage.save_proposals` / `load_proposals`: persistence helpers for discovery reports
 
 ## Reports
 

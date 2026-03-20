@@ -3,8 +3,8 @@
 import pytest
 import numpy as np
 import torch
-from semanticmatcher.core.bert_classifier import BERTClassifier
-from semanticmatcher.exceptions import TrainingError
+from novelentitymatcher.core.bert_classifier import BERTClassifier
+from novelentitymatcher.exceptions import TrainingError
 
 # Skip single-label test on MPS due to PyTorch MSE loss compatibility
 skip_on_mps = pytest.mark.skipif(

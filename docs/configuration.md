@@ -4,7 +4,7 @@ Related docs: [`index.md`](./index.md) | [`models.md`](./models.md) | [`architec
 
 ## Overview
 
-Semantic Matcher provides multiple ways to configure model selection, defaults, and behavior through:
+Novel Entity Matcher provides multiple ways to configure model selection, defaults, and behavior through:
 - Model registries (built-in)
 - Configuration files (YAML/JSON)
 - Environment variables
@@ -17,7 +17,7 @@ Semantic Matcher provides multiple ways to configure model selection, defaults, 
 The library includes several registries for easy model selection:
 
 ```python
-from semanticmatcher.config import (
+from novelentitymatcher.config import (
     MODEL_SPECS,
     STATIC_MODEL_REGISTRY,
     DYNAMIC_MODEL_REGISTRY,
@@ -59,7 +59,7 @@ MODEL_SPECS = {
 Extend the registry with your own models:
 
 ```python
-from semanticmatcher.config import MODEL_SPECS
+from novelentitymatcher.config import MODEL_SPECS
 
 MODEL_SPECS["my-model"] = {
     "name": "my-org/my-custom-model",
@@ -69,14 +69,14 @@ MODEL_SPECS["my-model"] = {
 }
 
 # Now you can use the alias
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 matcher = Matcher(entities=entities, model="my-model")
 ```
 
 ### Querying Model Specs
 
 ```python
-from semanticmatcher.config import get_model_spec
+from novelentitymatcher.config import get_model_spec
 
 # Get model metadata
 spec = get_model_spec("potion-8m")
@@ -85,7 +85,7 @@ print(spec["backend"])     # "static"
 print(spec["language"])    # "en"
 
 # Check if model supports training
-from semanticmatcher.config import supports_training_model
+from novelentitymatcher.config import supports_training_model
 print(supports_training_model("potion-8m"))  # False
 print(supports_training_model("mpnet"))      # True
 ```
@@ -136,7 +136,7 @@ Or JSON:
 ### Using Configuration
 
 ```python
-from semanticmatcher.config import Config
+from novelentitymatcher.config import Config
 
 # Load default config
 cfg = Config()
@@ -165,7 +165,7 @@ embedding:
 
 ```python
 # my-project/script.py
-from semanticmatcher.config import Config
+from novelentitymatcher.config import Config
 
 cfg = Config()  # Automatically finds project/config.yaml
 model = cfg.default_model  # "bge-base"
@@ -178,16 +178,16 @@ epochs = cfg.training.num_epochs  # 8
 
 ```bash
 # Set default embedding model
-export SEMANTIC_MATCHER_DEFAULT_MODEL="potion-8m"
+export NOVEL_ENTITY_MATCHER_DEFAULT_MODEL="potion-8m"
 
 # Set training default model
-export SEMANTIC_MATCHER_TRAINING_MODEL="mpnet"
+export NOVEL_ENTITY_MATCHER_TRAINING_MODEL="mpnet"
 
 # Enable verbose logging
-export SEMANTIC_MATCHER_VERBOSE="true"
+export NOVEL_ENTITY_MATCHER_VERBOSE="true"
 
 # Disable text normalization
-export SEMANTIC_MATCHER_NORMALIZE="false"
+export NOVEL_ENTITY_MATCHER_NORMALIZE="false"
 
 # PyTorch device selection
 export CUDA_VISIBLE_DEVICES="0"  # Use GPU 0
@@ -198,10 +198,10 @@ export PYTORCH_ENABLE_MPS_FALLBACK="1"  # Apple Silicon fallback
 
 ```python
 import os
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
-model = os.getenv("SEMANTIC_MATCHER_DEFAULT_MODEL", "default")
-verbose = os.getenv("SEMANTIC_MATCHER_VERBOSE", "false").lower() == "true"
+model = os.getenv("NOVEL_ENTITY_MATCHER_DEFAULT_MODEL", "default")
+verbose = os.getenv("NOVEL_ENTITY_MATCHER_VERBOSE", "false").lower() == "true"
 
 matcher = Matcher(
     entities=entities,
@@ -215,7 +215,7 @@ matcher = Matcher(
 ### Matcher Configuration
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 matcher = Matcher(
     entities=entities,
@@ -249,7 +249,7 @@ print(f"Model: {stats['model_name']}")
 ### Default Models
 
 ```python
-from semanticmatcher.config import (
+from novelentitymatcher.config import (
     RETRIEVAL_DEFAULT_MODEL,
     TRAINING_DEFAULT_MODEL
 )
@@ -271,7 +271,7 @@ training_default_model: bge-base
 Or programmatically:
 
 ```python
-from semanticmatcher.config import MODEL_REGISTRY
+from novelentitymatcher.config import MODEL_REGISTRY
 
 MODEL_REGISTRY["default"] = "minishlab/potion-base-32M"
 ```
@@ -281,7 +281,7 @@ MODEL_REGISTRY["default"] = "minishlab/potion-base-32M"
 ### Mode Registry
 
 ```python
-from semanticmatcher.config import MATCHER_MODE_REGISTRY
+from novelentitymatcher.config import MATCHER_MODE_REGISTRY
 
 print(MATCHER_MODE_REGISTRY)
 # {
@@ -296,7 +296,7 @@ print(MATCHER_MODE_REGISTRY)
 ### Mode Resolution
 
 ```python
-from semanticmatcher.config import resolve_matcher_mode
+from novelentitymatcher.config import resolve_matcher_mode
 
 mode_class = resolve_matcher_mode("zero-shot")
 print(mode_class)  # "EmbeddingMatcher"
@@ -325,7 +325,7 @@ training:
 ### Applying Training Config
 
 ```python
-from semanticmatcher.config import Config
+from novelentitymatcher.config import Config
 
 cfg = Config()
 matcher = Matcher(entities=entities)
@@ -351,7 +351,7 @@ static_embeddings:
 ```
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 matcher = Matcher(
     entities=entities,
@@ -385,8 +385,8 @@ hybrid:
 ```
 
 ```python
-from semanticmatcher import Matcher
-from semanticmatcher.core.blocking import BM25Blocking
+from novelentitymatcher import Matcher
+from novelentitymatcher.core.blocking import BM25Blocking
 
 matcher = Matcher(
     entities=entities,
@@ -407,7 +407,7 @@ result = matcher.match(
 ### Custom Model Resolution
 
 ```python
-from semanticmatcher.config import resolve_model_alias
+from novelentitymatcher.config import resolve_model_alias
 
 # Resolve alias to full model name
 full_name = resolve_model_alias("potion-8m")
@@ -421,7 +421,7 @@ print(full_name)  # "org/custom-model"
 ### Training Model Resolution
 
 ```python
-from semanticmatcher.config import resolve_training_model_alias
+from novelentitymatcher.config import resolve_training_model_alias
 
 # Static models auto-fallback to training-compatible
 training_model = resolve_training_model_alias("potion-8m")
@@ -435,7 +435,7 @@ print(training_model)  # "BAAI/bge-base-en-v1.5"
 ### Checking Model Capabilities
 
 ```python
-from semanticmatcher.config import (
+from novelentitymatcher.config import (
     is_static_embedding_model,
     supports_training_model,
     get_model_spec
@@ -505,7 +505,7 @@ matcher:
 
 **Solution:**
 ```python
-from semanticmatcher.config import Config
+from novelentitymatcher.config import Config
 
 # Specify path explicitly
 cfg = Config(custom_path="/path/to/config.yaml")
@@ -520,7 +520,7 @@ print(cfg.to_dict())
 
 **Solution:**
 ```python
-from semanticmatcher.config import MODEL_SPECS, MODEL_REGISTRY
+from novelentitymatcher.config import MODEL_SPECS, MODEL_REGISTRY
 
 # Check if alias exists
 print("my-model" in MODEL_SPECS)  # False
@@ -542,7 +542,7 @@ MODEL_SPECS["my-model"] = {
 **Solution:**
 ```python
 # Check training compatibility
-from semanticmatcher.config import supports_training_model
+from novelentitymatcher.config import supports_training_model
 
 print(supports_training_model("potion-8m"))  # False - will fallback
 print(supports_training_model("mpnet"))      # True - will work
