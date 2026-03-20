@@ -19,14 +19,14 @@ uv run ruff check .
 
 ## Project Conventions
 
-- PyPI distribution name: `semantic-matcher`
-- Python import path: `semanticmatcher`
-- Repo folder name: `semantic_matcher`
-- Library/package code lives in `src/semanticmatcher/`
+- PyPI distribution name: `novel-entity-matcher`
+- Python import path: `novelentitymatcher`
+- Repo folder name: `novel_entity_matcher`
+- Library/package code lives in `src/novelentitymatcher/`
 
 ## Where Changes Go
 
-- New library features: `src/semanticmatcher/`
+- New library features: `src/novelentitymatcher/`
 - Tests for library changes: `tests/` (mirror package areas where practical)
 - User-facing examples: `examples/`
 - Exploratory scripts / benchmarks: `experiments/`
@@ -35,10 +35,10 @@ uv run ruff check .
 
 ## CLI Mapping
 
-- `semanticmatcher-ingest` entrypoint is implemented in `src/semanticmatcher/ingestion/cli.py`
+- `novelentitymatcher-ingest` entrypoint is implemented in `src/novelentitymatcher/ingestion/cli.py`
 
 ## Notes for Contributors
 
-- Prefer non-breaking changes to public imports in `semanticmatcher`.
+- Prefer non-breaking changes to public imports in `novelentitymatcher`.
 - Keep docs and examples aligned with actual file locations when moving experiments.
 - Avoid committing generated artifacts (`dist/`, `docs/build/`, checkpoints, `__pycache__`).

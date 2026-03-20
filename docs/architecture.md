@@ -10,7 +10,7 @@ Use this page for internals and module boundaries rather than first-run usage.
 ## Module Structure
 
 ```text
-src/semanticmatcher/
+src/novelentitymatcher/
 ├── __init__.py              # Public exports / lazy import surface
 ├── config.py                # Config loading and defaults
 ├── core/                    # Matching pipelines and domain logic
@@ -30,7 +30,7 @@ src/semanticmatcher/
 │   ├── litellm.py           # Planned/in-progress cloud backend support
 │   └── ...
 ├── ingestion/               # Dataset ingestion and normalization CLI/pipelines
-│   ├── cli.py               # `semanticmatcher-ingest` entrypoint target
+│   ├── cli.py               # `novelentitymatcher-ingest` entrypoint target
 │   └── *.py                 # Source-specific ingestors (countries/products/etc.)
 ├── utils/                   # Cross-cutting helpers (non-domain specific)
 └── data/                    # Packaged static data files / defaults
@@ -50,7 +50,7 @@ src/semanticmatcher/
 - Add a new model/provider integration to `backends/`.
 - Add dataset import/transformation logic or CLI wiring to `ingestion/`.
 - Put generic helpers in `utils/`; avoid moving domain logic there just to “reuse” it.
-- Keep the public import surface curated through `src/semanticmatcher/__init__.py` (avoid exposing internal modules unintentionally).
+- Keep the public import surface curated through `src/novelentitymatcher/__init__.py` (avoid exposing internal modules unintentionally).
 
 ## Core Components
 

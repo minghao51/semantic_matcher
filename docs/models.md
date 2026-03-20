@@ -4,7 +4,7 @@ Related docs: [`index.md`](./index.md) | [`quickstart.md`](./quickstart.md) | [`
 
 ## Overview
 
-Semantic Matcher supports multiple embedding models through a registry system. This guide helps you choose the right model for your use case.
+Novel Entity Matcher supports multiple embedding models through a registry system. This guide helps you choose the right model for your use case.
 
 ## Quick Reference
 
@@ -239,7 +239,7 @@ Matcher(model="minilm", mode="full")     # ✅
 Add your own models to the registry:
 
 ```python
-from semanticmatcher.config import MODEL_SPECS
+from novelentitymatcher.config import MODEL_SPECS
 
 MODEL_SPECS["my-model"] = {
     "name": "my-org/my-model",
@@ -302,7 +302,7 @@ matcher = Matcher(entities=entities, model="bge-m3")
 **Solution:**
 ```python
 # Check model alias is valid
-from semanticmatcher.config import MODEL_SPECS
+from novelentitymatcher.config import MODEL_SPECS
 print(MODEL_SPECS.get("your-model"))
 
 # Try full model name
@@ -330,7 +330,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 **Solution:**
 ```python
 # Ensure training-compatible model
-from semanticmatcher.config import supports_training_model
+from novelentitymatcher.config import supports_training_model
 print(supports_training_model("your-model"))  # Should be True
 
 # Add more training examples (aim for 3+ per entity)

@@ -1,5 +1,5 @@
 import pytest
-from semanticmatcher.utils.embeddings import get_default_cache
+from novelentitymatcher.utils.embeddings import get_default_cache
 
 
 @pytest.fixture(autouse=True)

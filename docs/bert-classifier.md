@@ -1,6 +1,6 @@
 # BERT Classifier Guide
 
-This guide covers the BERT-based classifier implementation in semantic_matcher, which provides superior accuracy for complex pattern-driven text classification tasks.
+This guide covers the BERT-based classifier implementation in novel_entity_matcher, which provides superior accuracy for complex pattern-driven text classification tasks.
 
 ## What is BERT Classifier?
 
@@ -43,7 +43,7 @@ BERT (Bidirectional Encoder Representations from Transformers) is a transformer-
 ### Model Selection Guidelines
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 # Default: DistilBERT (recommended)
 matcher = Matcher(entities=entities, mode="bert")
@@ -63,7 +63,7 @@ matcher = Matcher(entities=entities, mode="bert", model="bert-multilingual")
 ### Direct BERTClassifier Usage
 
 ```python
-from semanticmatcher.core.bert_classifier import BERTClassifier
+from novelentitymatcher.core.bert_classifier import BERTClassifier
 
 # Define labels
 labels = ["DE", "FR", "US"]
@@ -99,7 +99,7 @@ loaded_clf = BERTClassifier.load("/path/to/model")
 ### Using BERT with Matcher
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 entities = [
     {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
@@ -409,12 +409,12 @@ BERTClassifier has an identical interface to SetFitClassifier:
 
 ```python
 # Before (SetFit)
-from semanticmatcher.core.classifier import SetFitClassifier
+from novelentitymatcher.core.classifier import SetFitClassifier
 clf = SetFitClassifier(labels=labels)
 clf.train(training_data)
 
 # After (BERT)
-from semanticmatcher.core.bert_classifier import BERTClassifier
+from novelentitymatcher.core.bert_classifier import BERTClassifier
 clf = BERTClassifier(labels=labels)
 clf.train(training_data)  # Same interface!
 ```

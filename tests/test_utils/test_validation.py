@@ -1,6 +1,6 @@
 import pytest
-from semanticmatcher.exceptions import ValidationError
-from semanticmatcher.utils.validation import (
+from novelentitymatcher.exceptions import ValidationError
+from novelentitymatcher.utils.validation import (
     validate_entity,
     validate_entities,
     validate_threshold,

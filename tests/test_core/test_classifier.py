@@ -1,6 +1,6 @@
 import pytest
-from semanticmatcher.core.classifier import SetFitClassifier
-from semanticmatcher.exceptions import TrainingError
+from novelentitymatcher.core.classifier import SetFitClassifier
+from novelentitymatcher.exceptions import TrainingError
 
 
 class TestSetFitClassifier:

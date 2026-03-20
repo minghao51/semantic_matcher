@@ -22,8 +22,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
-from semanticmatcher import Matcher
-from semanticmatcher.utils.benchmarks import load_processed_sections
+from novelentitymatcher import Matcher
+from novelentitymatcher.utils.benchmarks import load_processed_sections
 
 
 def _build_queries(seed_queries: List[str], multiplier: int) -> List[str]:

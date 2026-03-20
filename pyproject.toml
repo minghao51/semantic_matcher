@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "semantic-matcher"
+name = "novel-entity-matcher"
 version = "0.1.0"
 description = "Text-to-entity matching with SetFit few-shot learning"
 readme = "README.md"
@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 keywords = ["semantic", "matching", "entity", "embedding", "setfit", "text", "nlp"]
-urls = { repository = "https://github.com/anomalyco/semantic_matcher" }
+urls = { repository = "https://github.com/minghao51/novel_entity_matcher" }
 
 dependencies = [
     "numpy>=2.0.0",
@@ -41,8 +41,8 @@ dependencies = [
 ]
 
 [project.scripts]
-semanticmatcher-ingest = "semanticmatcher.ingestion.cli:main"
-semanticmatcher-bench = "semanticmatcher.benchmarks.cli:main"
+novelentitymatcher-ingest = "novelentitymatcher.ingestion.cli:main"
+novelentitymatcher-bench = "novelentitymatcher.benchmarks.cli:main"
 
 [project.optional-dependencies]
 # Progress bars for notebooks and terminals
@@ -124,7 +124,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/semanticmatcher"]
+packages = ["src/novelentitymatcher"]
 
 [tool.hatch.build.targets.sdist]
 include = [

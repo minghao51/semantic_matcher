@@ -23,7 +23,7 @@ The SemanticMatcher now supports async/await operations for high-concurrency sce
 
 ```python
 import asyncio
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 async def main():
     entities = [
@@ -181,7 +181,7 @@ async def cancellable_match():
 The async executor uses `CPU_COUNT * 2` workers (capped at 32) by default. Adjust if needed:
 
 ```python
-from semanticmatcher.core.async_utils import AsyncExecutor
+from novelentitymatcher.core.async_utils import AsyncExecutor
 
 # Custom executor
 executor = AsyncExecutor(max_workers=16)
@@ -216,7 +216,7 @@ async def match_large_dataset(matcher, queries, chunk_size=10000):
 
 ```python
 from fastapi import FastAPI
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 app = FastAPI()
 matcher: Matcher = None

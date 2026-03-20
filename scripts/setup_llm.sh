@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Semantic Matcher - LLM Setup Script
+# Novel Entity Matcher - LLM Setup Script
 # This script helps configure API keys for the novel class detection system
 
 set -e
 
 echo "=========================================="
-echo "Semantic Matcher - LLM API Setup"
+echo "Novel Entity Matcher - LLM API Setup"
 echo "=========================================="
 echo ""
 
@@ -30,7 +30,7 @@ if [ ! -f .env ]; then
     else
         echo "✗ .env.example not found. Creating basic .env file..."
         cat > .env << 'EOF'
-# Semantic Matcher - Environment Variables
+# Novel Entity Matcher - Environment Variables
 
 # LLM Provider API Keys
 OPENROUTER_API_KEY=
@@ -126,14 +126,14 @@ echo "=========================================="
 echo ""
 echo "Next steps:"
 echo "1. Test your configuration:"
-echo "   uv run python -c 'from semanticmatcher.novelty import LLMClassProposer; print(\"LLM setup ready!\")'"
+echo "   uv run python -c 'from novelentitymatcher.novelty import LLMClassProposer; print(\"LLM setup ready!\")'"
 echo ""
 echo "2. Run the example:"
 echo "   uv run python examples/novel_discovery_example.py"
 echo ""
 echo "3. Check your API keys are working:"
 echo "   uv run python -c "
-echo "from semanticmatcher.novelty import LLMClassProposer; "
+echo "from novelentitymatcher.novelty import LLMClassProposer; "
 echo "proposer = LLMClassProposer(); "
 echo "print(\"API keys configured:\", bool(proposer.api_keys))"
 echo "'"

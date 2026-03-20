@@ -2,7 +2,7 @@
 
 import pytest
 
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 
 class TestAsyncAPIIntegration:

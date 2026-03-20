@@ -4,7 +4,7 @@
 
 The benchmark code is organized into three layers:
 
-### 1. Utility Functions (`src/semanticmatcher/utils/`)
+### 1. Utility Functions (`src/novelentitymatcher/utils/`)
 Internal helper functions used by benchmark scripts:
 - `benchmarks.py` - Core benchmark utilities
 - `benchmark_dataset.py` - Dataset loading for benchmarks
@@ -27,10 +27,10 @@ Benchmark output data:
 
 ## Design Rationale
 
-**Why keep utilities in `src/semanticmatcher/utils/`?**
+**Why keep utilities in `src/novelentitymatcher/utils/`?**
 
 1. **Internal vs. External**: Benchmark utilities are internal helpers, not user-facing features
-2. **Import Path**: Scripts in `scripts/` can import from `semanticmatcher.utils.benchmark*`
+2. **Import Path**: Scripts in `scripts/` can import from `novelentitymatcher.utils.benchmark*`
 3. **Testing**: Tests are already in `tests/test_utils/test_benchmarks.py`
 4. **Clarity**: The `utils/` directory clearly indicates these are helper functions
 
@@ -59,15 +59,15 @@ uv run python scripts/benchmark_bert.py
 ### Using Utilities Directly
 
 ```python
-from semanticmatcher.utils.benchmarks import benchmark_accuracy
-from semanticmatcher.utils.benchmark_dataset import load_processed_sections
-from semanticmatcher.utils.benchmark_reporting import format_benchmark_summary
+from novelentitymatcher.utils.benchmarks import benchmark_accuracy
+from novelentitymatcher.utils.benchmark_dataset import load_processed_sections
+from novelentitymatcher.utils.benchmark_reporting import format_benchmark_summary
 ```
 
 ## Future Considerations
 
 If the benchmark utilities become part of the public API, consider:
-1. Creating `semanticmatcher.benchmarks` module
+1. Creating `novelentitymatcher.benchmarks` module
 2. Exporting in main `__init__.py`
 3. Adding documentation for public benchmark API
 

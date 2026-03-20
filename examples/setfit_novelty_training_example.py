@@ -5,7 +5,7 @@ Demonstrates how to use the SetFitNoveltyDetector to detect
 novel entities using SetFit with contrastive learning.
 """
 
-from semanticmatcher.novelty.strategies.setfit_novelty import SetFitNoveltyDetector
+from novelentitymatcher.novelty.strategies.setfit_novelty import SetFitNoveltyDetector
 
 
 def main():

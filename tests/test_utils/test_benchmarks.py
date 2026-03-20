@@ -3,9 +3,9 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from semanticmatcher.benchmarks.runner import BenchmarkRunner
-from semanticmatcher.utils.benchmark_dataset import build_processed_ood_sections
-from semanticmatcher.utils import benchmarks
+from novelentitymatcher.benchmarks.runner import BenchmarkRunner
+from novelentitymatcher.utils.benchmark_dataset import build_processed_ood_sections
+from novelentitymatcher.utils import benchmarks
 
 
 def test_load_processed_sections_reads_csv_sections(tmp_path):
@@ -243,7 +243,7 @@ def test_run_novelty_on_processed_uses_detector_and_writes_artifact(
     captured = {}
 
     monkeypatch.setattr(
-        "semanticmatcher.utils.benchmark_dataset.build_processed_ood_sections",
+        "novelentitymatcher.utils.benchmark_dataset.build_processed_ood_sections",
         lambda **kwargs: [
             {
                 "section": "custom/test",
@@ -330,7 +330,7 @@ def test_run_novelty_on_processed_uses_detector_and_writes_artifact(
             )
 
     monkeypatch.setattr(
-        "semanticmatcher.benchmarks.runner.NovelEntityMatcher",
+        "novelentitymatcher.benchmarks.runner.NovelEntityMatcher",
         FakeNovelEntityMatcher,
     )
 
@@ -397,7 +397,7 @@ def test_run_novelty_on_processed_calibrates_on_validation(
     monkeypatch,
 ):
     monkeypatch.setattr(
-        "semanticmatcher.utils.benchmark_dataset.build_processed_ood_sections",
+        "novelentitymatcher.utils.benchmark_dataset.build_processed_ood_sections",
         lambda **kwargs: [
             {
                 "section": "custom/calibrated",
@@ -487,7 +487,7 @@ def test_run_novelty_on_processed_calibrates_on_validation(
             )
 
     monkeypatch.setattr(
-        "semanticmatcher.benchmarks.runner.NovelEntityMatcher",
+        "novelentitymatcher.benchmarks.runner.NovelEntityMatcher",
         FakeNovelEntityMatcher,
     )
 

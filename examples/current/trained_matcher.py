@@ -2,7 +2,7 @@
 Few-shot training example for the unified Matcher API.
 """
 
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 
 def main():

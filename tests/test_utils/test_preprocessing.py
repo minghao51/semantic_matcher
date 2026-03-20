@@ -1,4 +1,4 @@
-from semanticmatcher.utils.preprocessing import (
+from novelentitymatcher.utils.preprocessing import (
     tokenize,
     remove_stopwords,
     lemmatize,

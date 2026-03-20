@@ -2,7 +2,7 @@
 
 import pytest
 
-from semanticmatcher.novelty.strategies.setfit_impl import SetFitDetector
+from novelentitymatcher.novelty.strategies.setfit_impl import SetFitDetector
 
 
 class TestSetFitDetector:

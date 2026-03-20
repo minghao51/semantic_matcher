@@ -15,7 +15,7 @@
 **Before starting, ensure you have:**
 
 1. Read the design document: `docs/plans/2026-03-04-hierarchical-entity-categorization-design.md`
-2. Reviewed existing matcher implementation: `src/semanticmatcher/core/matcher.py`
+2. Reviewed existing matcher implementation: `src/novelentitymatcher/core/matcher.py`
 3. Understand the current architecture:
    - `EmbeddingMatcher` for semantic similarity
    - `TextNormalizer` for text preprocessing
@@ -25,7 +25,7 @@
 
 ```bash
 # Navigate to project root
-cd /Users/minghao/Desktop/personal/semantic_matcher
+cd /Users/minghao/Desktop/personal/novel_entity_matcher
 
 # Install dependencies
 uv sync
@@ -82,12 +82,12 @@ git commit -m "deps: add networkx for graph operations"
 **Why:** Set up the file structure for the hierarchical matching system.
 
 **Files:**
-- Create: `src/semanticmatcher/core/hierarchy.py`
+- Create: `src/novelentitymatcher/core/hierarchy.py`
 - Create: `tests/core/test_hierarchy.py`
 
 **Step 1: Create module stub**
 
-Create `src/semanticmatcher/core/hierarchy.py`:
+Create `src/novelentitymatcher/core/hierarchy.py`:
 
 ```python
 """
@@ -122,7 +122,7 @@ Tests for hierarchical entity matching.
 """
 
 import pytest
-from semanticmatcher.core.hierarchy import (
+from novelentitymatcher.core.hierarchy import (
     HierarchyIndex,
     HierarchicalScoring,
     HierarchicalMatcher,
@@ -164,7 +164,7 @@ Expected: All 3 tests pass
 **Step 4: Commit**
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: add hierarchy module structure"
 ```
 
@@ -175,7 +175,7 @@ git commit -m "feat: add hierarchy module structure"
 **Why:** Core data structure for representing and querying hierarchical relationships.
 
 **Files:**
-- Modify: `src/semanticmatcher/core/hierarchy.py`
+- Modify: `src/novelentitymatcher/core/hierarchy.py`
 - Modify: `tests/core/test_hierarchy.py`
 
 ### Step 3.1: Write HierarchyIndex tests
@@ -429,7 +429,7 @@ Expected: All tests FAIL with "HierarchyIndex not defined" or AttributeError
 
 **Step 3.2.1: Add HierarchyIndex class to hierarchy.py**
 
-After the imports and `__all__` in `src/semanticmatcher/core/hierarchy.py`, add:
+After the imports and `__all__` in `src/novelentitymatcher/core/hierarchy.py`, add:
 
 ```python
 class HierarchyIndex:
@@ -643,7 +643,7 @@ Expected: All 8 tests PASS
 ### Step 3.4: Commit
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: implement HierarchyIndex with graph operations"
 ```
 
@@ -654,7 +654,7 @@ git commit -m "feat: implement HierarchyIndex with graph operations"
 **Why:** Calculate confidence scores that account for hierarchy structure and depth.
 
 **Files:**
-- Modify: `src/semanticmatcher/core/hierarchy.py`
+- Modify: `src/novelentitymatcher/core/hierarchy.py`
 - Modify: `tests/core/test_hierarchy.py`
 
 ### Step 4.1: Write HierarchicalScoring tests
@@ -788,7 +788,7 @@ Expected: All tests FAIL with "HierarchicalScoring not defined"
 
 **Step 4.2.1: Add imports needed for scoring**
 
-At the top of `src/semanticmatcher/core/hierarchy.py`, add to imports:
+At the top of `src/novelentitymatcher/core/hierarchy.py`, add to imports:
 
 ```python
 from sklearn.metrics.pairwise import cosine_similarity
@@ -796,7 +796,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 **Step 4.2.2: Add HierarchicalScoring class**
 
-Add after `HierarchyIndex` class in `src/semanticmatcher/core/hierarchy.py`:
+Add after `HierarchyIndex` class in `src/novelentitymatcher/core/hierarchy.py`:
 
 ```python
 class HierarchicalScoring:
@@ -920,7 +920,7 @@ Expected: All 5 tests PASS
 ### Step 4.4: Commit
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: implement HierarchicalScoring with depth-aware confidence"
 ```
 
@@ -931,9 +931,9 @@ git commit -m "feat: implement HierarchicalScoring with depth-aware confidence"
 **Why:** User-facing API that combines hierarchy index, scoring, and semantic embeddings.
 
 **Files:**
-- Modify: `src/semanticmatcher/core/hierarchy.py`
+- Modify: `src/novelentitymatcher/core/hierarchy.py`
 - Modify: `tests/core/test_hierarchy.py`
-- Modify: `src/semanticmatcher/__init__.py`
+- Modify: `src/novelentitymatcher/__init__.py`
 
 ### Step 5.1: Write HierarchicalMatcher initialization tests
 
@@ -983,16 +983,16 @@ Expected: Tests FAIL with "HierarchicalMatcher not defined"
 
 **Step 5.2.1: Add additional imports to hierarchy.py**
 
-Add to imports in `src/semanticmatcher/core/hierarchy.py`:
+Add to imports in `src/novelentitymatcher/core/hierarchy.py`:
 
 ```python
-from semanticmatcher.core.matcher import EmbeddingMatcher
-from semanticmatcher.core.normalizer import TextNormalizer
+from novelentitymatcher.core.matcher import EmbeddingMatcher
+from novelentitymatcher.core.normalizer import TextNormalizer
 ```
 
 **Step 5.2.2: Add HierarchicalMatcher class skeleton**
 
-Add after `HierarchicalScoring` class in `src/semanticmatcher/core/hierarchy.py`:
+Add after `HierarchicalScoring` class in `src/novelentitymatcher/core/hierarchy.py`:
 
 ```python
 class HierarchicalMatcher:
@@ -1100,7 +1100,7 @@ Expected: Both tests PASS
 ### Step 5.4: Commit
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: implement HierarchicalMatcher initialization"
 ```
 
@@ -1111,7 +1111,7 @@ git commit -m "feat: implement HierarchicalMatcher initialization"
 **Why:** Enable the primary use case: matching queries at any granularity level.
 
 **Files:**
-- Modify: `src/semanticmatcher/core/hierarchy.py`
+- Modify: `src/novelentitymatcher/core/hierarchy.py`
 - Modify: `tests/core/test_hierarchy.py`
 
 ### Step 6.1: Write match() method tests
@@ -1180,7 +1180,7 @@ Expected: Tests FAIL with "match method not found"
 
 ### Step 6.2: Implement match() method
 
-Add to `HierarchicalMatcher` class in `src/semanticmatcher/core/hierarchy.py`:
+Add to `HierarchicalMatcher` class in `src/novelentitymatcher/core/hierarchy.py`:
 
 ```python
     def match(
@@ -1348,7 +1348,7 @@ Expected: All match tests PASS
 ### Step 6.4: Commit
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: implement core match() method with hierarchical context"
 ```
 
@@ -1359,7 +1359,7 @@ git commit -m "feat: implement core match() method with hierarchical context"
 **Why:** Allow users to query hierarchy structure (paths, ancestors, descendants).
 
 **Files:**
-- Modify: `src/semanticmatcher/core/hierarchy.py`
+- Modify: `src/novelentitymatcher/core/hierarchy.py`
 - Modify: `tests/core/test_hierarchy.py`
 
 ### Step 7.1: Write exploration method tests
@@ -1512,7 +1512,7 @@ Expected: All tests PASS
 ### Step 7.4: Commit
 
 ```bash
-git add src/semanticmatcher/core/hierarchy.py tests/core/test_hierarchy.py
+git add src/novelentitymatcher/core/hierarchy.py tests/core/test_hierarchy.py
 git commit -m "feat: implement hierarchy exploration methods"
 ```
 
@@ -1520,17 +1520,17 @@ git commit -m "feat: implement hierarchy exploration methods"
 
 ## Task 8: Export HierarchicalMatcher from Package
 
-**Why:** Make the new class accessible via `from semanticmatcher import HierarchicalMatcher`.
+**Why:** Make the new class accessible via `from novelentitymatcher import HierarchicalMatcher`.
 
 **Files:**
-- Modify: `src/semanticmatcher/__init__.py`
+- Modify: `src/novelentitymatcher/__init__.py`
 
 ### Step 8.1: Add import to __init__.py
 
-Open `src/semanticmatcher/__init__.py` and add to the imports:
+Open `src/novelentitymatcher/__init__.py` and add to the imports:
 
 ```python
-from semanticmatcher.core.hierarchy import HierarchicalMatcher
+from novelentitymatcher.core.hierarchy import HierarchicalMatcher
 ```
 
 Also add to `__all__` list if it exists.
@@ -1538,7 +1538,7 @@ Also add to `__all__` list if it exists.
 ### Step 8.2: Test import
 
 ```bash
-uv run python -c "from semanticmatcher import HierarchicalMatcher; print(HierarchicalMatcher)"
+uv run python -c "from novelentitymatcher import HierarchicalMatcher; print(HierarchicalMatcher)"
 ```
 
 Expected: No error, prints class reference
@@ -1546,7 +1546,7 @@ Expected: No error, prints class reference
 ### Step 8.3: Commit
 
 ```bash
-git add src/semanticmatcher/__init__.py
+git add src/novelentitymatcher/__init__.py
 git commit -m "feat: export HierarchicalMatcher from package"
 ```
 
@@ -1570,7 +1570,7 @@ Example: Hierarchical Entity Matching
 Demonstrates how to use HierarchicalMatcher for multi-level entity matching.
 """
 
-from semanticmatcher import HierarchicalMatcher
+from novelentitymatcher import HierarchicalMatcher
 
 # Define hierarchical entities
 entities = [
@@ -1805,7 +1805,7 @@ Expected: All tests pass (including existing tests)
 ### Step 11.2: Run with coverage
 
 ```bash
-uv run pytest tests/ --cov=src/semanticmatcher/core/hierarchy --cov-report=term-missing
+uv run pytest tests/ --cov=src/novelentitymatcher/core/hierarchy --cov-report=term-missing
 ```
 
 Expected: >90% coverage for new module
@@ -1831,7 +1831,7 @@ Expected: Clean output with no errors
 ### Step 12.2: Check imports work
 
 ```bash
-uv run python -c "from semanticmatcher import HierarchicalMatcher; print('✓ Import successful')"
+uv run python -c "from novelentitymatcher import HierarchicalMatcher; print('✓ Import successful')"
 ```
 
 Expected: Prints "✓ Import successful"
@@ -1848,8 +1848,8 @@ Expected: All existing tests still pass
 ### Step 12.4: Run linting
 
 ```bash
-uv run ruff check src/semanticmatcher/core/hierarchy.py
-uv run ruff format src/semanticmatcher/core/hierarchy.py
+uv run ruff check src/novelentitymatcher/core/hierarchy.py
+uv run ruff format src/novelentitymatcher/core/hierarchy.py
 ```
 
 Expected: No linting errors
@@ -1874,7 +1874,7 @@ Verify the following before marking complete:
 ✅ `HierarchicalMatcher.match()` returns hierarchical results
 ✅ Multi-parent hierarchies are supported
 ✅ Exploration methods work (ancestors, descendants, paths)
-✅ Exportable from package: `from semanticmatcher import HierarchicalMatcher`
+✅ Exportable from package: `from novelentitymatcher import HierarchicalMatcher`
 ✅ Usage example runs without errors
 ✅ Test coverage >90%
 ✅ No breaking changes to existing matchers

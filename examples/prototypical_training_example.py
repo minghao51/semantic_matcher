@@ -5,7 +5,7 @@ Demonstrates how to use the PrototypicalNoveltyDetector to detect
 novel entities using prototypical networks with class-based prototypes.
 """
 
-from semanticmatcher.novelty.strategies.prototypical_strategy import (
+from novelentitymatcher.novelty.strategies.prototypical_strategy import (
     PrototypicalNoveltyDetector,
 )
 

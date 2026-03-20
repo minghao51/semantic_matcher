@@ -26,7 +26,7 @@ This document explains the different Python scripts in `experiments/country_clas
 - **Scenario C - Full training:** Fine-tunes both embeddings and classifier head (4 epochs).
 
 **Key Features:**
-- Uses `SetFitClassifier` from `semanticmatcher`
+- Uses `SetFitClassifier` from `novelentitymatcher`
 - Simple, readable code
 - Good for understanding the fundamentals
 

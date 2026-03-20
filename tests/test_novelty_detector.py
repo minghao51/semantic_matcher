@@ -3,16 +3,16 @@
 import numpy as np
 import pytest
 
-from semanticmatcher.novelty import DetectionConfig
-from semanticmatcher.novelty.config.weights import WeightConfig
-from semanticmatcher.novelty.config.strategies import (
+from novelentitymatcher.novelty import DetectionConfig
+from novelentitymatcher.novelty.config.weights import WeightConfig
+from novelentitymatcher.novelty.config.strategies import (
     ClusteringConfig,
     ConfidenceConfig,
     KNNConfig,
 )
-from semanticmatcher.novelty.core.detector import NoveltyDetector
-from semanticmatcher.novelty.strategies.base import NoveltyStrategy
-from semanticmatcher.novelty.core.strategies import StrategyRegistry
+from novelentitymatcher.novelty.core.detector import NoveltyDetector
+from novelentitymatcher.novelty.strategies.base import NoveltyStrategy
+from novelentitymatcher.novelty.core.strategies import StrategyRegistry
 
 
 class TestNoveltyDetector:

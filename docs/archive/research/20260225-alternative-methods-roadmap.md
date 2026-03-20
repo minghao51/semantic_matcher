@@ -661,7 +661,7 @@ model = trainer.train()  # Unlabeled domain data
 #### Add Matryoshka Embedding Support
 
 ```python
-# semanticmatcher/core/matcher.py - Future enhancement
+# novelentitymatcher/core/matcher.py - Future enhancement
 
 class EmbeddingMatcherV2(EmbeddingMatcher):
     def build_index(self, embedding_dim: int = 768):
@@ -695,7 +695,7 @@ class EmbeddingMatcherV2(EmbeddingMatcher):
 #### Add Multiple Negatives Ranking Loss Training
 
 ```python
-# semanticmatcher/core/training.py - New module
+# novelentitymatcher/core/training.py - New module
 
 from sentence_transformers import SentenceTransformer, losses, InputExample
 from torch.utils.data import DataLoader
@@ -744,7 +744,7 @@ class ContrastiveTrainer:
 ### 2. Cross-Encoder Reranker Implementation
 
 ```python
-# semanticmatcher/core/reranker.py - New module
+# novelentitymatcher/core/reranker.py - New module
 
 from sentence_transformers import CrossEncoder
 from typing import List, Dict, Any
@@ -801,7 +801,7 @@ final_results = reranker.rerank(query, candidates, top_k=5)
 ### 3. Hybrid Pipeline Integration
 
 ```python
-# semanticmatcher/core/hybrid.py - New module
+# novelentitymatcher/core/hybrid.py - New module
 
 class HybridMatcher:
     """Three-stage waterfall: Blocking → Retrieval → Reranking"""
@@ -867,7 +867,7 @@ class HybridMatcher:
 ### 4. LoRA Fine-Tuning for Domain Adaptation
 
 ```python
-# semanticmatcher/core/lora_trainer.py - New module
+# novelentitymatcher/core/lora_trainer.py - New module
 
 from peft import LoraConfig, get_peft_model, TaskType
 from transformers import AutoModel, AutoTokenizer
@@ -928,7 +928,7 @@ class LoRAEmbeddingTrainer:
 ### 5. XGBoost Ensemble Implementation
 
 ```python
-# semanticmatcher/core/ensemble.py - New module
+# novelentitymatcher/core/ensemble.py - New module
 
 import xgboost as xgb
 import numpy as np

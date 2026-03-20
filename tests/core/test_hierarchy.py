@@ -3,7 +3,7 @@ Tests for hierarchical entity matching.
 """
 
 import numpy as np
-from semanticmatcher.core.hierarchy import (
+from novelentitymatcher.core.hierarchy import (
     HierarchyIndex,
     HierarchicalScoring,
     HierarchicalMatcher,

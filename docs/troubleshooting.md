@@ -145,7 +145,7 @@ matcher = EmbeddingMatcher(entities, model_name="minilm")
 
 ### Jupyter
 
-- Install Jupyter in the same environment as `semanticmatcher`
+- Install Jupyter in the same environment as `novelentitymatcher`
 - Launch from repo root to avoid path confusion
 
 ### `geograpy`
@@ -178,7 +178,7 @@ Updated examples:
 uv pip install model2vec
 
 # Or with extras
-uv pip install semantic-matcher[static]
+uv pip install novel-entity-matcher[static]
 ```
 
 ### MRL Model Loading Error
@@ -192,10 +192,10 @@ uv pip install semantic-matcher[static]
 
 **Fix:**
 ```python
-from semanticmatcher.backends.static_embedding import StaticEmbeddingBackend
+from novelentitymatcher.backends.static_embedding import StaticEmbeddingBackend
 
 # Automatically handled by Matcher
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 matcher = Matcher(model="mrl-en")  # Works correctly
 ```
 
@@ -293,7 +293,7 @@ matcher.fit()  # OK
 **Fix:**
 ```python
 # 1. Try different blocking strategy
-from semanticmatcher.core.blocking import NoOpBlocking
+from novelentitymatcher.core.blocking import NoOpBlocking
 
 matcher = Matcher(
     entities=entities,
@@ -410,7 +410,7 @@ If you're still stuck:
    print(explanation)
    ```
 
-4. **Search issues**: [GitHub Issues](https://github.com/anomalyco/semantic_matcher/issues)
+4. **Search issues**: [GitHub Issues](https://github.com/anomalyco/novel_entity_matcher/issues)
 
 5. **Create an issue** with:
    - Code snippet

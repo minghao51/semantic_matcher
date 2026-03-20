@@ -5,8 +5,8 @@ Map messy text to canonical entities using semantic matching.
 **New:** Unified `Matcher` class with smart auto-selection - no need to choose between different matchers!
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/semantic-matcher)](https://pypi.org/project/semantic-matcher/)
-[![Python Version](https://img.shields.io/pypi/pyversions/semantic-matcher)](https://pypi.org/project/semantic-matcher/)
+[![PyPI](https://img.shields.io/pypi/v/novel-entity-matcher)](https://pypi.org/project/novel-entity-matcher/)
+[![Python Version](https://img.shields.io/pypi/pyversions/novel-entity-matcher)](https://pypi.org/project/novel-entity-matcher/)
 
 ## What It Solves
 
@@ -19,33 +19,33 @@ Example: `"Deutchland"` → `DE`
 ## Installation
 
 ```bash
-uv add semantic-matcher
+uv add novel-entity-matcher
 ```
 
 Optional extras:
 
 ```bash
 # Novel class detection and ANN-backed discovery
-uv add "semantic-matcher[novelty]"
+uv add "novel-entity-matcher[novelty]"
 
 # LiteLLM-powered embeddings, reranking, and class proposal features
-uv add "semantic-matcher[llm]"
+uv add "novel-entity-matcher[llm]"
 
 # Benchmark visualization scripts
-uv add "semantic-matcher[viz]"
+uv add "novel-entity-matcher[viz]"
 
 # Everything
-uv add "semantic-matcher[all]"
+uv add "novel-entity-matcher[all]"
 ```
 
 If you are not using `uv`, the equivalent `pip` commands still work:
 
 ```bash
-pip install semantic-matcher
-pip install "semantic-matcher[novelty]"
-pip install "semantic-matcher[llm]"
-pip install "semantic-matcher[viz]"
-pip install "semantic-matcher[all]"
+pip install novel-entity-matcher
+pip install "novel-entity-matcher[novelty]"
+pip install "novel-entity-matcher[llm]"
+pip install "novel-entity-matcher[viz]"
+pip install "novel-entity-matcher[all]"
 ```
 
 ## Quick Start
@@ -56,7 +56,7 @@ pip install "semantic-matcher[all]"
 
 ```python
 import asyncio
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 entities = [
     {"id": "DE", "name": "Germany", "aliases": ["Deutschland"]},
@@ -89,7 +89,7 @@ Prefer the async API for new integrations, especially in web services, batch job
 ### Sync Alternative
 
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 matcher = Matcher(entities=entities)
 matcher.fit()
@@ -129,7 +129,7 @@ The async API is the recommended default for new code. It provides non-blocking 
 
 ```python
 import asyncio
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 async def main():
     entities = [
@@ -179,7 +179,7 @@ See [Async API Guide](docs/async-guide.md) for comprehensive documentation.
 
 ### Default: Static Embeddings
 
-Semantic Matcher uses **static embeddings by default for retrieval**:
+Novel Entity Matcher uses **static embeddings by default for retrieval**:
 
 ```python
 # Retrieval default
@@ -206,7 +206,7 @@ matcher = Matcher(mode="zero-shot")  # Uses "potion-8m" by default
 
 ### Static Embedding Backends
 
-Semantic Matcher supports two static embedding approaches:
+Novel Entity Matcher supports two static embedding approaches:
 
 1. **StaticEmbedding** (sentence-transformers): For models like RikkaBotan MRL
 2. **model2vec**: For minishlab potion models and custom distillations
@@ -265,8 +265,8 @@ uv run python scripts/benchmark_async.py --multiplier 20 --concurrency 8
 ## Project Layout
 
 ```text
-semantic_matcher/              # Repository root
-├── src/semanticmatcher/       # Python package
+novel_entity_matcher/              # Repository root
+├── src/novelentitymatcher/       # Python package
 ├── examples/                  # Maintained runnable examples
 ├── experiments/               # Exploratory scripts
 ├── artifacts/                 # Local generated benchmark outputs

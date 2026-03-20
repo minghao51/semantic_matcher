@@ -24,7 +24,7 @@ if str(SRC_DIR) not in sys.path:
 
 import pandas as pd  # noqa: E402
 from sklearn.metrics import accuracy_score, classification_report  # noqa: E402
-from semanticmatcher.core.classifier import SetFitClassifier  # noqa: E402
+from novelentitymatcher.core.classifier import SetFitClassifier  # noqa: E402
 from sentence_transformers import SentenceTransformer  # noqa: E402
 from sklearn.metrics.pairwise import cosine_similarity  # noqa: E402
 

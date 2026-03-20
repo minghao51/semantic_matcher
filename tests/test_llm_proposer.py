@@ -4,8 +4,8 @@ import json
 import pytest
 from unittest.mock import Mock, patch
 
-from semanticmatcher.novelty.proposal.llm import LLMClassProposer
-from semanticmatcher.novelty.schemas import NovelSampleMetadata
+from novelentitymatcher.novelty.proposal.llm import LLMClassProposer
+from novelentitymatcher.novelty.schemas import NovelSampleMetadata
 
 
 class TestLLMClassProposer:

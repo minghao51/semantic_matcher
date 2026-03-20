@@ -1,4 +1,4 @@
-from semanticmatcher.config import (
+from novelentitymatcher.config import (
     BERT_DEFAULT_MODEL,
     Config,
     RETRIEVAL_DEFAULT_MODEL,

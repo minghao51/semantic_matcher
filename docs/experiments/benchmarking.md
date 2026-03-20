@@ -4,7 +4,7 @@ Related docs: [`../index.md`](../index.md) | [`../models.md`](../models.md) | [`
 
 ## Overview
 
-Semantic Matcher includes a comprehensive benchmarking suite for comparing model performance across accuracy, latency, and throughput.
+Novel Entity Matcher includes a comprehensive benchmarking suite for comparing model performance across accuracy, latency, and throughput.
 
 There are three benchmark entrypoints:
 
@@ -300,7 +300,7 @@ uv run python scripts/benchmark_embeddings.py \
 ### Benchmarking Custom Models
 
 ```python
-from semanticmatcher.utils.benchmarks import benchmark_embedding_models
+from novelentitymatcher.utils.benchmarks import benchmark_embedding_models
 
 # Define your custom section
 custom_section = {
@@ -323,7 +323,7 @@ print(results)
 ### Benchmarking Training Modes
 
 ```python
-from semanticmatcher.utils.benchmarks import benchmark_trained_modes
+from novelentitymatcher.utils.benchmarks import benchmark_trained_modes
 
 results = benchmark_trained_modes(
     model_names=["mpnet", "bge-base"],
@@ -397,7 +397,7 @@ uv run python scripts/benchmark_embeddings.py --sections languages/languages
 **Solution:**
 ```python
 # Test model loading first
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 test = Matcher(model="your-model", entities=[{"id": "1", "name": "test"}])
 test.fit()
 ```

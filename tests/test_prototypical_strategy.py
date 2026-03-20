@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from semanticmatcher.novelty.strategies.prototypical_impl import (
+from novelentitymatcher.novelty.strategies.prototypical_impl import (
     PrototypicalDetector,
 )
 

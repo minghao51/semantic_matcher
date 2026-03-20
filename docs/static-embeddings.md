@@ -41,7 +41,7 @@ Fast, lightweight models distilled from larger sentence transformers.
 
 **Usage:**
 ```python
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 matcher = Matcher(entities=entities, model="potion-8m")
 matcher.fit()

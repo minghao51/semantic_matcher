@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 import warnings
-from semanticmatcher.core.matcher import EntityMatcher, EmbeddingMatcher, Matcher
-from semanticmatcher.exceptions import ModeError, TrainingError
+from novelentitymatcher.core.matcher import EntityMatcher, EmbeddingMatcher, Matcher
+from novelentitymatcher.exceptions import ModeError, TrainingError
 
 
 class TestEntityMatcher:
@@ -128,7 +128,7 @@ class TestEmbeddingMatcher:
                 return np.ones((len(texts), 2), dtype=float)
 
         monkeypatch.setattr(
-            "semanticmatcher.core.matcher.SentenceTransformer", FakeModel
+            "novelentitymatcher.core.matcher.SentenceTransformer", FakeModel
         )
 
         matcher = EmbeddingMatcher(
@@ -203,7 +203,7 @@ class TestEmbeddingMatcher:
                 return np.array(encoded, dtype=float)
 
         monkeypatch.setattr(
-            "semanticmatcher.core.matcher.SentenceTransformer", FakeModel
+            "novelentitymatcher.core.matcher.SentenceTransformer", FakeModel
         )
 
         matcher = EmbeddingMatcher(
@@ -230,7 +230,7 @@ class TestEmbeddingMatcher:
                 return np.ones((len(texts), 2), dtype=float)
 
         monkeypatch.setattr(
-            "semanticmatcher.core.matcher.SentenceTransformer", FakeModel
+            "novelentitymatcher.core.matcher.SentenceTransformer", FakeModel
         )
 
         matcher = EmbeddingMatcher(
@@ -448,7 +448,7 @@ class TestUnifiedMatcher:
                 self.normalize = normalize
 
         monkeypatch.setattr(
-            "semanticmatcher.core.hybrid.HybridMatcher", FakeHybridMatcher
+            "novelentitymatcher.core.hybrid.HybridMatcher", FakeHybridMatcher
         )
 
         matcher = Matcher(
@@ -750,20 +750,20 @@ class TestUnifiedMatcher:
         assert matcher.model_name == "BAAI/bge-base-en-v1.5"
 
     def test_removed_entity_matcher_alias_is_not_exported(self, sample_entities):
-        import semanticmatcher
+        import novelentitymatcher
 
         with pytest.raises(AttributeError):
-            _ = semanticmatcher.EntityMatcher
+            _ = novelentitymatcher.EntityMatcher
 
     def test_removed_embedding_matcher_alias_is_not_exported(self, sample_entities):
-        import semanticmatcher
+        import novelentitymatcher
 
         with pytest.raises(AttributeError):
-            _ = semanticmatcher.EmbeddingMatcher
+            _ = novelentitymatcher.EmbeddingMatcher
 
     def test_matcher_no_deprecation_for_new_api(self, sample_entities):
         """Test that new Matcher class doesn't show deprecation warning."""
-        from semanticmatcher import Matcher as NewMatcher
+        from novelentitymatcher import Matcher as NewMatcher
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")

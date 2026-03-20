@@ -6,9 +6,9 @@ and propose new classes in text data.
 """
 
 import asyncio
-from semanticmatcher import Matcher, NovelEntityMatcher
-from semanticmatcher.novelty import DetectionConfig
-from semanticmatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
+from novelentitymatcher import Matcher, NovelEntityMatcher
+from novelentitymatcher.novelty import DetectionConfig
+from novelentitymatcher.novelty.config.strategies import ConfidenceConfig, KNNConfig
 
 
 async def main():
@@ -195,7 +195,7 @@ async def main():
     print("=" * 60)
 
     if report.output_file:
-        from semanticmatcher.novelty.storage import load_proposals, list_proposals
+        from novelentitymatcher.novelty.storage import load_proposals, list_proposals
 
         # List all proposals
         all_proposals = list_proposals("./proposals")

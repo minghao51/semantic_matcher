@@ -6,7 +6,7 @@ This is the recommended async-first starting point for the public API.
 
 import asyncio
 
-from semanticmatcher import Matcher
+from novelentitymatcher import Matcher
 
 
 async def main():

@@ -66,6 +66,6 @@ This folder is split into stable user guides, experiment docs, and archived proj
 
 ## Notes
 
-- The package code lives in `src/semanticmatcher/` (src-layout).
+- The package code lives in `src/novelentitymatcher/` (src-layout).
 - Script experiments live in `experiments/`.
 - Local generated outputs should go under `artifacts/`, not the repository root.
