@@ -3,13 +3,13 @@
 import pytest
 import numpy as np
 
-from semanticmatcher.novelty.strategies.prototypical_strategy import (
-    PrototypicalNoveltyDetector,
+from semanticmatcher.novelty.strategies.prototypical_impl import (
+    PrototypicalDetector,
 )
 
 
-class TestPrototypicalNoveltyDetector:
-    """Test suite for PrototypicalNoveltyDetector."""
+class TestPrototypicalDetector:
+    """Test suite for PrototypicalDetector."""
 
     @pytest.fixture
     def training_data(self):
@@ -24,7 +24,7 @@ class TestPrototypicalNoveltyDetector:
 
     @pytest.fixture
     def detector(self):
-        return PrototypicalNoveltyDetector(
+        return PrototypicalDetector(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             distance_threshold=0.5,
         )
@@ -95,7 +95,7 @@ class TestPrototypicalNoveltyDetector:
             detector.score_batch(["test"])
 
     def test_cosine_distance_metric(self, training_data):
-        detector = PrototypicalNoveltyDetector(
+        detector = PrototypicalDetector(
             distance_metric="cosine",
             distance_threshold=0.5,
         )
@@ -108,7 +108,7 @@ class TestPrototypicalNoveltyDetector:
         assert 0 <= distance <= 1  # Cosine distance is bounded
 
     def test_euclidean_distance_metric(self, training_data):
-        detector = PrototypicalNoveltyDetector(
+        detector = PrototypicalDetector(
             distance_metric="euclidean",
             distance_threshold=1.0,
         )
@@ -143,7 +143,7 @@ class TestPrototypicalNoveltyDetector:
         detector.save(str(save_path))
 
         # Load
-        loaded_detector = PrototypicalNoveltyDetector.load(str(save_path))
+        loaded_detector = PrototypicalDetector.load(str(save_path))
 
         assert loaded_detector.is_trained is True
         assert loaded_detector.distance_threshold == detector.distance_threshold
@@ -162,13 +162,13 @@ class TestPrototypicalNoveltyDetector:
 
     def test_distance_threshold_affects_detection(self, training_data):
         # Test with low threshold (more strict)
-        detector_strict = PrototypicalNoveltyDetector(
+        detector_strict = PrototypicalDetector(
             distance_threshold=0.3,
         )
         detector_strict.train(training_data, show_progress=False)
 
         # Test with high threshold (more lenient)
-        detector_lenient = PrototypicalNoveltyDetector(
+        detector_lenient = PrototypicalDetector(
             distance_threshold=0.8,
         )
         detector_lenient.train(training_data, show_progress=False)

@@ -2,14 +2,14 @@
 
 import pytest
 
-from semanticmatcher.novelty.strategies.pattern_strategy import (
-    PatternBasedNoveltyStrategy,
+from semanticmatcher.novelty.strategies.pattern_impl import (
+    PatternScorer,
     score_batch_novelty,
 )
 
 
-class TestPatternBasedNoveltyStrategy:
-    """Test suite for PatternBasedNoveltyStrategy."""
+class TestPatternScorer:
+    """Test suite for PatternScorer."""
 
     @pytest.fixture
     def known_entities(self):
@@ -23,7 +23,7 @@ class TestPatternBasedNoveltyStrategy:
 
     @pytest.fixture
     def strategy(self, known_entities):
-        return PatternBasedNoveltyStrategy(known_entities)
+        return PatternScorer(known_entities)
 
     def test_initialization(self, strategy, known_entities):
         assert strategy.known_entities == known_entities
@@ -35,7 +35,7 @@ class TestPatternBasedNoveltyStrategy:
 
     def test_initialization_empty_entities(self):
         with pytest.raises(ValueError, match="known_entities cannot be empty"):
-            PatternBasedNoveltyStrategy([])
+            PatternScorer([])
 
     def test_score_novelty_known_entity(self, strategy):
         # Known entity should have low novelty score

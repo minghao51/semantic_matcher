@@ -3,11 +3,11 @@
 import pytest
 import numpy as np
 
-from semanticmatcher.novelty.strategies.oneclass_strategy import OneClassNoveltyDetector
+from semanticmatcher.novelty.strategies.oneclass_impl import OneClassSVMDetector
 
 
-class TestOneClassNoveltyDetector:
-    """Test suite for OneClassNoveltyDetector."""
+class TestOneClassSVMDetector:
+    """Test suite for OneClassSVMDetector."""
 
     @pytest.fixture
     def known_entities(self):
@@ -22,7 +22,7 @@ class TestOneClassNoveltyDetector:
 
     @pytest.fixture
     def detector(self):
-        return OneClassNoveltyDetector(
+        return OneClassSVMDetector(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             nu=0.1,
         )
@@ -112,7 +112,7 @@ class TestOneClassNoveltyDetector:
         detector.save(str(save_path))
 
         # Load
-        loaded_detector = OneClassNoveltyDetector.load(str(save_path))
+        loaded_detector = OneClassSVMDetector.load(str(save_path))
 
         assert loaded_detector.is_trained is True
         assert loaded_detector.nu == detector.nu
@@ -130,7 +130,7 @@ class TestOneClassNoveltyDetector:
     def test_different_nu_values(self, known_entities):
         # Test with different nu values
         for nu in [0.05, 0.1, 0.2, 0.5]:
-            detector = OneClassNoveltyDetector(nu=nu)
+            detector = OneClassSVMDetector(nu=nu)
             detector.train(known_entities, show_progress=False)
 
             assert detector.is_trained is True
@@ -139,7 +139,7 @@ class TestOneClassNoveltyDetector:
     def test_different_kernels(self, known_entities):
         # Test with different kernels
         for kernel in ["rbf", "linear", "poly"]:
-            detector = OneClassNoveltyDetector(kernel=kernel)
+            detector = OneClassSVMDetector(kernel=kernel)
             detector.train(known_entities, show_progress=False)
 
             assert detector.is_trained is True
