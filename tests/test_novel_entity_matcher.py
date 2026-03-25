@@ -75,6 +75,7 @@ class TestNovelEntityMatcher:
 
         assert report.discovery_id
         assert report.novel_sample_report is not None
+        assert isinstance(report.discovery_clusters, list)
 
     def test_threshold_updates_delegate_to_inner_matcher(self, trained_matcher):
         novelty_matcher = NovelEntityMatcher(matcher=trained_matcher, auto_save=False)
@@ -121,8 +122,8 @@ class TestNovelEntityMatcher:
             auto_save=False,
         )
         novelty_matcher.adjust_threshold(0.99)
-        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: SimpleNamespace(
-            novel_samples=[]
+        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: (
+            SimpleNamespace(novel_samples=[])
         )
 
         result = novelty_matcher.match("quantum superposition")
@@ -137,13 +138,15 @@ class TestNovelEntityMatcher:
             matcher=trained_matcher,
             auto_save=False,
         )
-        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: SimpleNamespace(
-            novel_samples=[
-                SimpleNamespace(
-                    novelty_score=0.91,
-                    signals={"confidence": True},
-                )
-            ]
+        novelty_matcher.detector.detect_novel_samples = lambda **kwargs: (
+            SimpleNamespace(
+                novel_samples=[
+                    SimpleNamespace(
+                        novelty_score=0.91,
+                        signals={"confidence": True},
+                    )
+                ]
+            )
         )
 
         result = novelty_matcher.match("quantum superposition")

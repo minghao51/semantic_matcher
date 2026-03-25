@@ -13,11 +13,13 @@ import numpy as np
 import yaml
 
 from novelentitymatcher.novelty.schemas import (
+    DiscoveryCluster,
     ClassProposal,
     NovelClassAnalysis,
     NovelClassDiscoveryReport,
     NovelSampleMetadata,
     NovelSampleReport,
+    ProposalReviewRecord,
 )
 from novelentitymatcher.utils.logging_config import get_logger
 
@@ -201,6 +203,13 @@ def _report_to_dict(report: NovelClassDiscoveryReport) -> Dict[str, Any]:
             "config": _to_builtin(report.novel_sample_report.config),
             "signal_counts": _to_builtin(report.novel_sample_report.signal_counts),
         },
+        "discovery_clusters": [
+            _to_builtin(cluster.model_dump()) for cluster in report.discovery_clusters
+        ],
+        "review_records": [
+            _to_builtin(record.model_dump()) for record in report.review_records
+        ],
+        "diagnostics": _to_builtin(report.diagnostics),
     }
 
     # Add class proposals if available
@@ -222,6 +231,8 @@ def _report_to_dict(report: NovelClassDiscoveryReport) -> Dict[str, Any]:
             "analysis_summary": report.class_proposals.analysis_summary,
             "cluster_count": report.class_proposals.cluster_count,
             "model_used": report.class_proposals.model_used,
+            "validation_errors": report.class_proposals.validation_errors,
+            "proposal_metadata": _to_builtin(report.class_proposals.proposal_metadata),
         }
 
     # Add metadata
@@ -246,6 +257,12 @@ def _dict_to_report(data: Dict[str, Any]) -> NovelClassDiscoveryReport:
         config=data["novel_sample_report"]["config"],
         signal_counts=data["novel_sample_report"]["signal_counts"],
     )
+    discovery_clusters = [
+        DiscoveryCluster(**cluster) for cluster in data.get("discovery_clusters", [])
+    ]
+    review_records = [
+        ProposalReviewRecord(**record) for record in data.get("review_records", [])
+    ]
 
     # Reconstruct class proposals if available
     class_proposals = None
@@ -259,6 +276,8 @@ def _dict_to_report(data: Dict[str, Any]) -> NovelClassDiscoveryReport:
             analysis_summary=proposal_data.get("analysis_summary", ""),
             cluster_count=proposal_data.get("cluster_count", 0),
             model_used=proposal_data.get("model_used", ""),
+            validation_errors=proposal_data.get("validation_errors", []),
+            proposal_metadata=proposal_data.get("proposal_metadata", {}),
         )
 
     # Create report
@@ -268,7 +287,10 @@ def _dict_to_report(data: Dict[str, Any]) -> NovelClassDiscoveryReport:
         matcher_config=data["matcher_config"],
         detection_config=data["detection_config"],
         novel_sample_report=novel_sample_report,
+        discovery_clusters=discovery_clusters,
         class_proposals=class_proposals,
+        review_records=review_records,
+        diagnostics=data.get("diagnostics", {}),
         metadata=data.get("metadata", {}),
     )
 
@@ -302,6 +324,7 @@ def export_summary(
         "",
         f"- **Novel Samples Detected:** {len(report.novel_sample_report.novel_samples)}",
         f"- **Detection Strategies:** {', '.join(report.novel_sample_report.detection_strategies)}",
+        f"- **Discovery Clusters:** {len(report.discovery_clusters)}",
         "",
     ]
 
@@ -315,6 +338,29 @@ def export_summary(
                 "",
             ]
         )
+        if report.review_records:
+            pending = sum(
+                1
+                for record in report.review_records
+                if record.state == "pending_review"
+            )
+            approved = sum(
+                1 for record in report.review_records if record.state == "approved"
+            )
+            promoted = sum(
+                1 for record in report.review_records if record.state == "promoted"
+            )
+            lines.extend(
+                [
+                    "## Review Lifecycle",
+                    "",
+                    f"- **Review Records:** {len(report.review_records)}",
+                    f"- **Pending Review:** {pending}",
+                    f"- **Approved:** {approved}",
+                    f"- **Promoted:** {promoted}",
+                    "",
+                ]
+            )
 
         for i, proposal in enumerate(report.class_proposals.proposed_classes, 1):
             lines.extend(

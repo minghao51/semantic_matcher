@@ -5,7 +5,7 @@ Provides a central registry for all novelty detection strategies,
 allowing dynamic strategy registration and instantiation.
 """
 
-from typing import Dict, List, Type, Optional
+from typing import Dict, List, Type
 from ..strategies.base import NoveltyStrategy
 
 
@@ -36,7 +36,7 @@ class StrategyRegistry:
         Returns:
             The same strategy class (for decorator use)
         """
-        if not hasattr(strategy_cls, 'strategy_id'):
+        if not hasattr(strategy_cls, "strategy_id"):
             raise ValueError(
                 f"Strategy class {strategy_cls.__name__} must have a 'strategy_id' attribute"
             )
@@ -67,10 +67,9 @@ class StrategyRegistry:
             ValueError: If strategy_id is not registered
         """
         if strategy_id not in cls._strategies:
-            available = ', '.join(cls.list_strategies())
+            available = ", ".join(cls.list_strategies())
             raise ValueError(
-                f"Unknown strategy: '{strategy_id}'. "
-                f"Available strategies: {available}"
+                f"Unknown strategy: '{strategy_id}'. Available strategies: {available}"
             )
         return cls._strategies[strategy_id]
 

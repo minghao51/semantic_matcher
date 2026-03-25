@@ -138,7 +138,9 @@ class NoveltyDetector:
                 novel_samples=[],
                 detection_strategies=list(self.config.strategies),
                 config=self.config.model_dump(),
-                signal_counts={strategy_id: 0 for strategy_id in self.config.strategies},
+                signal_counts={
+                    strategy_id: 0 for strategy_id in self.config.strategies
+                },
             )
 
         reference_signature = self._compute_reference_signature(
@@ -147,10 +149,7 @@ class NoveltyDetector:
         )
 
         # Initialize strategies if needed or if the reference corpus changed.
-        if (
-            not self._is_initialized
-            or self._reference_signature != reference_signature
-        ):
+        if not self._is_initialized or self._reference_signature != reference_signature:
             self._initialize_strategies(reference_embeddings, reference_labels)
 
         # Run each strategy
@@ -221,8 +220,7 @@ class NoveltyDetector:
         if strategy_id not in self._strategies:
             available = ", ".join(self._strategies.keys())
             raise ValueError(
-                f"Strategy '{strategy_id}' not initialized. "
-                f"Available: {available}"
+                f"Strategy '{strategy_id}' not initialized. Available: {available}"
             )
         return self._strategies[strategy_id]
 

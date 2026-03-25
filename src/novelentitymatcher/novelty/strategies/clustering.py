@@ -70,7 +70,7 @@ class ClusteringStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
         """
         Detect novel samples using clustering.
@@ -120,7 +120,7 @@ class ClusteringStrategy(NoveltyStrategy):
                 # Check if cluster is valid
                 # Get all embeddings with this label (including reference)
                 all_mask = labels == label
-                cluster_embeddings = all_embeddings[all_mask]
+                _cluster_embeddings = all_embeddings[all_mask]
 
                 is_valid = self._validator.is_valid_cluster(
                     all_embeddings,

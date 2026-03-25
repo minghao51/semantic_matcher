@@ -165,6 +165,24 @@ class TestNovelClassDetectionIntegration:
         assert hasattr(result, "predictions")
         assert hasattr(result, "confidences")
         assert hasattr(result, "embeddings")
+        assert hasattr(result, "candidate_results")
+        assert hasattr(result, "records")
+
+    def test_metadata_return_exposes_stable_candidate_records(self, trained_matcher):
+        """Metadata mode should expose normalized candidates and per-query records."""
+        result = trained_matcher.match(
+            ["test query 1", "test query 2"],
+            return_metadata=True,
+            top_k=3,
+        )
+
+        assert len(result.candidate_results) == 2
+        assert len(result.records) == 2
+        assert result.records[0].text == "test query 1"
+        assert result.records[1].text == "test query 2"
+        assert result.records[0].confidence == pytest.approx(result.confidences[0])
+        assert isinstance(result.candidate_results[0], list)
+        assert result.metadata["candidate_results"] == result.candidate_results
 
     def test_metadata_return_preserves_top_prediction_below_threshold(self):
         """Metadata mode should keep the best candidate for novelty detection."""
@@ -194,6 +212,7 @@ class TestNovelClassDetectionIntegration:
         assert metadata.confidences[0] > 0.0
         assert metadata.metadata["threshold_override"] == 0.0
         assert metadata.metadata["evaluation_threshold"] == 0.99
+        assert metadata.records[0].predicted_id == metadata.predictions[0]
 
     @pytest.mark.asyncio
     async def test_discovery_uses_async_matcher_path(self, trained_matcher):
@@ -233,6 +252,9 @@ class TestNovelClassDetectionIntegration:
         assert calls["match_async"] >= 1
         assert calls["match"] == 0
         assert report.novel_sample_report is not None
+        assert "match" in report.metadata["pipeline_stage_metadata"]
+        assert "ood" in report.metadata["pipeline_stage_metadata"]
+        assert "proposal" in report.metadata["pipeline_stage_metadata"]
 
     @pytest.mark.asyncio
     async def test_file_persistence(self, trained_matcher, test_queries):

@@ -42,17 +42,26 @@ from .evaluation.splitters import OODSplitter, GradualNoveltySplitter
 
 # Results and reports
 from .schemas import (
+    ClusterEvidence,
+    DiscoveryCluster,
     ClassProposal,
     NovelClassAnalysis,
     NovelClassDiscoveryReport,
     NovelSampleMetadata,
     NovelSampleReport,
+    ProposalReviewRecord,
 )
 from .schemas.results import EvaluationReport
 
 # Storage and indexing
-from .storage.persistence import export_summary, save_proposals, load_proposals, list_proposals
+from .storage.persistence import (
+    export_summary,
+    save_proposals,
+    load_proposals,
+    list_proposals,
+)
 from .storage.index import ANNBackend, ANNIndex
+from .storage.review import ProposalReviewManager
 
 # Clustering
 from .clustering.scalable import ScalableClusterer
@@ -89,15 +98,19 @@ __all__ = [
     # Results
     "NovelSampleMetadata",
     "NovelSampleReport",
+    "ClusterEvidence",
+    "DiscoveryCluster",
     "ClassProposal",
     "NovelClassAnalysis",
     "NovelClassDiscoveryReport",
+    "ProposalReviewRecord",
     "EvaluationReport",
     # Storage
     "save_proposals",
     "load_proposals",
     "list_proposals",
     "export_summary",
+    "ProposalReviewManager",
     "ANNBackend",
     "ANNIndex",
     # Clustering

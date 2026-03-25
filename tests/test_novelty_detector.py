@@ -119,7 +119,10 @@ class TestNoveltyDetector:
         assert isinstance(metrics, dict)
         assert 6 in flags
         assert 7 in flags
-        assert metrics[6]["knn_novelty_score"] >= detector.config.knn_distance.distance_threshold
+        assert (
+            metrics[6]["knn_novelty_score"]
+            >= detector.config.knn_distance.distance_threshold
+        )
 
     def test_missing_reference_embeddings_raises(
         self,

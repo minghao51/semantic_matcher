@@ -15,7 +15,6 @@ from .metrics import (
     compute_detection_rates,
     compute_precision_recall_f1,
     compute_confusion_matrix,
-    find_optimal_threshold,
 )
 from ..schemas.reports import EvaluationReport
 

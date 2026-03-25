@@ -126,6 +126,30 @@ class TestMatcherMatchAsync:
             assert len(results) <= 2
 
     @pytest.mark.asyncio
+    async def test_match_async_metadata_matches_sync_contract(self, sample_entities):
+        """Async metadata contract should mirror the sync metadata shape."""
+        async with Matcher(entities=sample_entities) as matcher:
+            await matcher.fit_async()
+            async_result = await matcher.match_async(
+                ["USA", "Germany"],
+                return_metadata=True,
+                top_k=2,
+            )
+            sync_result = matcher.match(
+                ["USA", "Germany"],
+                return_metadata=True,
+                top_k=2,
+            )
+
+            assert len(async_result.records) == len(sync_result.records) == 2
+            assert (
+                len(async_result.candidate_results)
+                == len(sync_result.candidate_results)
+                == 2
+            )
+            assert async_result.metadata["top_k"] == sync_result.metadata["top_k"] == 2
+
+    @pytest.mark.asyncio
     async def test_match_async_below_threshold(self, sample_entities):
         """Test async match returns None when below threshold"""
         async with Matcher(entities=sample_entities, threshold=0.99) as matcher:

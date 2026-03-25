@@ -58,7 +58,7 @@ class KNNDistanceStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
         """
         Detect novel samples using kNN distance.

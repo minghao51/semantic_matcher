@@ -12,6 +12,7 @@ from pydantic import ValidationError
 
 from ..schemas import (
     ClassProposal,
+    DiscoveryCluster,
     NovelClassAnalysis,
     NovelSampleMetadata,
 )
@@ -158,29 +159,41 @@ class LLMClassProposer:
             f"using model: {self.primary_model}"
         )
 
-        # Group samples by cluster if available
         clustered_samples = self._group_by_cluster(novel_samples)
-
-        # Build proposal prompt
         prompt = self._build_proposal_prompt(
             novel_samples,
             existing_classes,
             clustered_samples,
             context,
         )
+        clusters = self._clusters_from_samples(clustered_samples)
+        return self._run_structured_cluster_proposal(
+            prompt=prompt,
+            discovery_clusters=clusters,
+            novel_samples=novel_samples,
+        )
 
-        # Call LLM with fallback
-        try:
-            response, model_used = self._call_llm_with_fallback(prompt)
-            analysis = self._parse_response(response, novel_samples, model_used)
-            logger.info(
-                f"Successfully proposed {len(analysis.proposed_classes)} classes"
-            )
-            return analysis
-        except Exception as e:
-            logger.error(f"Failed to generate LLM proposals: {e}")
-            # Return fallback analysis
-            return self._create_fallback_analysis(novel_samples, existing_classes)
+    def propose_from_clusters(
+        self,
+        discovery_clusters: List[DiscoveryCluster],
+        existing_classes: List[str],
+        context: Optional[str] = None,
+        max_retries: int = 2,
+    ) -> NovelClassAnalysis:
+        """Generate proposals from cluster-level evidence."""
+        if not discovery_clusters:
+            raise ValueError("discovery_clusters cannot be empty")
+
+        prompt = self._build_cluster_prompt(
+            discovery_clusters=discovery_clusters,
+            existing_classes=existing_classes,
+            context=context,
+        )
+        return self._run_structured_cluster_proposal(
+            prompt=prompt,
+            discovery_clusters=discovery_clusters,
+            max_retries=max_retries,
+        )
 
     def _group_by_cluster(
         self, samples: List[NovelSampleMetadata]
@@ -277,9 +290,123 @@ Provide your analysis as a JSON object:"""
 
         return prompt
 
+    def _build_cluster_prompt(
+        self,
+        discovery_clusters: List[DiscoveryCluster],
+        existing_classes: List[str],
+        context: Optional[str],
+    ) -> str:
+        cluster_lines = []
+        for cluster in discovery_clusters:
+            keywords = ", ".join(cluster.keywords or [])
+            examples = "; ".join(
+                cluster.evidence.representative_examples
+                if cluster.evidence
+                else cluster.example_texts
+            )
+            cluster_lines.append(
+                f"- Cluster {cluster.cluster_id}: sample_count={cluster.sample_count}; "
+                f"keywords=[{keywords}]; examples=[{examples}]"
+            )
+
+        context_section = f"\nDomain Context: {context}" if context else ""
+        return f"""You are reviewing clusters of likely novel concepts.
+
+Existing Classes: {", ".join(existing_classes)}{context_section}
+
+Discovery Clusters:
+{chr(10).join(cluster_lines)}
+
+Return valid JSON with this schema:
+{{
+  "proposed_classes": [
+    {{
+      "name": "class name",
+      "description": "what the class represents",
+      "confidence": 0.0,
+      "sample_count": 0,
+      "example_samples": ["example"],
+      "justification": "why this cluster should become a class",
+      "suggested_parent": null,
+      "source_cluster_ids": [0],
+      "provenance": {{"keywords": ["keyword"]}}
+    }}
+  ],
+  "rejected_as_noise": ["cluster ids or sample text"],
+  "analysis_summary": "brief summary",
+  "cluster_count": {len(discovery_clusters)}
+}}
+
+Prefer one proposal per coherent cluster. Use source_cluster_ids for traceability."""
+
+    def _run_structured_cluster_proposal(
+        self,
+        *,
+        prompt: str,
+        discovery_clusters: List[DiscoveryCluster],
+        novel_samples: Optional[List[NovelSampleMetadata]] = None,
+        max_retries: int = 2,
+    ) -> NovelClassAnalysis:
+        attempts = 0
+        retry_prompt = prompt
+        last_error: Exception | None = None
+
+        while attempts <= max_retries:
+            try:
+                response, model_used = self._call_llm_with_fallback(retry_prompt)
+                analysis = self._parse_response(
+                    response,
+                    novel_samples or [],
+                    model_used,
+                )
+                if not analysis.cluster_count:
+                    analysis.cluster_count = len(discovery_clusters)
+                analysis.proposal_metadata.setdefault("attempts", attempts + 1)
+                return analysis
+            except Exception as exc:
+                last_error = exc
+                attempts += 1
+                retry_prompt = (
+                    f"{prompt}\n\nThe previous response was invalid: {exc}. "
+                    "Return only valid JSON matching the requested schema."
+                )
+
+        logger.error(f"Failed to generate LLM proposals: {last_error}")
+        if novel_samples is not None:
+            return self._create_fallback_analysis(novel_samples, [])
+        return NovelClassAnalysis(
+            proposed_classes=[],
+            rejected_as_noise=[],
+            analysis_summary="Fallback analysis due to repeated validation failures.",
+            cluster_count=len(discovery_clusters),
+            model_used="fallback",
+            validation_errors=[str(last_error)] if last_error else [],
+            proposal_metadata={"attempts": attempts},
+        )
+
+    def _clusters_from_samples(
+        self,
+        clustered_samples: Dict[Optional[int], List[NovelSampleMetadata]],
+    ) -> List[DiscoveryCluster]:
+        clusters: List[DiscoveryCluster] = []
+        for cluster_id, samples in clustered_samples.items():
+            resolved_cluster_id = (
+                int(cluster_id) if cluster_id is not None else len(clusters)
+            )
+            clusters.append(
+                DiscoveryCluster(
+                    cluster_id=resolved_cluster_id,
+                    sample_indices=[sample.index for sample in samples],
+                    sample_count=len(samples),
+                    example_texts=[sample.text for sample in samples[:4]],
+                    keywords=[],
+                )
+            )
+        return clusters
+
     def _call_llm_with_fallback(self, prompt: str) -> tuple[str, str]:
         """Call LLM with automatic fallback on failure."""
-        models_to_try = [self.primary_model] + self.fallback_models
+        models_to_try = [m for m in ([self.primary_model] + self.fallback_models) if m]
 
         last_error = None
         for model in models_to_try:
@@ -377,7 +504,8 @@ Provide your analysis as a JSON object:"""
 
         # Validate with Pydantic
         try:
-            return NovelClassAnalysis(
+            final_model = model_used or self.primary_model or "unknown"
+            analysis = NovelClassAnalysis(
                 proposed_classes=[
                     ClassProposal(**proposal)
                     for proposal in data.get("proposed_classes", [])
@@ -385,8 +513,13 @@ Provide your analysis as a JSON object:"""
                 rejected_as_noise=data.get("rejected_as_noise", []),
                 analysis_summary=data.get("analysis_summary", ""),
                 cluster_count=data.get("cluster_count", 0),
-                model_used=model_used or self.primary_model,
+                model_used=final_model,
+                validation_errors=[],
+                proposal_metadata=data.get("proposal_metadata", {}),
             )
+            for proposal in analysis.proposed_classes:
+                proposal.provenance.setdefault("model_used", final_model)
+            return analysis
         except ValidationError as e:
             raise ValueError(f"Response validation failed: {e}") from e
 
@@ -425,4 +558,6 @@ Provide your analysis as a JSON object:"""
             analysis_summary="Fallback analysis due to LLM failure. Samples grouped by predicted class.",
             cluster_count=len(proposals),
             model_used="fallback",
+            validation_errors=[],
+            proposal_metadata={},
         )

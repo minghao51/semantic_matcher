@@ -10,7 +10,7 @@ import numpy as np
 from .base import NoveltyStrategy
 from ..core.strategies import StrategyRegistry
 from ..config.strategies import PatternConfig
-from .pattern_impl import PatternScorer, score_batch_novelty
+from .pattern_impl import PatternScorer
 
 
 @StrategyRegistry.register
@@ -36,7 +36,7 @@ class PatternStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
         flags = set()
         metrics = {}

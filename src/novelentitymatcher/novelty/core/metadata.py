@@ -104,7 +104,9 @@ class MetadataBuilder:
         return {
             "total_samples": total_samples,
             "novel_samples": len(report.novel_samples),
-            "novel_ratio": len(report.novel_samples) / total_samples if total_samples else 0.0,
+            "novel_ratio": len(report.novel_samples) / total_samples
+            if total_samples
+            else 0.0,
             "avg_novelty_score": np.mean(
                 [
                     sample.novelty_score

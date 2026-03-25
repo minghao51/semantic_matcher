@@ -45,10 +45,10 @@ class SetFitStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
-        flags = set()
-        metrics = {}
+        flags: set[int] = set()
+        metrics: dict[int, dict[str, Any]] = {}
 
         if self._detector is None or not self._detector.is_trained:
             return flags, metrics

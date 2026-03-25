@@ -29,5 +29,6 @@ def test_get_logger_preserves_package_namespace():
         == "novelentitymatcher.core.matcher"
     )
     assert (
-        logging_config.get_logger("core.matcher").name == "novelentitymatcher.core.matcher"
+        logging_config.get_logger("core.matcher").name
+        == "novelentitymatcher.core.matcher"
     )

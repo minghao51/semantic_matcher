@@ -109,9 +109,10 @@ class TestANNIndex:
         """Test getting distance matrix."""
         queries = sample_embeddings[:10]
         distances = hnswlib_index.get_distance_matrix(queries)
-        expected = hnswlib_index._normalize(queries) @ hnswlib_index._normalize(
-            sample_embeddings
-        ).T
+        expected = (
+            hnswlib_index._normalize(queries)
+            @ hnswlib_index._normalize(sample_embeddings).T
+        )
 
         assert distances.shape == (10, 100)
         np.testing.assert_allclose(distances, expected, atol=1e-5)
@@ -121,9 +122,9 @@ class TestANNIndex:
         queries = sample_embeddings[:5]
         targets = sample_embeddings[5:15]
         distances = hnswlib_index.get_distance_matrix(queries, targets)
-        expected = hnswlib_index._normalize(queries) @ hnswlib_index._normalize(
-            targets
-        ).T
+        expected = (
+            hnswlib_index._normalize(queries) @ hnswlib_index._normalize(targets).T
+        )
 
         assert distances.shape == (5, 10)
         np.testing.assert_allclose(distances, expected, atol=1e-5)

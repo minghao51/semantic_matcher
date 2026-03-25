@@ -6,12 +6,14 @@ for storing proposals and searching embeddings.
 """
 
 from .persistence import save_proposals, load_proposals, list_proposals
+from .review import ProposalReviewManager
 from .index import ANNBackend, ANNIndex
 
 __all__ = [
     "save_proposals",
     "load_proposals",
     "list_proposals",
+    "ProposalReviewManager",
     "ANNBackend",
     "ANNIndex",
 ]

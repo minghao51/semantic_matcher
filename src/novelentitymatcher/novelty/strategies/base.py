@@ -6,7 +6,7 @@ with the NoveltyDetector.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Set, Any, Optional, Type
+from typing import Dict, List, Set, Any, Type
 import numpy as np
 
 
@@ -47,7 +47,7 @@ class NoveltyStrategy(ABC):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
         """
         Detect novel samples.
@@ -92,4 +92,4 @@ class NoveltyStrategy(ABC):
 
         Override this if your strategy stores its config differently.
         """
-        return getattr(self, '_config', None)
+        return getattr(self, "_config", None)

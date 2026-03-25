@@ -142,9 +142,13 @@ class SignalCombiner:
         confidence = 1.0 if sample_metrics.get("confidence_is_novel", False) else 0.0
         pattern = 1.0 if sample_metrics.get("pattern_is_novel", False) else 0.0
         oneclass = 1.0 if sample_metrics.get("oneclass_is_novel", False) else 0.0
-        prototypical = 1.0 if sample_metrics.get("prototypical_is_novel", False) else 0.0
+        prototypical = (
+            1.0 if sample_metrics.get("prototypical_is_novel", False) else 0.0
+        )
         setfit = 1.0 if sample_metrics.get("setfit_is_novel", False) else 0.0
-        self_knowledge = 1.0 if sample_metrics.get("self_knowledge_is_novel", False) else 0.0
+        self_knowledge = (
+            1.0 if sample_metrics.get("self_knowledge_is_novel", False) else 0.0
+        )
 
         # For strategies with continuous scores, use the score directly
         uncertainty = sample_metrics.get("uncertainty_score", 0.0)
@@ -157,23 +161,23 @@ class SignalCombiner:
         # Compute weighted sum (only include active strategies)
         weighted_score = 0.0
 
-        if 'confidence' in active_strategies:
+        if "confidence" in active_strategies:
             weighted_score += confidence_weight * confidence
-        if 'uncertainty' in active_strategies:
+        if "uncertainty" in active_strategies:
             weighted_score += self.weights.uncertainty * uncertainty
-        if 'knn_distance' in active_strategies:
+        if "knn_distance" in active_strategies:
             weighted_score += self.weights.knn * knn_score
-        if 'clustering' in active_strategies:
+        if "clustering" in active_strategies:
             weighted_score += self.weights.cluster * cluster_score
-        if 'self_knowledge' in active_strategies:
+        if "self_knowledge" in active_strategies:
             weighted_score += self.weights.self_knowledge * self_knowledge
-        if 'pattern' in active_strategies:
+        if "pattern" in active_strategies:
             weighted_score += self.weights.pattern * pattern
-        if 'oneclass' in active_strategies:
+        if "oneclass" in active_strategies:
             weighted_score += self.weights.oneclass * oneclass
-        if 'prototypical' in active_strategies:
+        if "prototypical" in active_strategies:
             weighted_score += self.weights.prototypical * prototypical
-        if 'setfit' in active_strategies:
+        if "setfit" in active_strategies:
             weighted_score += self.weights.setfit * setfit
 
         return float(np.clip(weighted_score, 0.0, 1.0))

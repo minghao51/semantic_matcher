@@ -55,7 +55,6 @@ class OODSplitter:
         n_known = max(1, int(n_classes * self.known_ratio))
 
         known_classes = set(np.random.choice(unique_labels, n_known, replace=False))
-        novel_classes = set(unique_labels) - known_classes
 
         train_texts = []
         train_labels = []

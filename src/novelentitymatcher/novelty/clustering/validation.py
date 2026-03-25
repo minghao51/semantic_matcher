@@ -5,7 +5,7 @@ This module provides utilities for validating clustering results
 and assessing cluster quality for novelty detection.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 import numpy as np
 
 
@@ -66,7 +66,9 @@ class ClusterValidator:
         # Exclude diagonal
         np.fill_diagonal(similarity_matrix, 0)
 
-        cohesion = similarity_matrix.sum() / (similarity_matrix.size - len(cluster_embeddings))
+        cohesion = similarity_matrix.sum() / (
+            similarity_matrix.size - len(cluster_embeddings)
+        )
 
         return float(cohesion)
 

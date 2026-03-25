@@ -142,7 +142,7 @@ class PatternScorer:
     def _get_prefix_suffix_distribution(
         self, entities: List[str], prefix: bool = True, n: int = 3
     ) -> Dict[str, int]:
-        counter = Counter()
+        counter: Counter[str] = Counter()
         for entity in entities:
             entity = entity.strip()
             if len(entity) >= n:
@@ -154,7 +154,5 @@ class PatternScorer:
         return dict(counter)
 
 
-def score_batch_novelty(
-    entities: List[str], scorer: PatternScorer
-) -> List[float]:
+def score_batch_novelty(entities: List[str], scorer: PatternScorer) -> List[float]:
     return [scorer.score_novelty(entity) for entity in entities]

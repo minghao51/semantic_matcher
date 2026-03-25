@@ -1,11 +1,9 @@
-"""
-Canonical Pydantic models for novelty detection and discovery.
-"""
+"""Canonical Pydantic models for novelty detection and discovery."""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -43,6 +41,32 @@ class NovelSampleReport(BaseModel):
     signal_counts: dict[str, int] = Field(default_factory=dict)
 
 
+class ClusterEvidence(BaseModel):
+    """Compact statistical evidence extracted for a cluster."""
+
+    keywords: list[str] = Field(default_factory=list)
+    representative_examples: list[str] = Field(default_factory=list)
+    sample_indices: list[int] = Field(default_factory=list)
+    predicted_classes: list[str] = Field(default_factory=list)
+    confidence_summary: dict[str, float] = Field(default_factory=dict)
+    token_budget: int | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class DiscoveryCluster(BaseModel):
+    """Community of likely novel samples discovered in a batch."""
+
+    cluster_id: int
+    sample_indices: list[int] = Field(default_factory=list)
+    sample_count: int = Field(ge=0)
+    example_texts: list[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
+    evidence: ClusterEvidence | None = None
+    mean_novelty_score: float | None = None
+    mean_confidence: float | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class ClassProposal(BaseModel):
     """A proposed class for a cluster of novel samples."""
 
@@ -53,6 +77,8 @@ class ClassProposal(BaseModel):
     example_samples: list[str]
     justification: str
     suggested_parent: str | None = None
+    source_cluster_ids: list[int] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
 
 
 class NovelClassAnalysis(BaseModel):
@@ -63,6 +89,28 @@ class NovelClassAnalysis(BaseModel):
     analysis_summary: str
     cluster_count: int = Field(ge=0)
     model_used: str
+    validation_errors: list[str] = Field(default_factory=list)
+    proposal_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+ReviewState = Literal["pending_review", "approved", "rejected", "promoted"]
+
+
+class ProposalReviewRecord(BaseModel):
+    """Lifecycle-aware review record for a proposed class."""
+
+    review_id: str
+    discovery_id: str
+    proposal_index: int = Field(ge=0)
+    proposal_name: str
+    state: ReviewState = "pending_review"
+    proposal: ClassProposal
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    notes: str | None = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    reviewed_at: datetime | None = None
+    promoted_at: datetime | None = None
 
 
 class NovelClassDiscoveryReport(BaseModel):
@@ -75,6 +123,9 @@ class NovelClassDiscoveryReport(BaseModel):
     matcher_config: dict[str, Any] = Field(default_factory=dict)
     detection_config: dict[str, Any] = Field(default_factory=dict)
     novel_sample_report: NovelSampleReport
+    discovery_clusters: list[DiscoveryCluster] = Field(default_factory=list)
     class_proposals: NovelClassAnalysis | None = None
+    review_records: list[ProposalReviewRecord] = Field(default_factory=list)
+    diagnostics: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
     output_file: str | None = None

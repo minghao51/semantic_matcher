@@ -48,7 +48,7 @@ class UncertaintyStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
         """
         Detect novel samples using uncertainty metrics.
@@ -123,9 +123,7 @@ class UncertaintyStrategy(NoveltyStrategy):
             # Binary entropy approximation from confidence
             eps = 1e-10
             p = np.clip(confidence, eps, 1.0 - eps)
-            entropy = float(
-                -p * np.log(p) - (1.0 - p) * np.log(1.0 - p)
-            )
+            entropy = float(-p * np.log(p) - (1.0 - p) * np.log(1.0 - p))
 
         # Overall uncertainty score (normalized)
         uncertainty_score = 1.0 - margin  # Lower margin = higher uncertainty

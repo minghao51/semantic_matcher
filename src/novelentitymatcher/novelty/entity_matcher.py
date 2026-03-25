@@ -17,12 +17,24 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 from .core.detector import NoveltyDetector
+from .clustering.scalable import ScalableClusterer
 from .config.base import DetectionConfig
 from .config.strategies import ClusteringConfig, ConfidenceConfig, KNNConfig
 from .proposal.llm import LLMClassProposer
-from .schemas import NovelClassDiscoveryReport
+from .schemas import NovelClassDiscoveryReport, NovelSampleMetadata, NovelSampleReport
 from .storage.persistence import export_summary, save_proposals
+from .storage.review import ProposalReviewManager
 from ..core.matcher import Matcher
+from ..pipeline.adapters import (
+    ClusterEvidenceStage,
+    CommunityDetectionStage,
+    MatcherMetadataStage,
+    OODDetectionStage,
+    ProposalStage,
+)
+from ..pipeline.contracts import StageContext
+from ..pipeline.match_result import MatchResultWithMetadata
+from ..pipeline.orchestrator import PipelineOrchestrator
 from novelentitymatcher.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -78,6 +90,7 @@ class NovelEntityMatcher:
         knn_distance_threshold: float = 0.6,
         min_cluster_size: int = 5,
         use_novelty_detector: bool = True,
+        review_storage_path: str = "./proposals/review_records.json",
     ):
         if matcher is None:
             if entities is None:
@@ -120,11 +133,18 @@ class NovelEntityMatcher:
             min_cluster_size=min_cluster_size,
         )
         self.detector = NoveltyDetector(config=self.detection_config)
+        clustering_config = self.detection_config.clustering or ClusteringConfig(
+            min_cluster_size=min_cluster_size
+        )
+        self.clusterer = ScalableClusterer(
+            min_cluster_size=clustering_config.min_cluster_size
+        )
         self.llm_proposer = LLMClassProposer(
             primary_model=llm_model,
             provider=llm_provider,
             api_keys=llm_api_keys,
         )
+        self.review_manager = ProposalReviewManager(review_storage_path)
 
     @staticmethod
     def _coerce_detection_config(
@@ -230,27 +250,9 @@ class NovelEntityMatcher:
         reference = self.get_reference_corpus()
         return list(reference.get("labels", []))
 
-    @staticmethod
-    def _normalize_candidate_results(
-        raw_match_results: Any,
-        num_queries: int,
-    ) -> List[Any]:
-        if raw_match_results is None:
-            return [None] * num_queries
-        if num_queries == 1:
-            if isinstance(raw_match_results, list):
-                if raw_match_results and all(
-                    isinstance(item, dict) for item in raw_match_results
-                ):
-                    return [raw_match_results]
-                if len(raw_match_results) == 1:
-                    return [raw_match_results[0]]
-            return [raw_match_results]
-        if isinstance(raw_match_results, list):
-            return raw_match_results
-        return [raw_match_results] * num_queries
-
-    async def _collect_metadata_async(self, queries: List[str]) -> Dict[str, Any]:
+    async def _collect_match_result_async(
+        self, queries: List[str]
+    ) -> tuple[MatchResultWithMetadata, Dict[str, Any]]:
         match_async = getattr(self.matcher, "match_async", None)
         if callable(match_async):
             result = await match_async(
@@ -266,68 +268,106 @@ class NovelEntityMatcher:
                 top_k=self.detection_config.candidate_top_k,
             )
 
-        reference = self.get_reference_corpus()
-        raw_match_results = (result.metadata or {}).get("raw_match_results")
-        return {
-            "predicted_classes": result.predictions,
-            "confidences": result.confidences,
-            "embeddings": result.embeddings,
-            "candidate_results": self._normalize_candidate_results(
-                raw_match_results,
-                num_queries=len(queries),
-            ),
-            "reference_embeddings": reference["embeddings"],
-            "reference_labels": reference["labels"],
-        }
+        return result, self.get_reference_corpus()
 
-    def _collect_metadata_sync(self, queries: List[str]) -> Dict[str, Any]:
+    def _collect_match_result_sync(
+        self, queries: List[str]
+    ) -> tuple[MatchResultWithMetadata, Dict[str, Any]]:
         result = self.matcher.match(
             queries,
             return_metadata=True,
             top_k=self.detection_config.candidate_top_k,
         )
-        reference = self.get_reference_corpus()
-        raw_match_results = (result.metadata or {}).get("raw_match_results")
-        return {
-            "predicted_classes": result.predictions,
-            "confidences": result.confidences,
-            "embeddings": result.embeddings,
-            "candidate_results": self._normalize_candidate_results(
-                raw_match_results,
-                num_queries=len(queries),
-            ),
-            "reference_embeddings": reference["embeddings"],
-            "reference_labels": reference["labels"],
-        }
+        return result, self.get_reference_corpus()
+
+    def _build_discovery_pipeline(
+        self,
+        *,
+        existing_classes: Optional[List[str]] = None,
+        context: Optional[str] = None,
+        run_llm_proposal: bool = True,
+    ) -> PipelineOrchestrator:
+        return PipelineOrchestrator(
+            stages=[
+                MatcherMetadataStage(
+                    collect_sync=self._collect_match_result_sync,
+                    collect_async=self._collect_match_result_async,
+                ),
+                OODDetectionStage(
+                    detector=self.detector,
+                    enabled=self.use_novelty_detector,
+                ),
+                CommunityDetectionStage(
+                    clusterer=self.clusterer,
+                    enabled=True,
+                    min_cluster_size=max(
+                        2,
+                        (
+                            self.detection_config.clustering.min_cluster_size
+                            if self.detection_config.clustering is not None
+                            else 2
+                        ),
+                    ),
+                ),
+                ClusterEvidenceStage(enabled=True),
+                ProposalStage(
+                    proposer=self.llm_proposer,
+                    existing_classes_resolver=lambda: self._derive_existing_classes(
+                        existing_classes
+                    ),
+                    enabled=run_llm_proposal,
+                    context_text=context,
+                ),
+            ]
+        )
+
+    def _coerce_novel_sample_report(self, report: Any) -> NovelSampleReport:
+        if isinstance(report, NovelSampleReport):
+            return report
+
+        samples = [
+            sample
+            if isinstance(sample, NovelSampleMetadata)
+            else NovelSampleMetadata(
+                text=str(getattr(sample, "text", "")),
+                index=int(getattr(sample, "index", 0)),
+                confidence=float(getattr(sample, "confidence", 0.0)),
+                predicted_class=str(getattr(sample, "predicted_class", "unknown")),
+                novelty_score=getattr(sample, "novelty_score", None),
+                cluster_id=getattr(sample, "cluster_id", None),
+                signals=dict(getattr(sample, "signals", {})),
+            )
+            for sample in getattr(report, "novel_samples", [])
+        ]
+        return NovelSampleReport(
+            novel_samples=samples,
+            detection_strategies=list(getattr(report, "detection_strategies", [])),
+            config=dict(getattr(report, "config", {})),
+            signal_counts=dict(getattr(report, "signal_counts", {})),
+        )
 
     def _build_match_result(
         self,
         query: str,
-        metadata: Dict[str, Any],
+        match_result: MatchResultWithMetadata,
+        reference_corpus: Dict[str, Any],
         existing_classes: Optional[List[str]] = None,
         return_alternatives: bool = False,
     ) -> NovelEntityMatchResult:
-        predicted_id = (
-            metadata["predicted_classes"][0] if metadata["predicted_classes"] else None
-        )
-        score = (
-            float(metadata["confidences"][0])
-            if len(metadata["confidences"]) > 0
-            else 0.0
-        )
-        alternatives = metadata["candidate_results"][0]
-        if not isinstance(alternatives, list):
-            alternatives = [alternatives] if alternatives else []
+        record = match_result.records[0]
+        predicted_id = record.predicted_id if record.predicted_id else None
+        score = float(record.confidence)
+        alternatives = list(record.candidates)
 
         if self.use_novelty_detector:
             report = self.detector.detect_novel_samples(
                 texts=[query],
-                confidences=np.asarray(metadata["confidences"], dtype=float),
-                embeddings=np.asarray(metadata["embeddings"]),
-                predicted_classes=list(metadata["predicted_classes"]),
-                candidate_results=metadata["candidate_results"],
-                reference_embeddings=metadata["reference_embeddings"],
-                reference_labels=metadata["reference_labels"],
+                confidences=np.asarray(match_result.confidences, dtype=float),
+                embeddings=np.asarray(match_result.embeddings),
+                predicted_classes=list(match_result.predictions),
+                candidate_results=match_result.candidate_results,
+                reference_embeddings=reference_corpus["embeddings"],
+                reference_labels=reference_corpus["labels"],
             )
             sample = report.novel_samples[0] if report.novel_samples else None
         else:
@@ -379,10 +419,11 @@ class NovelEntityMatcher:
         return_alternatives: bool = False,
         existing_classes: Optional[List[str]] = None,
     ) -> NovelEntityMatchResult:
-        metadata = self._collect_metadata_sync([text])
+        match_result, reference_corpus = self._collect_match_result_sync([text])
         return self._build_match_result(
             text,
-            metadata,
+            match_result,
+            reference_corpus,
             existing_classes=existing_classes,
             return_alternatives=return_alternatives,
         )
@@ -393,10 +434,11 @@ class NovelEntityMatcher:
         return_alternatives: bool = False,
         existing_classes: Optional[List[str]] = None,
     ) -> NovelEntityMatchResult:
-        metadata = await self._collect_metadata_async([text])
+        match_result, reference_corpus = await self._collect_match_result_async([text])
         return self._build_match_result(
             text,
-            metadata,
+            match_result,
+            reference_corpus,
             existing_classes=existing_classes,
             return_alternatives=return_alternatives,
         )
@@ -407,20 +449,24 @@ class NovelEntityMatcher:
         return_alternatives: bool = False,
         existing_classes: Optional[List[str]] = None,
     ) -> list[NovelEntityMatchResult]:
-        metadata = self._collect_metadata_sync(texts)
+        match_result, reference_corpus = self._collect_match_result_sync(texts)
         return [
             self._build_match_result(
                 text,
-                {
-                    "predicted_classes": [metadata["predicted_classes"][idx]],
-                    "confidences": np.asarray(
-                        [metadata["confidences"][idx]], dtype=float
+                MatchResultWithMetadata(
+                    predictions=[match_result.predictions[idx]],
+                    confidences=np.asarray(
+                        [match_result.confidences[idx]], dtype=float
                     ),
-                    "embeddings": np.asarray([metadata["embeddings"][idx]]),
-                    "candidate_results": [metadata["candidate_results"][idx]],
-                    "reference_embeddings": metadata["reference_embeddings"],
-                    "reference_labels": metadata["reference_labels"],
-                },
+                    embeddings=np.asarray([match_result.embeddings[idx]]),
+                    metadata={
+                        "texts": [text],
+                        "top_k": (match_result.metadata or {}).get("top_k"),
+                    },
+                    candidate_results=[match_result.candidate_results[idx]],
+                    records=[match_result.records[idx]],
+                ),
+                reference_corpus,
                 existing_classes=existing_classes,
                 return_alternatives=return_alternatives,
             )
@@ -441,33 +487,26 @@ class NovelEntityMatcher:
             discovery_id,
             len(queries),
         )
+        pipeline = self._build_discovery_pipeline(
+            existing_classes=existing_classes,
+            context=context,
+            run_llm_proposal=run_llm_proposal,
+        )
+        context_obj = StageContext(inputs=list(queries))
 
         if return_metadata:
-            results = await self._collect_metadata_async(queries)
+            pipeline_result = await pipeline.run_async(context_obj)
         else:
-            results = self._collect_metadata_sync(queries)
+            pipeline_result = pipeline.run(context_obj)
 
         known_classes = self._derive_existing_classes(existing_classes)
-        novel_sample_report = self.detector.detect_novel_samples(
-            texts=queries,
-            confidences=results["confidences"],
-            embeddings=results["embeddings"],
-            predicted_classes=results["predicted_classes"],
-            candidate_results=results.get("candidate_results"),
-            reference_embeddings=results["reference_embeddings"],
-            reference_labels=results["reference_labels"],
+        novel_sample_report = self._coerce_novel_sample_report(
+            pipeline_result.context.artifacts["novel_sample_report"]
         )
-
-        class_proposals = None
-        if run_llm_proposal and novel_sample_report.novel_samples:
-            try:
-                class_proposals = self.llm_proposer.propose_classes(
-                    novel_samples=novel_sample_report.novel_samples,
-                    existing_classes=known_classes,
-                    context=context,
-                )
-            except Exception as exc:
-                logger.error("[%s] LLM proposal failed: %s", discovery_id, exc)
+        discovery_clusters = pipeline_result.context.artifacts.get(
+            "discovery_clusters", []
+        )
+        class_proposals = pipeline_result.context.artifacts.get("class_proposals")
 
         report = NovelClassDiscoveryReport(
             discovery_id=discovery_id,
@@ -475,14 +514,22 @@ class NovelEntityMatcher:
             matcher_config=self._get_matcher_config(),
             detection_config=self.detection_config.model_dump(),
             novel_sample_report=novel_sample_report,
+            discovery_clusters=discovery_clusters,
             class_proposals=class_proposals,
+            diagnostics={
+                "stage_metadata": pipeline_result.context.metadata,
+            },
             metadata={
                 "num_queries": len(queries),
                 "num_existing_classes": len(known_classes),
                 "num_novel_samples": len(novel_sample_report.novel_samples),
+                "num_discovery_clusters": len(discovery_clusters),
                 "context": context,
+                "pipeline_stage_metadata": pipeline_result.context.metadata,
             },
         )
+
+        report.review_records = self.review_manager.create_records(report)
 
         if self.auto_save:
             output_file = save_proposals(report, output_dir=self.output_dir)
@@ -530,7 +577,7 @@ class NovelEntityMatcher:
         if hasattr(self.matcher, "model_name"):
             config["model"] = str(self.matcher.model_name)
         if hasattr(self.matcher, "threshold"):
-            config["threshold"] = self.matcher.threshold
+            config["threshold"] = str(self.matcher.threshold)
         if hasattr(self.matcher, "_training_mode"):
             config["mode"] = getattr(self.matcher, "_training_mode")
         return config

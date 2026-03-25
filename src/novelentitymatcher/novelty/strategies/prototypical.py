@@ -34,10 +34,7 @@ class PrototypicalStrategy(NoveltyStrategy):
             model_name=self._config.model_name,
         )
 
-        training_data = [
-            {"text": label, "label": label}
-            for label in reference_labels
-        ]
+        training_data = [{"text": label, "label": label} for label in reference_labels]
         self._detector.train(training_data, show_progress=False)
 
     def detect(
@@ -46,10 +43,10 @@ class PrototypicalStrategy(NoveltyStrategy):
         embeddings: np.ndarray,
         predicted_classes: List[str],
         confidences: np.ndarray,
-        **kwargs
+        **kwargs,
     ) -> tuple[Set[int], Dict[int, Dict[str, Any]]]:
-        flags = set()
-        metrics = {}
+        flags: set[int] = set()
+        metrics: dict[int, dict[str, Any]] = {}
 
         if self._detector is None or not self._detector.is_trained:
             return flags, metrics
@@ -64,7 +61,11 @@ class PrototypicalStrategy(NoveltyStrategy):
                 "prototypical_is_novel": is_novel,
                 "prototypical_distance": distance,
                 "prototypical_nearest_label": nearest_label,
-                "prototypical_novelty_score": min(distance / self._config.distance_threshold, 1.0) if distance else 0.0,
+                "prototypical_novelty_score": min(
+                    distance / self._config.distance_threshold, 1.0
+                )
+                if distance
+                else 0.0,
             }
 
         return flags, metrics

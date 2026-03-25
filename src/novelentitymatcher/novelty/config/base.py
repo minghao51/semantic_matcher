@@ -155,20 +155,19 @@ class DetectionConfig(BaseModel):
         from ..core.strategies import StrategyRegistry
 
         # Import all strategy modules to trigger registration
-        from ..strategies.confidence import ConfidenceStrategy
-        from ..strategies.knn_distance import KNNDistanceStrategy
-        from ..strategies.uncertainty import UncertaintyStrategy
-        from ..strategies.clustering import ClusteringStrategy
-        from ..strategies.pattern import PatternStrategy
-        from ..strategies.oneclass import OneClassStrategy
-        from ..strategies.prototypical import PrototypicalStrategy
-        from ..strategies.setfit import SetFitStrategy
-        from ..strategies.self_knowledge import SelfKnowledgeStrategy
+        from ..strategies.confidence import ConfidenceStrategy  # noqa: F401
+        from ..strategies.knn_distance import KNNDistanceStrategy  # noqa: F401
+        from ..strategies.uncertainty import UncertaintyStrategy  # noqa: F401
+        from ..strategies.clustering import ClusteringStrategy  # noqa: F401
+        from ..strategies.pattern import PatternStrategy  # noqa: F401
+        from ..strategies.oneclass import OneClassStrategy  # noqa: F401
+        from ..strategies.prototypical import PrototypicalStrategy  # noqa: F401
+        from ..strategies.setfit import SetFitStrategy  # noqa: F401
+        from ..strategies.self_knowledge import SelfKnowledgeStrategy  # noqa: F401
 
         for strategy_id in self.strategies:
             if not StrategyRegistry.is_registered(strategy_id):
                 available = ", ".join(StrategyRegistry.list_strategies())
                 raise ValueError(
-                    f"Unknown strategy: '{strategy_id}'. "
-                    f"Available: {available}"
+                    f"Unknown strategy: '{strategy_id}'. Available: {available}"
                 )

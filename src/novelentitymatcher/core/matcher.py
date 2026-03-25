@@ -18,6 +18,7 @@ from .matcher_shared import (
     extract_top_prediction_metadata,
     resolve_threshold,
 )
+from ..pipeline.match_result import build_match_result_with_metadata
 from .normalizer import TextNormalizer
 from ..config import (
     is_bert_model,
@@ -65,7 +66,9 @@ class Matcher:
         validate_entities(entities)
         validate_threshold(threshold)
 
-        env_verbose = os.getenv("NOVEL_ENTITY_MATCHER_VERBOSE", "false").lower() == "true"
+        env_verbose = (
+            os.getenv("NOVEL_ENTITY_MATCHER_VERBOSE", "false").lower() == "true"
+        )
         verbose = verbose or env_verbose
 
         configure_logging(verbose=verbose)
@@ -169,8 +172,6 @@ class Matcher:
         threshold_override: Optional[float] = None,
         **kwargs,
     ):
-        from ..novelty.match_result import MatchResultWithMetadata
-
         texts_list, single_input = coerce_texts(texts)
 
         model = self.model
@@ -191,10 +192,12 @@ class Matcher:
             match_results, single_input
         )
 
-        return MatchResultWithMetadata(
+        return build_match_result_with_metadata(
+            texts=texts_list,
             predictions=predictions,
             confidences=confidences,
             embeddings=embeddings,
+            raw_match_results=match_results,
             metadata={
                 "top_k": top_k,
                 "threshold_override": metadata_threshold,
@@ -202,7 +205,7 @@ class Matcher:
                 if threshold_override is None
                 else threshold_override,
                 "model_name": str(self.model_name),
-                "raw_match_results": match_results,
+                "single_input": single_input,
             },
         )
 
@@ -213,8 +216,6 @@ class Matcher:
         threshold_override: Optional[float] = None,
         **kwargs,
     ):
-        from ..novelty.match_result import MatchResultWithMetadata
-
         executor = self._ensure_async_executor()
         texts_list, single_input = coerce_texts(texts)
 
@@ -236,10 +237,12 @@ class Matcher:
             match_results, single_input
         )
 
-        return MatchResultWithMetadata(
+        return build_match_result_with_metadata(
+            texts=texts_list,
             predictions=predictions,
             confidences=confidences,
             embeddings=embeddings,
+            raw_match_results=match_results,
             metadata={
                 "top_k": top_k,
                 "threshold_override": metadata_threshold,
@@ -247,7 +250,7 @@ class Matcher:
                 if threshold_override is None
                 else threshold_override,
                 "model_name": str(self.model_name),
-                "raw_match_results": match_results,
+                "single_input": single_input,
             },
         )
 

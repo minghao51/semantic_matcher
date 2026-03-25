@@ -330,7 +330,7 @@ class BGERetriever:
         self.model_name = model_name
         self.device = device
         self.batch_size = batch_size
-        self._model = None
+        self._model: Optional[Any] = None
         self._is_initialized = False
 
     def _initialize(self) -> None:
@@ -371,6 +371,7 @@ class BGERetriever:
         self._initialize()
 
         batch_size = batch_size or self.batch_size
+        assert self._model is not None, "Model should be initialized"
         embeddings = self._model.encode(
             texts,
             batch_size=batch_size,

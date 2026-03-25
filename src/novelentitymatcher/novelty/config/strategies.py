@@ -109,9 +109,7 @@ class OneClassConfig(BaseModel):
     gamma: str = Field(default="scale")
     """Kernel coefficient ('scale', 'auto', or float)."""
 
-    model_name: str = Field(
-        default="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    model_name: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     """Sentence transformer model name for embeddings."""
 
 
@@ -121,9 +119,7 @@ class PrototypicalConfig(BaseModel):
     distance_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
     """Distance threshold for novelty detection."""
 
-    model_name: str = Field(
-        default="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    model_name: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     """Sentence transformer model name for embeddings."""
 
     support_samples_per_class: int = Field(default=5, ge=1)
@@ -136,9 +132,7 @@ class SetFitConfig(BaseModel):
     margin: float = Field(default=0.5, ge=0.0)
     """Contrastive loss margin."""
 
-    model_name: str = Field(
-        default="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    model_name: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     """Sentence transformer model name."""
 
     epochs: int = Field(default=10, ge=1)
