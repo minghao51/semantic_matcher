@@ -207,7 +207,7 @@ def _report_to_dict(report: NovelClassDiscoveryReport) -> Dict[str, Any]:
             _to_builtin(cluster.model_dump()) for cluster in report.discovery_clusters
         ],
         "review_records": [
-            _to_builtin(record.model_dump()) for record in report.review_records
+            _to_builtin(record.model_dump(mode="json")) for record in report.review_records
         ],
         "diagnostics": _to_builtin(report.diagnostics),
     }

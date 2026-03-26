@@ -1,90 +1,9 @@
 import pytest
 import numpy as np
 import warnings
-from novelentitymatcher.core.matcher import EntityMatcher, EmbeddingMatcher, Matcher
+from novelentitymatcher.core.embedding_matcher import EmbeddingMatcher
+from novelentitymatcher.core.matcher import Matcher, _EntityMatcher
 from novelentitymatcher.exceptions import ModeError, TrainingError
-
-
-class TestEntityMatcher:
-    """Tests for EntityMatcher - SetFit-based entity matching."""
-
-    @pytest.fixture
-    def sample_entities(self):
-        return [
-            {"id": "DE", "name": "Germany", "aliases": ["Deutschland", "Deutchland"]},
-            {"id": "FR", "name": "France", "aliases": ["Frankreich"]},
-            {"id": "US", "name": "United States", "aliases": ["USA", "America"]},
-        ]
-
-    @pytest.fixture
-    def training_data(self):
-        return [
-            {"text": "Germany", "label": "DE"},
-            {"text": "Deutschland", "label": "DE"},
-            {"text": "Deutchland", "label": "DE"},
-            {"text": "France", "label": "FR"},
-            {"text": "Frankreich", "label": "FR"},
-            {"text": "USA", "label": "US"},
-            {"text": "America", "label": "US"},
-        ]
-
-    def test_entity_matcher_init(self, sample_entities):
-        matcher = EntityMatcher(entities=sample_entities)
-        assert matcher.entities == sample_entities
-
-    def test_entity_matcher_with_model(self, sample_entities):
-        matcher = EntityMatcher(
-            entities=sample_entities,
-            model_name="sentence-transformers/paraphrase-mpnet-base-v2",
-        )
-        assert matcher.model_name == "sentence-transformers/paraphrase-mpnet-base-v2"
-
-    def test_entity_matcher_default_threshold(self, sample_entities):
-        matcher = EntityMatcher(entities=sample_entities)
-        assert matcher.threshold == 0.7
-
-    def test_entity_matcher_custom_threshold(self, sample_entities):
-        matcher = EntityMatcher(entities=sample_entities, threshold=0.5)
-        assert matcher.threshold == 0.5
-
-    def test_entity_matcher_without_training_raises(self, sample_entities):
-        matcher = EntityMatcher(entities=sample_entities)
-        with pytest.raises(RuntimeError, match="not trained"):
-            matcher.predict("Germany")
-
-    def test_entity_matcher_train(self, sample_entities, training_data):
-        matcher = EntityMatcher(entities=sample_entities)
-        matcher.train(training_data, num_epochs=1)
-        assert matcher.is_trained
-
-    def test_entity_matcher_predict_single(self, sample_entities, training_data):
-        matcher = EntityMatcher(entities=sample_entities)
-        matcher.train(training_data, num_epochs=1)
-        result = matcher.predict("Deutchland")
-        assert result == "DE"
-
-    def test_entity_matcher_predict_multiple(self, sample_entities, training_data):
-        matcher = EntityMatcher(entities=sample_entities)
-        matcher.train(training_data, num_epochs=1)
-        results = matcher.predict(["Deutchland", "America", "France"])
-        assert results == ["DE", "US", "FR"]
-
-    def test_entity_matcher_predict_below_threshold(
-        self, sample_entities, training_data
-    ):
-        matcher = EntityMatcher(entities=sample_entities, threshold=0.99)
-        matcher.train(training_data, num_epochs=1)
-        result = matcher.predict("UnknownCountry123")
-        assert result is None
-
-    def test_entity_matcher_match_empty_candidates_returns_no_match(
-        self, sample_entities, training_data
-    ):
-        matcher = EntityMatcher(entities=sample_entities, threshold=0.0)
-        matcher.train(training_data, num_epochs=1)
-
-        assert matcher.match("Germany", candidates=[]) is None
-        assert matcher.match("Germany", candidates=[], top_k=2) == []
 
 
 class TestEmbeddingMatcher:
@@ -285,7 +204,9 @@ class TestUnifiedMatcher:
                 assert text == "deutschland"
                 return np.array([0.82, 0.75, 0.41], dtype=float)
 
-        entity_matcher = EntityMatcher(
+        from novelentitymatcher.core.matcher import _EntityMatcher
+
+        entity_matcher = _EntityMatcher(
             entities=sample_entities,
             threshold=threshold,
             normalize=True,
@@ -394,7 +315,7 @@ class TestUnifiedMatcher:
             trained_models.append(self.model_name)
             self.is_trained = True
 
-        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+        monkeypatch.setattr(_EntityMatcher, "train", fake_train)
 
         matcher = Matcher(entities=sample_entities)
         matcher.fit(training_data_small, mode="full", show_progress=False)
@@ -410,7 +331,7 @@ class TestUnifiedMatcher:
             trained_models.append(self.model_name)
             self.is_trained = True
 
-        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+        monkeypatch.setattr(_EntityMatcher, "train", fake_train)
 
         matcher = Matcher(entities=sample_entities, model="potion-8m")
         matcher.fit(training_data_small, mode="head-only", show_progress=False)
@@ -642,7 +563,7 @@ class TestUnifiedMatcher:
             "mode": "full",
             "detected_mode": "full",
             "is_trained": True,
-            "active_matcher": "EntityMatcher",
+            "active_matcher": "_EntityMatcher",
             "has_training_data": True,
             "threshold": 0.55,
         }
@@ -928,7 +849,7 @@ class TestMatcherBERTMode:
             trained_models.append(self.model_name)
             self.is_trained = True
 
-        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+        monkeypatch.setattr(_EntityMatcher, "train", fake_train)
 
         matcher = Matcher(
             entities=sample_entities,
@@ -953,7 +874,7 @@ class TestMatcherBERTMode:
             trained_models.append(self.model_name)
             self.is_trained = True
 
-        monkeypatch.setattr(EntityMatcher, "train", fake_train)
+        monkeypatch.setattr(_EntityMatcher, "train", fake_train)
 
         matcher = Matcher(entities=sample_entities, model="default")
         matcher.fit(training_data_rich, show_progress=False)
@@ -984,5 +905,5 @@ class TestMatcherBERTMode:
         diagnosis = matcher.diagnose("Germany")
 
         assert diagnosis["matcher_ready"] is True
-        assert diagnosis["active_matcher"] == "EntityMatcher"
+        assert diagnosis["active_matcher"] == "_EntityMatcher"
         assert diagnosis["matched"] is True

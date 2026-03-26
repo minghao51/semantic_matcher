@@ -135,10 +135,10 @@ RERANKER_REGISTRY = {
 
 MATCHER_MODE_REGISTRY = {
     "zero-shot": "EmbeddingMatcher",
-    "head-only": "EntityMatcher",
-    "full": "EntityMatcher",
+    "head-only": "_EntityMatcher",
+    "full": "_EntityMatcher",
     "hybrid": "HybridMatcher",
-    "bert": "EntityMatcher",
+    "bert": "_EntityMatcher",
     "auto": "SmartSelection",
 }
 

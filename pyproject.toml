@@ -141,6 +141,9 @@ markers = [
     "integration: tests that depend on external services or network access",
     "slow: tests that are expensive to run in default CI",
     "hf: Hugging Face model-backed tests",
+    "llm: tests that make actual LLM API calls (require API key, slow)",
+    "llm_mocked: tests that involve LLM logic but use mocks instead of real API calls",
+    "e2e: end-to-end / feature tests that exercise multiple components",
 ]
 asyncio_mode = "auto"
 

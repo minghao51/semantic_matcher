@@ -92,7 +92,7 @@ def test_config_can_load_packaged_default_when_local_sources_absent(monkeypatch)
 
 def test_resolve_matcher_mode_supported_values():
     assert resolve_matcher_mode("zero-shot") == "EmbeddingMatcher"
-    assert resolve_matcher_mode("full") == "EntityMatcher"
+    assert resolve_matcher_mode("full") == "_EntityMatcher"
     assert resolve_matcher_mode("hybrid") == "HybridMatcher"
     assert resolve_matcher_mode("auto") == "SmartSelection"
 
